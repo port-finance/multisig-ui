@@ -10,15 +10,22 @@ export let TOKEN_PROGRAM_ID = new PublicKey(
 export const PROGRAM_IDS = [
   {
     name: "mainnet-beta",
+    url: "https://solana-api.projectserum.com/", 
+    multisigProgramId: "msigmtwzgXJHj2ext4XJjCDmpbcMuufFb5cHuwg6Xdt"
   },
   {
     name: "testnet",
+    url: "https://api.testnet.solana.com"
   },
   {
     name: "devnet",
+    url: "https://api.devnet.solana.com",
+    multisigProgramId: "F3Uf5F61dmht1xuNNNkk3jnzj82TY56vVjVEhZALRkN"
   },
   {
     name: "localnet",
+    url: "http://127.0.0.1:8899",
+    multisigProgramId: "74Cgm3as7QPrp1v8DfQkUHmj6QaSQupqCKGKmKhAvfzV"
   },
 ];
 
@@ -34,3 +41,11 @@ export const programIds = () => {
     token: TOKEN_PROGRAM_ID,
   };
 };
+
+export const getMultisigProgramIdByUrl = (url: string) => {
+  let instance = PROGRAM_IDS.find((env) => env.url == url); 
+  if (!instance) {
+    return;
+  }; 
+  return instance.multisigProgramId; 
+}; 

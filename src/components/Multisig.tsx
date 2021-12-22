@@ -54,10 +54,13 @@ import { useMultisigProgram } from "../hooks/useMultisigProgram";
 import { Token, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
 import { MoneyRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
-import { getMintInfo, getTokenAccount, parseTokenAccount } from "@project-serum/common";
+import { getMintInfo, getTokenAccount, parseTokenAccount, ProgramAccount } from "@project-serum/common";
 import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
+import { activateDeal } from "../credix/api";
+import { findPendingDeals } from "../credix/api";
+import { Deal } from "../credix/types/program.types";
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -122,8 +125,9 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   }, [multisig, multisigClient.account]);
   useEffect(() => {
     multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
+      console.log("transactions", txs);
       setTransactions(txs);
-    });
+    }).catch(err => console.log("error", err));
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
   useEffect(() => {
     multisigClient.account.multisig
@@ -633,43 +637,43 @@ function ixLabel(tx: any, multisigClient: any) {
       );
     }
   }
-  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
-    const tag = tx.account.data.slice(0, 1);
-    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-    const amountParsed = u64.fromBuffer(amountBuf);
-    if (Buffer.from([3]).equals(tag)) {
-      return (
-        <ListItemText
-          primary={`Transfer ${amountParsed.toString()} Lamport Token`}
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
+  // if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
+  //   const tag = tx.account.data.slice(0, 1);
+  //   const amountBuf = tx.account.data.slice(1, 9) as Buffer;
+  //   const amountParsed = u64.fromBuffer(amountBuf);
+  //   if (Buffer.from([3]).equals(tag)) {
+  //     return (
+  //       <ListItemText
+  //         primary={`Transfer ${amountParsed.toString()} Lamport Token`}
+  //         secondary={tx.publicKey.toString()}
+  //       />
+  //     );
+  //   }
 
-    if (Buffer.from([4]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Approve Token"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
+  //   if (Buffer.from([4]).equals(tag)) {
+  //     return (
+  //       <ListItemText
+  //         primary="Approve Token"
+  //         secondary={tx.publicKey.toString()}
+  //       />
+  //     );
+  //   }
 
-    if (Buffer.from([7]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Mint Token To"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-    return (
-      <ListItemText
-        primary="Token Instructions"
-        secondary={tx.publicKey.toString()}
-      />
-    );
-  }
+  //   if (Buffer.from([7]).equals(tag)) {
+  //     return (
+  //       <ListItemText
+  //         primary="Mint Token To"
+  //         secondary={tx.publicKey.toString()}
+  //       />
+  //     );
+  //   }
+  //   return (
+  //     <ListItemText
+  //       primary="Token Instructions"
+  //       secondary={tx.publicKey.toString()}
+  //     />
+  //   );
+  // }
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return (
       <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
@@ -800,6 +804,11 @@ function AddTransactionDialog({
             onClose={onClose}
           />
           <TransferTokenListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ActivateDealListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}
@@ -1363,6 +1372,154 @@ function UpgradeProgramListItemDetails({
           Create upgrade
         </Button>
       </div>
+    </div>
+  );
+}
+function ActivateDealListItem({
+  multisig,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  onClose: Function;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <ListItem button onClick={() => setOpen((open) => !open)}>
+        <ListItemIcon>
+          <MoneyRounded />
+        </ListItemIcon>
+        <ListItemText primary={"Activate Deal"} />
+        {open ? <ExpandLess /> : <ExpandMore />}
+      </ListItem>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <ActivateDealListItemDetails
+          didAddTransaction={didAddTransaction}
+          multisig={multisig}
+          onClose={onClose}
+        />
+      </Collapse>
+    </>
+  );
+}
+
+function ActivateDealListItemDetails({
+  multisig,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  onClose: Function;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  const [source, setSource] = useState<null | string>(null);
+  const [destination, setDestination] = useState<null | string>(null);
+  const [amount, setAmount] = useState<null | u64>(null);
+  const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
+  const multisigClient = useMultisigProgram();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+		if (multisigClient.provider.connection) {
+			fetchDeals();
+		}
+	}, [multisigClient.provider.connection]);
+
+  const fetchDeals = async () => {
+    const pendingDeals = await findPendingDeals(multisigClient.provider); 
+    setDeals(pendingDeals);
+  }
+
+  const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
+    enqueueSnackbar("Creating transaction", {
+      variant: "info",
+    });
+
+    const [multisigSigner] = await PublicKey.findProgramAddress(
+      [multisig.toBuffer()],
+      multisigClient.programId
+    );
+
+    console.log("multi signer", multisigSigner.toString());
+    const transferIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
+    const transaction = new Account();
+    const tx = await multisigClient.rpc.createTransaction(
+      TOKEN_PROGRAM_ID,
+      transferIx.keys,
+      Buffer.from(transferIx.data),
+      {
+        accounts: {
+          multisig,
+          transaction: transaction.publicKey,
+          proposer: multisigClient.provider.wallet.publicKey,
+          rent: SYSVAR_RENT_PUBKEY,
+        },
+        signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            3000
+          ),
+        ],
+      }
+    );
+    enqueueSnackbar("Transaction created", {
+      variant: "success",
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
+    });
+    didAddTransaction(transaction.publicKey);
+    onClose();
+  };
+
+  let dealRows = [<p>"no pending deals"</p>];
+  if (deals) {
+    dealRows = deals.map((deal) =>
+        <div key={deal.account.borrower.toString()}
+          style={{
+            display: "flex", 
+            justifyContent: "space-between",
+            width: "100%",
+            background: "white",
+            paddingLeft: "20px",
+            paddingRight: "20px",
+            borderBottom: "1px solid grey"
+          }}
+        >
+          <p style={{width: "400px"}}>{deal.account.borrower.toString()}</p> 
+          <p style={{width: "300px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
+          <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
+            Activate
+          </Button>
+        </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        background: "#f1f0f0",
+        padding: "24px"
+      }}
+    >
+      <div
+        style={{
+          display: "flex", 
+          justifyContent: "space-between",
+          width: "100%",
+          background: "white",
+          paddingLeft: "20px",
+          paddingRight: "20px",
+          borderBottom: "1px solid grey"
+        }}
+      >
+        <p style={{width: "400px"}}>Borrower Public Key</p> 
+        <p style={{width: "300px"}}>Amount</p>
+        <p style={{width: "100px"}}></p>
+      </div>
+      {dealRows}
     </div>
   );
 }
