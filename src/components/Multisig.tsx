@@ -61,6 +61,7 @@ import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
 import { activateDeal } from "../credix/api";
 import { findPendingDeals } from "../credix/api";
 import { Deal } from "../credix/types/program.types";
+import { config } from "../credix/config";
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -1443,12 +1444,14 @@ function ActivateDealListItemDetails({
     );
 
     console.log("multi signer", multisigSigner.toString());
-    const transferIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
+    const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
     const transaction = new Account();
+    console.log(activateIx.keys);
+    console.log(activateIx.data);
     const tx = await multisigClient.rpc.createTransaction(
-      TOKEN_PROGRAM_ID,
-      transferIx.keys,
-      Buffer.from(transferIx.data),
+      config.clusterConfig.programId,
+      activateIx.keys,
+      Buffer.from(activateIx.data),
       {
         accounts: {
           multisig,
@@ -1461,7 +1464,7 @@ function ActivateDealListItemDetails({
           await multisigClient.account.transaction.createInstruction(
             transaction,
             // @ts-ignore
-            3000
+            1000
           ),
         ],
       }
