@@ -5,6 +5,7 @@ import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
 import AppBar from "@material-ui/core/AppBar";
 import GavelIcon from "@material-ui/icons/Gavel";
+import StarsIcon from "@material-ui/icons/Stars"; 
 import DescriptionIcon from "@material-ui/icons/Description";
 import Paper from "@material-ui/core/Paper";
 import SupervisorAccountIcon from "@material-ui/icons/SupervisorAccount";
@@ -54,10 +55,14 @@ import { useMultisigProgram } from "../hooks/useMultisigProgram";
 import { Token, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
 import { MoneyRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
-import { getMintInfo, getTokenAccount, parseTokenAccount } from "@project-serum/common";
+import { getMintInfo, getTokenAccount, parseTokenAccount, ProgramAccount } from "@project-serum/common";
 import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
+import { activateDeal } from "../credix/api";
+import { findPendingDeals, getDealAccountData } from "../credix/api";
+import { Deal } from "../credix/types/program.types";
+import { config } from "../credix/config";
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -122,8 +127,9 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   }, [multisig, multisigClient.account]);
   useEffect(() => {
     multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
+      console.log("transactions", txs);
       setTransactions(txs);
-    });
+    }).catch(err => console.log("error", err));
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
   useEffect(() => {
     multisigClient.account.multisig
@@ -670,6 +676,16 @@ function ixLabel(tx: any, multisigClient: any) {
       />
     );
   }
+  if (tx.account.programId.equals(config.clusterConfig.programId)) {
+    const borrowerPk = tx.account.accounts[5].pubkey.toString();
+    const dealPk = tx.account.accounts[3].pubkey;
+    return (
+      <ListItemText
+        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return (
       <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
@@ -800,6 +816,11 @@ function AddTransactionDialog({
             onClose={onClose}
           />
           <TransferTokenListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ActivateDealListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}
@@ -1363,6 +1384,155 @@ function UpgradeProgramListItemDetails({
           Create upgrade
         </Button>
       </div>
+    </div>
+  );
+}
+function ActivateDealListItem({
+  multisig,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  onClose: Function;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <ListItem button onClick={() => setOpen((open) => !open)}>
+        <ListItemIcon>
+          <MoneyRounded />
+        </ListItemIcon>
+        <ListItemText primary={"Activate Deal"} />
+        {open ? <ExpandLess /> : <ExpandMore />}
+      </ListItem>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <ActivateDealListItemDetails
+          didAddTransaction={didAddTransaction}
+          multisig={multisig}
+          onClose={onClose}
+        />
+      </Collapse>
+    </>
+  );
+}
+
+function ActivateDealListItemDetails({
+  multisig,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  onClose: Function;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
+  const multisigClient = useMultisigProgram();
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+		if (multisigClient.provider.connection) {
+			fetchDeals();
+		}
+	}, [multisigClient.provider.connection]);
+
+  const fetchDeals = async () => {
+    const pendingDeals = await findPendingDeals(multisigClient.provider); 
+    setDeals(pendingDeals);
+  }
+
+  const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
+    enqueueSnackbar("Creating transaction", {
+      variant: "info",
+    });
+
+    const [multisigSigner] = await PublicKey.findProgramAddress(
+      [multisig.toBuffer()],
+      multisigClient.programId
+    );
+
+    console.log("multi signer", multisigSigner.toString());
+    const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
+    const transaction = new Account();
+    console.log(activateIx.keys);
+    console.log(activateIx.data);
+    const tx = await multisigClient.rpc.createTransaction(
+      config.clusterConfig.programId,
+      activateIx.keys,
+      Buffer.from(activateIx.data),
+      {
+        accounts: {
+          multisig,
+          transaction: transaction.publicKey,
+          proposer: multisigClient.provider.wallet.publicKey,
+          rent: SYSVAR_RENT_PUBKEY,
+        },
+        signers: [transaction],
+        instructions: [
+          await multisigClient.account.transaction.createInstruction(
+            transaction,
+            // @ts-ignore
+            1000
+          ),
+        ],
+      }
+    );
+    enqueueSnackbar("Transaction created", {
+      variant: "success",
+      action: <ViewTransactionOnExplorerButton signature={tx} />,
+    });
+    didAddTransaction(transaction.publicKey);
+    onClose();
+  };
+
+  let dealRows = [<p>"no pending deals"</p>];
+  if (deals) {
+    dealRows = deals.map((deal) =>
+        <div key={deal.account.borrower.toString()}
+          style={{
+            display: "flex", 
+            justifyContent: "space-between",
+            width: "100%",
+            background: "white",
+            paddingLeft: "20px",
+            paddingRight: "20px",
+            borderBottom: "1px solid grey"
+          }}
+        >
+          <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
+          <p style={{width: "200px"}}>{deal.account.name}</p> 
+          <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
+          <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
+            Activate
+          </Button>
+        </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        background: "#f1f0f0",
+        padding: "24px"
+      }}
+    >
+      <div
+        style={{
+          display: "flex", 
+          justifyContent: "space-between",
+          width: "100%",
+          background: "white",
+          paddingLeft: "20px",
+          paddingRight: "20px",
+          borderBottom: "1px solid grey"
+        }}
+      >
+        <p style={{width: "500px"}}>Borrower Public Key</p> 
+        <p style={{width: "200px"}}>Deal name</p> 
+        <p style={{width: "200px"}}>Amount</p>
+        <p style={{width: "100px"}}></p>
+      </div>
+      {dealRows}
     </div>
   );
 }
