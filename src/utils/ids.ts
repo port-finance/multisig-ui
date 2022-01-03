@@ -14,10 +14,6 @@ export const PROGRAM_IDS = [
     multisigProgramId: "msigmtwzgXJHj2ext4XJjCDmpbcMuufFb5cHuwg6Xdt"
   },
   {
-    name: "testnet",
-    url: "https://api.testnet.solana.com"
-  },
-  {
     name: "devnet",
     url: "https://api.devnet.solana.com",
     multisigProgramId: "F3Uf5F61dmht1xuNNNkk3jnzj82TY56vVjVEhZALRkN"
@@ -45,7 +41,7 @@ export const programIds = () => {
 export const getMultisigProgramIdByUrl = (url: string) => {
   let instance = PROGRAM_IDS.find((env) => env.url == url); 
   if (!instance) {
-    return;
+    return "";
   }; 
   return instance.multisigProgramId; 
 }; 

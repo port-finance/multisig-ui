@@ -11,6 +11,11 @@
           "isSigner": true
         },
         {
+          "name": "gatekeeperNetwork",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "globalMarketState",
           "isMut": true,
           "isSigner": false
@@ -98,6 +103,11 @@
           "isSigner": true
         },
         {
+          "name": "gatewayToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "globalMarketState",
           "isMut": true,
           "isSigner": false
@@ -125,6 +135,11 @@
         {
           "name": "depositorLpTokenAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -169,18 +184,33 @@
           "isSigner": true
         },
         {
-          "name": "borrowerAccount",
+          "name": "gatewayToken",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "globalMarketState",
+          "name": "borrower",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "borrowerInfo",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "globalMarketState",
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "deal",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -192,6 +222,10 @@
       "args": [
         {
           "name": "dealBump",
+          "type": "u8"
+        },
+        {
+          "name": "borrowerInfoBump",
           "type": "u8"
         },
         {
@@ -213,6 +247,10 @@
         {
           "name": "timeToMaturityDays",
           "type": "u16"
+        },
+        {
+          "name": "dealName",
+          "type": "string"
         }
       ]
     },
@@ -223,6 +261,11 @@
           "name": "owner",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "gatewayToken",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "globalMarketState",
@@ -245,13 +288,18 @@
           "isSigner": false
         },
         {
-          "name": "borrowerAccount",
+          "name": "borrower",
           "isMut": false,
           "isSigner": false
         },
         {
           "name": "borrowerTokenAccount",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -291,6 +339,11 @@
           "isSigner": true
         },
         {
+          "name": "gatewayToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "globalMarketState",
           "isMut": true,
           "isSigner": false
@@ -317,6 +370,11 @@
         },
         {
           "name": "signingAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
           "isMut": false,
           "isSigner": false
         },
@@ -358,6 +416,11 @@
           "isSigner": true
         },
         {
+          "name": "gatewayToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "globalMarketState",
           "isMut": true,
           "isSigner": false
@@ -393,6 +456,11 @@
           "isSigner": false
         },
         {
+          "name": "credixPass",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "usdcMintAccount",
           "isMut": false,
           "isSigner": false
@@ -410,18 +478,116 @@
       ],
       "args": [
         {
-          "name": "itWithdrawalAmount",
+          "name": "usdcWithdrawalAmount",
           "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "createCredixPass",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "passHolder",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "passBump",
+          "type": "u8"
+        },
+        {
+          "name": "isUnderwriter",
+          "type": "bool"
+        },
+        {
+          "name": "isBorrower",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "updateCredixPass",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "passHolder",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "credixPass",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "name": "isUnderwriter",
+          "type": "bool"
+        },
+        {
+          "name": "isBorrower",
+          "type": "bool"
         }
       ]
     }
   ],
   "accounts": [
     {
+      "name": "BorrowerInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "numOfDeals",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "Deal",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
           {
             "name": "borrower",
             "type": "publicKey"
@@ -463,8 +629,24 @@
             "type": "u16"
           },
           {
+            "name": "dealNumber",
+            "type": "u16"
+          },
+          {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "lateFees",
+            "type": "u64"
+          },
+          {
+            "name": "lateFeesRepaid",
+            "type": "u64"
+          },
+          {
+            "name": "private",
+            "type": "bool"
           }
         ]
       }
@@ -474,6 +656,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "gatekeeperNetwork",
+            "type": "publicKey"
+          },
           {
             "name": "liquidityPoolTokenAccount",
             "type": "publicKey"
@@ -513,6 +699,30 @@
           {
             "name": "withrawalFee",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CredixPass",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "isBorrower",
+            "type": "bool"
+          },
+          {
+            "name": "isUnderwriter",
+            "type": "bool"
+          },
+          {
+            "name": "active",
+            "type": "bool"
           }
         ]
       }
@@ -579,9 +789,19 @@
       "code": 6008,
       "name": "UnauthorizedSigner",
       "msg": "The Signer is not authorized to use this instruction."
+    },
+    {
+      "code": 6009,
+      "name": "CredixPassInvalid",
+      "msg": "Credix pass is invalid for this request."
+    },
+    {
+      "code": 6010,
+      "name": "CredixPassInactive",
+      "msg": "Credix pass is inactive at the moment."
     }
   ],
   "metadata": {
-    "address": "B7PiFKNiBvQPMVtsJt8bM86U69a1ivev4VvnkLViMiUZ"
+    "address": "9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"
   }
 }

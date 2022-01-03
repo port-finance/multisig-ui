@@ -2,19 +2,28 @@ import { Idl } from "@project-serum/anchor";
 import { ConfirmOptions, PublicKey } from "@solana/web3.js";
 import { ClusterConfig, Config } from "./types/config.types";
 import { RPCEndpoint, SolanaCluster } from "./types/solana.types";
-import idl from "./credix.json";
+import IDL from "./credix.json";
 
 /// PREFILLED CONFIGS
 const localnetConfig: ClusterConfig = {
 	name: SolanaCluster.LOCALNET,
 	RPCEndpoint: RPCEndpoint.LOCALNET,
-	programId: new PublicKey("B7PiFKNiBvQPMVtsJt8bM86U69a1ivev4VvnkLViMiUZ"),
+	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	gatewayProgramId: new PublicKey("8UHYR4tauzyX3MFcQXN2QjPUBHXDPt8yHcE3V5GkbnEC"),
 };
 
 const devnetConfig: ClusterConfig = {
 	name: SolanaCluster.DEVNET,
 	RPCEndpoint: RPCEndpoint.DEVNET,
-	programId: new PublicKey("B7PiFKNiBvQPMVtsJt8bM86U69a1ivev4VvnkLViMiUZ"),
+	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
+};
+
+const mainnetConfig: ClusterConfig = {
+	name: SolanaCluster.MAINNET,
+	RPCEndpoint: RPCEndpoint.MAINNET,
+	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
 };
 ///
 
@@ -23,7 +32,7 @@ const getTargetClusterFromEnv = (): SolanaCluster => {
 
 	if (targetCluster) {
 		if (!Object.values(SolanaCluster).some((c) => c === targetCluster)) {
-			throw new Error(`Invalid cluster targetted ${targetCluster}`);
+			throw new Error(`Invalid cluster targeted ${targetCluster}`);
 		}
 
 		return targetCluster as SolanaCluster;
@@ -38,6 +47,8 @@ const getBaseClusterConfig = (): ClusterConfig => {
 	switch (targetCluster) {
 		case SolanaCluster.DEVNET:
 			return devnetConfig;
+		case SolanaCluster.MAINNET:
+			return mainnetConfig;
 		default:
 			return localnetConfig;
 	}
@@ -63,6 +74,14 @@ const getProgramIdFromEnv = (): PublicKey | undefined => {
 	}
 };
 
+const getGatewayProgramIdFromEnv = (): PublicKey | undefined => {
+	const key = process.env.REACT_APP_GATEWAY_PROGRAM_ID;
+
+	if (key) {
+		return new PublicKey(key);
+	}
+};
+
 const getClusterConfig = (): ClusterConfig => {
 	const baseClusterConfig = getBaseClusterConfig();
 
@@ -78,10 +97,17 @@ const getClusterConfig = (): ClusterConfig => {
 		throw new Error("No program id provided");
 	}
 
+	const gatewayProgramId = getGatewayProgramIdFromEnv() || baseClusterConfig.gatewayProgramId;
+
+	if (!gatewayProgramId) {
+		throw new Error("No gateway program id provided");
+	}
+
 	const clusterConfig: ClusterConfig = {
 		...baseClusterConfig,
 		RPCEndpoint: rpcEndpoint,
 		programId,
+		gatewayProgramId,
 	};
 
 	return clusterConfig;
@@ -95,10 +121,15 @@ export const config: Config = ((): Config => {
 		commitment: "processed",
 		preflightCommitment: "processed",
 	};
+	const MANAGEMENT_KEYS = [
+		"Ej5zJzej7rrUoDngsJ3jcpfuvfVyWpcDcK7uv9cE2LdL",
+		"Ej5zJzej7rrUoDngsJ3jcpfuvfVyWpcDcK7uv9cE2LdL",
+	];
 
 	return {
 		clusterConfig,
-		idl: idl as Idl,
+		idl: IDL as Idl,
 		confirmOptions,
+		managementKeys: MANAGEMENT_KEYS,
 	};
 })();

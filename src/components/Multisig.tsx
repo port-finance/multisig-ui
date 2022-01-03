@@ -5,6 +5,7 @@ import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
 import AppBar from "@material-ui/core/AppBar";
 import GavelIcon from "@material-ui/icons/Gavel";
+import StarsIcon from "@material-ui/icons/Stars"; 
 import DescriptionIcon from "@material-ui/icons/Description";
 import Paper from "@material-ui/core/Paper";
 import SupervisorAccountIcon from "@material-ui/icons/SupervisorAccount";
@@ -59,7 +60,7 @@ import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
 import { activateDeal } from "../credix/api";
-import { findPendingDeals } from "../credix/api";
+import { findPendingDeals, getDealAccountData } from "../credix/api";
 import { Deal } from "../credix/types/program.types";
 import { config } from "../credix/config";
 
@@ -638,43 +639,53 @@ function ixLabel(tx: any, multisigClient: any) {
       );
     }
   }
-  // if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
-  //   const tag = tx.account.data.slice(0, 1);
-  //   const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-  //   const amountParsed = u64.fromBuffer(amountBuf);
-  //   if (Buffer.from([3]).equals(tag)) {
-  //     return (
-  //       <ListItemText
-  //         primary={`Transfer ${amountParsed.toString()} Lamport Token`}
-  //         secondary={tx.publicKey.toString()}
-  //       />
-  //     );
-  //   }
+  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
+    const tag = tx.account.data.slice(0, 1);
+    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
+    const amountParsed = u64.fromBuffer(amountBuf);
+    if (Buffer.from([3]).equals(tag)) {
+      return (
+        <ListItemText
+          primary={`Transfer ${amountParsed.toString()} Lamport Token`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
 
-  //   if (Buffer.from([4]).equals(tag)) {
-  //     return (
-  //       <ListItemText
-  //         primary="Approve Token"
-  //         secondary={tx.publicKey.toString()}
-  //       />
-  //     );
-  //   }
+    if (Buffer.from([4]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Approve Token"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
 
-  //   if (Buffer.from([7]).equals(tag)) {
-  //     return (
-  //       <ListItemText
-  //         primary="Mint Token To"
-  //         secondary={tx.publicKey.toString()}
-  //       />
-  //     );
-  //   }
-  //   return (
-  //     <ListItemText
-  //       primary="Token Instructions"
-  //       secondary={tx.publicKey.toString()}
-  //     />
-  //   );
-  // }
+    if (Buffer.from([7]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Mint Token To"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+    return (
+      <ListItemText
+        primary="Token Instructions"
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
+  if (tx.account.programId.equals(config.clusterConfig.programId)) {
+    const borrowerPk = tx.account.accounts[5].pubkey.toString();
+    const dealPk = tx.account.accounts[3].pubkey;
+    return (
+      <ListItemText
+        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return (
       <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
@@ -1415,9 +1426,6 @@ function ActivateDealListItemDetails({
   onClose: Function;
   didAddTransaction: (tx: PublicKey) => void;
 }) {
-  const [source, setSource] = useState<null | string>(null);
-  const [destination, setDestination] = useState<null | string>(null);
-  const [amount, setAmount] = useState<null | u64>(null);
   const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
   const multisigClient = useMultisigProgram();
   const { enqueueSnackbar } = useSnackbar();
@@ -1491,8 +1499,9 @@ function ActivateDealListItemDetails({
             borderBottom: "1px solid grey"
           }}
         >
-          <p style={{width: "400px"}}>{deal.account.borrower.toString()}</p> 
-          <p style={{width: "300px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
+          <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
+          <p style={{width: "200px"}}>{deal.account.name}</p> 
+          <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
           <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
             Activate
           </Button>
@@ -1518,8 +1527,9 @@ function ActivateDealListItemDetails({
           borderBottom: "1px solid grey"
         }}
       >
-        <p style={{width: "400px"}}>Borrower Public Key</p> 
-        <p style={{width: "300px"}}>Amount</p>
+        <p style={{width: "500px"}}>Borrower Public Key</p> 
+        <p style={{width: "200px"}}>Deal name</p> 
+        <p style={{width: "200px"}}>Amount</p>
         <p style={{width: "100px"}}></p>
       </div>
       {dealRows}

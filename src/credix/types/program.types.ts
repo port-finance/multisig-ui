@@ -25,6 +25,7 @@ export type Deal = {
 	createdAt: BN;
 	leverageRatio: number;
 	underwriterPerformanceFeePercentage: number;
+	name: string; 
 };
 
 export type PrincipalRepaymentType = { principal: {} };
