@@ -1,4 +1,6 @@
 name: React app deployment
+env: 
+  CI: false
 on:
   push:
     branches:
@@ -9,8 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run : npm i
-      shell: bash
-    - run : npm ci
       shell: bash
     - run : npm run build
       shell: bash
