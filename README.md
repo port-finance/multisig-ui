@@ -51,5 +51,5 @@ Multisig address: `AM194gsNqRnmu8CZKi5GBPRGMC4Bq4Egkj2GQ4Yz4JZ4`
 Program derived address: `9GKiJfzjUUpWxKm1owKwAA2QWMQc7UXg4btXPF1BEbLV`
 
 #### Devnet
-Multisig address: `77AmbNUbZmtBiB95BgMFXUD1xVDotjTVeHeEbADMrQGE`
-Program derived address: `GKRX58cmwTvqFmX49ZKPjvLNxuRnAMhyZujMV8PeoaCh`
+Multisig address: `5xwnWVbJuU3DQH6S6tBjr7D49nhMV9t8ZDNFLFYL4nPH`
+Program derived address: `Du6efvMcXXLGyEea4SrTnVGHgBZmu4xU7SM9vDfRDqrp`

@@ -52,7 +52,7 @@ import {
 import { ViewTransactionOnExplorerButton } from "./Notification";
 import * as idl from "../utils/idl";
 import { useMultisigProgram } from "../hooks/useMultisigProgram";
-import { Token, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
+import { Token, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
 import { MoneyRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
 import { getMintInfo, getTokenAccount, parseTokenAccount, ProgramAccount } from "@project-serum/common";
@@ -642,11 +642,11 @@ function ixLabel(tx: any, multisigClient: any) {
   if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
     const tag = tx.account.data.slice(0, 1);
     const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-    const amountParsed = u64.fromBuffer(amountBuf);
+    const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
     if (Buffer.from([3]).equals(tag)) {
       return (
         <ListItemText
-          primary={`Transfer ${amountParsed.toString()} Lamport Token`}
+          primary={`Transfer ${amountParsed.toString()} Token`}
           secondary={tx.publicKey.toString()}
         />
       );
@@ -1586,12 +1586,21 @@ function TransferTokenListItemDetails({
 
   const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)
 
+  const getAssociatedTokenAddressPK = async (ownerPk: PublicKey, mintPk: PublicKey) => {
+    return await Token.getAssociatedTokenAddress(
+      ASSOCIATED_TOKEN_PROGRAM_ID,
+      TOKEN_PROGRAM_ID,
+      mintPk,
+      ownerPk
+    );
+  }
+
   const createTransactionAccount = async () => {
     enqueueSnackbar("Creating transaction", {
       variant: "info",
     });
     const sourceAddr = new PublicKey(source as string);
-    const destinationAddr = new PublicKey(destination as string);
+    const destinationAccAddr = new PublicKey(destination as string);
     const [multisigSigner] = await PublicKey.findProgramAddress(
       [multisig.toBuffer()],
       multisigClient.programId
@@ -1601,27 +1610,25 @@ function TransferTokenListItemDetails({
       sourceAddr,
     );
 
-    const destinationAccountInfo = await multisigClient.provider.connection.getAccountInfo(
-      destinationAddr
-    );
+    const destinationTokenAccAddr = await getAssociatedTokenAddressPK(destinationAccAddr, sourceTokenAccount.mint); 
 
-    if (destinationAccountInfo === null || destinationAccountInfo.owner.toString() !== TOKEN_PROGRAM_ID.toString() || destinationAccountInfo.data.length !== ACCOUNT_LAYOUT.span) {
-      debugger
-      enqueueSnackbar("Not token account", {
-        variant: "error",
-      });
-      return;
-    }
+    console.log(sourceTokenAccount);
 
-    const destinationTokenAccount = await getTokenAccount(
-      multisigClient.provider,
-      destinationAddr
-    );
-
-    if (sourceTokenAccount.mint.toBase58() !== destinationTokenAccount.mint.toBase58()) {
-      enqueueSnackbar("Token mint does not match", {
-        variant: "error",
-      });
+    // @ts-ignore
+    try { 
+        const destinationTokenAccount = await getTokenAccount(
+        multisigClient.provider,
+        destinationTokenAccAddr
+      );
+      // @ts-ignore
+      if (sourceTokenAccount.mint.toBase58() !== destinationTokenAccount.mint.toBase58()) {
+        enqueueSnackbar("Token mint does not match", {
+          variant: "error",
+        });
+        return;
+      }
+    } catch (err) {
+        enqueueSnackbar("No token account found for the destination address. Op in for this specific token on your phantom wallet.", {variant: "error",});
       return;
     }
 
@@ -1640,7 +1647,7 @@ function TransferTokenListItemDetails({
     const transferIx = Token.createTransferInstruction(
       TOKEN_PROGRAM_ID,
       sourceAddr,
-      destinationAddr,
+      destinationTokenAccAddr,
       multisigSigner,
       [],
       new u64(amountInLamports.toString())
@@ -1685,7 +1692,7 @@ function TransferTokenListItemDetails({
       }}
     >
       <FormControl fullWidth>
-        <InputLabel id="source-select-label">Source Token Account</InputLabel>
+        <InputLabel id="source-select-label">Source Token Mint</InputLabel>
         <Select
           autoWidth={true}
           value={source}
@@ -1698,7 +1705,7 @@ function TransferTokenListItemDetails({
                     setSource(tokenAccount.address.toString());
                   }
                 }>
-                  {tokenAccount.address.toString()}
+                  <p>{tokenAccount.mint.toString()} - [Balance: {(tokenAccount.amount.toNumber() / 1000000).toString()}]</p>
                 </MenuItem>
               )
             }
