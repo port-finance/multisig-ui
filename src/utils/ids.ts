@@ -16,7 +16,7 @@ export const PROGRAM_IDS = [
   {
     name: "devnet",
     url: "https://api.devnet.solana.com",
-    multisigProgramId: "F3Uf5F61dmht1xuNNNkk3jnzj82TY56vVjVEhZALRkN"
+    multisigProgramId: "74Cgm3as7QPrp1v8DfQkUHmj6QaSQupqCKGKmKhAvfzV"
   },
   {
     name: "localnet",

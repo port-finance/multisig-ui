@@ -80,7 +80,7 @@ function App() {
 }
 
 function MultisigPage() {
-  const multisig = new PublicKey("6ExGdhoUeqzExzXWx1tW2RPojuRnfXeTRwQ7sCeEcnKy");
+  const multisig = new PublicKey("AM194gsNqRnmu8CZKi5GBPRGMC4Bq4Egkj2GQ4Yz4JZ4");
   return <Multisig multisig={multisig} />;
 }
 
