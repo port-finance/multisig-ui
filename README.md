@@ -45,7 +45,11 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Port Multisig Address
-Multisig address: `6ExGdhoUeqzExzXWx1tW2RPojuRnfXeTRwQ7sCeEcnKy`
+### Credix Multisig Addresses
+#### Mainnet
+Multisig address: `AM194gsNqRnmu8CZKi5GBPRGMC4Bq4Egkj2GQ4Yz4JZ4`
+Program derived address: `9GKiJfzjUUpWxKm1owKwAA2QWMQc7UXg4btXPF1BEbLV`
 
-Program derived address: `8jJSYeg13LwDP3jNdPdKsG88pNEgmKuwn5W4kPZ13dn8`
+#### Devnet
+Multisig address: `77AmbNUbZmtBiB95BgMFXUD1xVDotjTVeHeEbADMrQGE`
+Program derived address: `GKRX58cmwTvqFmX49ZKPjvLNxuRnAMhyZujMV8PeoaCh`
