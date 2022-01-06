@@ -65,6 +65,7 @@ import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal"; 
 import { TransferTokenListItem } from "./transactions/TransferToken";
+import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 
 // NEW TRANSACTION 
 function AddTransactionDialog({
@@ -118,6 +119,11 @@ function AddTransactionDialog({
             onClose={onClose}
           />
           <ActivateDealListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <FreezeThawGlobalMarketStateListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}
@@ -205,13 +211,22 @@ function ixLabel(tx: any, multisigClient: any) {
     );
   }
   if (tx.account.programId.equals(config.clusterConfig.programId)) {
-    const borrowerPk = tx.account.accounts[6].pubkey.toString();
-    return (
-      <ListItemText
-        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
-        secondary={tx.publicKey.toString()}
-      />
-    );
+    if (tx.account.accounts.length === 2) {
+      return (
+        <ListItemText
+          primary={"Freeze / Thaw market"}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    } else {
+      const borrowerPk = tx.account.accounts[6].pubkey.toString();
+      return (
+        <ListItemText
+          primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
   }
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return (

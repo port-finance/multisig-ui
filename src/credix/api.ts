@@ -1,6 +1,6 @@
 import { BN, Program, ProgramAccount, Provider, Wallet, web3 } from "@project-serum/anchor";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
-import { Connection, ParsedAccountData, PublicKey, SystemProgram } from "@solana/web3.js";
+import { Connection, ParsedAccountData, PublicKey, SystemProgram, Keypair } from "@solana/web3.js";
 import { config } from "./config";
 import { SEEDS } from "./consts";
 import { Deal, DealStatus } from "./types/program.types";
@@ -9,6 +9,7 @@ import { multiAsync } from "./utils/async.utils";
 import { mapDealToStatus } from "./utils/deal.utils";
 import { encodeSeedString } from "./utils/format.utils";
 import { dataToGatewayToken, GatewayTokenData } from "@identity.com/solana-gateway-ts";
+import * as anchor from "@project-serum/anchor";
 
 const constructProgram = (provider: Provider) => {
 	return new Program(config.idl, config.clusterConfig.programId, provider);
@@ -215,4 +216,137 @@ export const activateDeal = multiAsync(
 			},
 		});
 	}
+); 
+
+
+export const initializeMarket = multiAsync(
+	async (
+		_withdrawalFee: number, 
+		_interestFee: number, 
+		_globalMarketSeed: string, 
+		_usdcMintPk: string, 
+		_treasuryPk: string, 
+		_gatekeeperNetworkPk: string,
+		provider
+		) => {
+			const program = constructProgram(provider);
+			const withdrawalFee = _withdrawalFee * 1000; 
+			const interestFee = _interestFee * 1000; 
+			const usdcMintPk = new PublicKey(_usdcMintPk); 
+			const treasuryPk = new PublicKey(_treasuryPk); 
+			const gatekeeperNetworkPk = new PublicKey(_gatekeeperNetworkPk); 
+			
+			const [globalMarketStatePda, globalMarketStateBump] =
+				await PublicKey.findProgramAddress(
+					[Buffer.from(anchor.utils.bytes.utf8.encode(_globalMarketSeed))],
+					program.programId
+				);
+
+			const [signingAuthorityPda, signingAuthorityPdaBump] =
+				await PublicKey.findProgramAddress(
+					[globalMarketStatePda.toBuffer()],
+					program.programId
+				);
+
+			const treasuryAssociatedUSDCTokenAddress =
+				await Token.getAssociatedTokenAddress(
+					ASSOCIATED_TOKEN_PROGRAM_ID,
+					TOKEN_PROGRAM_ID,
+					usdcMintPk,
+					treasuryPk
+				);
+
+			const liquidityPoolUSDCTokenAccount =
+				await Token.getAssociatedTokenAddress(
+					ASSOCIATED_TOKEN_PROGRAM_ID,
+					TOKEN_PROGRAM_ID,
+					usdcMintPk,
+					signingAuthorityPda
+				);
+
+			const lpTokenMintKeypair = Keypair.generate();
+
+			return program.instruction.initializeMarket(
+				signingAuthorityPdaBump,
+				globalMarketStateBump,
+				_globalMarketSeed,
+				interestFee, // 10%
+				withdrawalFee, // 0.5%
+				{
+				accounts: {
+					owner: provider.wallet.publicKey,
+					gatekeeperNetwork:new PublicKey(gatekeeperNetworkPk),
+					globalMarketState: globalMarketStatePda,
+					liquidityPoolTokenAccount: liquidityPoolUSDCTokenAccount,
+					treasury: new PublicKey(treasuryPk),
+					treasuryPoolTokenAccount: treasuryAssociatedUSDCTokenAddress,
+					lpTokenMintAccount: lpTokenMintKeypair.publicKey,
+					usdcMintAccount: new PublicKey(usdcMintPk),
+					rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+					tokenProgram: TOKEN_PROGRAM_ID,
+					signingAuthority: signingAuthorityPda,
+					systemProgram: anchor.web3.SystemProgram.programId,
+					associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+				},
+				signers: [lpTokenMintKeypair],
+				}
+			);
+	}
+);
+
+export const fetchGlobalMarketStateFrozen = multiAsync(async (globalMarketSeed: string, provider) => {
+	const program = constructProgram(provider);
+	const [globalMarketStatePda, globalMarketStateBump] =
+		await PublicKey.findProgramAddress(
+			[Buffer.from(anchor.utils.bytes.utf8.encode(globalMarketSeed))],
+			program.programId
+		);
+	return program.account.globalMarketState.fetch(globalMarketStatePda);
+})
+
+// Freezing/thawing global market state
+export const freezeGlobalMarketState = multiAsync(
+	async (
+		multisigPk: PublicKey, 
+		globalMarketSeed: string,
+		provider
+		) => {
+			const program = constructProgram(provider);
+			const [globalMarketStatePda, globalMarketStateBump] =
+				await PublicKey.findProgramAddress(
+					[Buffer.from(anchor.utils.bytes.utf8.encode(globalMarketSeed))],
+					program.programId
+				);
+
+			return program.instruction.freezeGlobalMarketState({
+				accounts: {
+					owner: multisigPk,
+					globalMarketState: globalMarketStatePda,
+				},
+				signers: [],
+			});
+		}
+); 
+  
+export const thawGlobalMarketState = multiAsync(
+	async (
+		multisigPk: PublicKey, 
+		globalMarketSeed: string,
+		provider
+		) => {
+			const program = constructProgram(provider);
+			const [globalMarketStatePda, globalMarketStateBump] =
+				await PublicKey.findProgramAddress(
+					[Buffer.from(anchor.utils.bytes.utf8.encode(globalMarketSeed))],
+					program.programId
+				);
+
+			return program.instruction.thawGlobalMarketState({
+				accounts: {
+					owner: multisigPk,
+					globalMarketState: globalMarketStatePda,
+				},
+				signers: [],
+			});
+		}
 ); 

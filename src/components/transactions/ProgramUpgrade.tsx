@@ -43,7 +43,7 @@ export function ProgramUpdateListItem({
     );
   }
   
-  const BPF_LOADER_UPGRADEABLE_PID = new PublicKey(
+  export const BPF_LOADER_UPGRADEABLE_PID = new PublicKey(
     "BPFLoaderUpgradeab1e11111111111111111111111"
   );
   

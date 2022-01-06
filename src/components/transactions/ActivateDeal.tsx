@@ -80,11 +80,8 @@ export function ActivateDealListItem({
         multisigClient.programId
       );
   
-      console.log("multi signer", multisigSigner.toString());
       const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
       const transaction = new Account();
-      console.log(activateIx.keys);
-      console.log(activateIx.data);
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,
         activateIx.keys,

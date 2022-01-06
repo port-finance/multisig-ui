@@ -570,6 +570,38 @@
           "type": "bool"
         }
       ]
+    },
+    {
+      "name": "freezeGlobalMarketState",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "globalMarketState",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "thawGlobalMarketState",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "globalMarketState",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -709,6 +741,10 @@
           {
             "name": "withrawalFee",
             "type": "u32"
+          },
+          {
+            "name": "frozen",
+            "type": "bool"
           }
         ]
       }
