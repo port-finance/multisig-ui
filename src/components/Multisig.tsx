@@ -66,6 +66,160 @@ import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal"; 
 import { TransferTokenListItem } from "./transactions/TransferToken";
 
+// NEW TRANSACTION 
+function AddTransactionDialog({
+  multisig,
+  open,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  open: boolean;
+  onClose: () => void;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  return (
+    <Dialog open={open} fullWidth onClose={onClose} maxWidth="md">
+      <DialogTitle>
+        <Typography variant="h4" component="h2">
+          New Transaction
+        </Typography>
+      </DialogTitle>
+      <DialogContent style={{ paddingBottom: "16px" }}>
+        <DialogContentText>
+          Create a new transaction to be signed by the multisig. This
+          transaction will not execute until enough owners have signed the
+          transaction.
+        </DialogContentText>
+        <List disablePadding>
+          <ProgramUpdateListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <IdlUpgradeListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <MultisigSetOwnersListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ChangeThresholdListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <TransferTokenListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ActivateDealListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+        </List>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// LABELS FOR TRANSACTIONS
+function ixLabel(tx: any, multisigClient: any) {
+  if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
+    // Upgrade instruction.
+    if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
+      return (
+        <ListItemText
+          primary="Program upgrade"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+  }
+  if (tx.account.programId.equals(multisigClient.programId)) {
+    const setThresholdSighash = multisigClient.coder.sighash(
+      "global",
+      "change_threshold"
+    );
+    if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+      return (
+        <ListItemText
+          primary="Set threshold"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+    const setOwnersSighash = multisigClient.coder.sighash(
+      "global",
+      "set_owners"
+    );
+    if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+      return (
+        <ListItemText
+          primary="Set owners"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+  }
+  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
+    const tag = tx.account.data.slice(0, 1);
+    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
+    const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
+    if (Buffer.from([3]).equals(tag)) {
+      return (
+        <ListItemText
+          primary={`Transfer ${amountParsed.toString()} Token`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+
+    if (Buffer.from([4]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Approve Token"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+
+    if (Buffer.from([7]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Mint Token To"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+    return (
+      <ListItemText
+        primary="Token Instructions"
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
+  if (tx.account.programId.equals(config.clusterConfig.programId)) {
+    const borrowerPk = tx.account.accounts[6].pubkey.toString();
+    return (
+      <ListItemText
+        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
+  if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+    return (
+      <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
+    );
+  }
+  return <ListItemText primary={tx.publicKey.toString()} />;
+}
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -608,99 +762,7 @@ function TxListItem({
   );
 }
 
-// LABELS FOR TRANSACTIONS
-function ixLabel(tx: any, multisigClient: any) {
-  if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
-    // Upgrade instruction.
-    if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
-      return (
-        <ListItemText
-          primary="Program upgrade"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-  }
-  if (tx.account.programId.equals(multisigClient.programId)) {
-    const setThresholdSighash = multisigClient.coder.sighash(
-      "global",
-      "change_threshold"
-    );
-    if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-      return (
-        <ListItemText
-          primary="Set threshold"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-    const setOwnersSighash = multisigClient.coder.sighash(
-      "global",
-      "set_owners"
-    );
-    if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-      return (
-        <ListItemText
-          primary="Set owners"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-  }
-  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
-    const tag = tx.account.data.slice(0, 1);
-    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-    const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
-    if (Buffer.from([3]).equals(tag)) {
-      return (
-        <ListItemText
-          primary={`Transfer ${amountParsed.toString()} Token`}
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
 
-    if (Buffer.from([4]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Approve Token"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-
-    if (Buffer.from([7]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Mint Token To"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-    return (
-      <ListItemText
-        primary="Token Instructions"
-        secondary={tx.publicKey.toString()}
-      />
-    );
-  }
-  if (tx.account.programId.equals(config.clusterConfig.programId)) {
-    const borrowerPk = tx.account.accounts[5].pubkey.toString();
-    const dealPk = tx.account.accounts[3].pubkey;
-    return (
-      <ListItemText
-        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
-        secondary={tx.publicKey.toString()}
-      />
-    );
-  }
-  if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-    return (
-      <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
-    );
-  }
-  return <ListItemText primary={tx.publicKey.toString()} />;
-}
 
 function AccountsList({ accounts }: { accounts: any }) {
   return (
@@ -774,68 +836,6 @@ function SignerDialog({
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
-    </Dialog>
-  );
-}
-
-// NEW TRANSACTION 
-function AddTransactionDialog({
-  multisig,
-  open,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  open: boolean;
-  onClose: () => void;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  return (
-    <Dialog open={open} fullWidth onClose={onClose} maxWidth="md">
-      <DialogTitle>
-        <Typography variant="h4" component="h2">
-          New Transaction
-        </Typography>
-      </DialogTitle>
-      <DialogContent style={{ paddingBottom: "16px" }}>
-        <DialogContentText>
-          Create a new transaction to be signed by the multisig. This
-          transaction will not execute until enough owners have signed the
-          transaction.
-        </DialogContentText>
-        <List disablePadding>
-          <ProgramUpdateListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <IdlUpgradeListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <MultisigSetOwnersListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <ChangeThresholdListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <TransferTokenListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <ActivateDealListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-        </List>
-      </DialogContent>
     </Dialog>
   );
 }

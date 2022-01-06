@@ -146,13 +146,18 @@ const getGatewayToken = multiAsync(
 	}
 );
 
-const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
-	const credixPassSeeds = encodeSeedString("credix-pass");
-	const address = publicKey.toBuffer();
-	const seeds: PdaSeeds = [address, credixPassSeeds];
+export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
+	const globalMarketStatePDA = await findGlobalMarketStatePDA();
+	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
+	const seeds: PdaSeeds = [
+		globalMarketStatePDA[0].toBuffer(),
+		publicKey.toBuffer(),
+		credixPassSeeds,
+	];
 
 	return findPDA(seeds);
 });
+
 
 export const activateDeal = multiAsync(
 	async (dealPk: PublicKey, borrowerPk: PublicKey, multisigPk: PublicKey, provider) => {

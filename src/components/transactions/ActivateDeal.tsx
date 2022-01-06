@@ -67,6 +67,7 @@ export function ActivateDealListItem({
     const fetchDeals = async () => {
       const pendingDeals = await findPendingDeals(multisigClient.provider); 
       setDeals(pendingDeals);
+      console.log(deals); 
     }
   
     const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {

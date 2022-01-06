@@ -98,7 +98,7 @@
       "name": "depositFunds",
       "accounts": [
         {
-          "name": "depositor",
+          "name": "investor",
           "isMut": true,
           "isSigner": true
         },
@@ -118,7 +118,7 @@
           "isSigner": false
         },
         {
-          "name": "depositorTokenAccount",
+          "name": "investorTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -133,7 +133,7 @@
           "isSigner": false
         },
         {
-          "name": "depositorLpTokenAccount",
+          "name": "investorLpTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -411,7 +411,7 @@
       "name": "withdrawFunds",
       "accounts": [
         {
-          "name": "withdrawer",
+          "name": "investor",
           "isMut": false,
           "isSigner": true
         },
@@ -431,12 +431,12 @@
           "isSigner": false
         },
         {
-          "name": "withdrawerLpTokenAccount",
+          "name": "investorLpTokenAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "withdrawerTokenAccount",
+          "name": "investorTokenAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -502,6 +502,11 @@
           "isSigner": false
         },
         {
+          "name": "globalMarketState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -543,6 +548,11 @@
         {
           "name": "credixPass",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "globalMarketState",
+          "isMut": false,
           "isSigner": false
         }
       ],
@@ -689,7 +699,7 @@
             "type": "u8"
           },
           {
-            "name": "globalMarketStateBump",
+            "name": "bump",
             "type": "u8"
           },
           {
