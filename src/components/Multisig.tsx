@@ -4,7 +4,6 @@ import { useSnackbar } from "notistack";
 import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
 import AppBar from "@material-ui/core/AppBar";
-import GavelIcon from "@material-ui/icons/Gavel";
 import StarsIcon from "@material-ui/icons/Stars"; 
 import DescriptionIcon from "@material-ui/icons/Description";
 import Paper from "@material-ui/core/Paper";
@@ -18,6 +17,7 @@ import InfoIcon from "@material-ui/icons/Info";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
 import TableBody from "@material-ui/core/TableBody";
+import GavelIcon from "@material-ui/icons/Gavel";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import BuildIcon from "@material-ui/icons/Build";
@@ -42,6 +42,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+// import CredixLogo from "../credix.svg"; 
 import BN from "bn.js";
 import {
   Account,
@@ -58,11 +59,211 @@ import { Connection } from "@solana/web3.js";
 import { getMintInfo, getTokenAccount, parseTokenAccount, ProgramAccount } from "@project-serum/common";
 import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
-import { ACCOUNT_LAYOUT } from "@project-serum/common/dist/lib/token";
-import { activateDeal } from "../credix/api";
-import { findPendingDeals, getDealAccountData } from "../credix/api";
-import { Deal } from "../credix/types/program.types";
 import { config } from "../credix/config";
+import { ChangeThresholdListItem } from "./transactions/ChangeThreshold";
+import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
+import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
+import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
+import { ActivateDealListItem } from "./transactions/ActivateDeal"; 
+import { TransferTokenListItem } from "./transactions/TransferToken";
+import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
+import { InitializeMarketListItem } from "./transactions/InitializeMarket";
+import { CredixPassListItem } from "./transactions/CredixPass";
+
+// NEW TRANSACTION 
+function AddTransactionDialog({
+  multisig,
+  open,
+  onClose,
+  didAddTransaction,
+}: {
+  multisig: PublicKey;
+  open: boolean;
+  onClose: () => void;
+  didAddTransaction: (tx: PublicKey) => void;
+}) {
+  return (
+    <Dialog open={open} fullWidth onClose={onClose} maxWidth="md">
+      <DialogTitle>
+        <Typography variant="h4" component="h2">
+          New Transaction
+        </Typography>
+      </DialogTitle>
+      <DialogContent style={{ paddingBottom: "16px" }}>
+        <DialogContentText>
+          Create a new transaction to be signed by the multisig. This
+          transaction will not execute until enough owners have signed the
+          transaction.
+        </DialogContentText>
+        <List disablePadding>
+          <ProgramUpdateListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <IdlUpgradeListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <MultisigSetOwnersListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ChangeThresholdListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <TransferTokenListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <ActivateDealListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <FreezeThawGlobalMarketStateListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          {/* <InitializeMarketListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          /> */}
+          <CredixPassListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+        </List>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// LABELS FOR TRANSACTIONS
+function ixLabel(tx: any, multisigClient: any) {
+  if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
+    // Upgrade instruction.
+    if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
+      return (
+        <ListItemText
+          primary="Program upgrade"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+  }
+  if (tx.account.programId.equals(multisigClient.programId)) {
+    const setThresholdSighash = multisigClient.coder.sighash(
+      "global",
+      "change_threshold"
+    );
+    if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+      return (
+        <ListItemText
+          primary="Set threshold"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+    const setOwnersSighash = multisigClient.coder.sighash(
+      "global",
+      "set_owners"
+    );
+    if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+      return (
+        <ListItemText
+          primary="Set owners"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+  }
+  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
+    const tag = tx.account.data.slice(0, 1);
+    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
+    const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
+    if (Buffer.from([3]).equals(tag)) {
+      return (
+        <ListItemText
+          primary={`Transfer ${amountParsed.toString()} Token`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+
+    if (Buffer.from([4]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Approve Token"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+
+    if (Buffer.from([7]).equals(tag)) {
+      return (
+        <ListItemText
+          primary="Mint Token To"
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+    return (
+      <ListItemText
+        primary="Token Instructions"
+        secondary={tx.publicKey.toString()}
+      />
+    );
+  }
+  if (tx.account.programId.equals(config.clusterConfig.programId)) {
+    if (tx.account.accounts.length === 2) {
+      return (
+        <ListItemText
+          primary={"Freeze / Thaw market"}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    // } else if (tx.account.accounts.length === 13) {
+    //   return (
+    //     <ListItemText
+    //       primary={"Set up new market"}
+    //       secondary={tx.publicKey.toString()}
+    //     />
+    //   );
+    } else if (tx.account.accounts.length === 4 || (tx.account.accounts.length === 6 && tx.account.data.length === 11)) {
+      const credixPassPk = tx.account.accounts[1].pubkey.toString();
+      return (
+        <ListItemText
+            primary={`Issue / update credix pass for ${credixPassPk.slice(0,5)}...${credixPassPk.slice(-5,)}`}
+            secondary={tx.publicKey.toString()}
+          />
+      );
+    }
+    else {
+      const borrowerPk = tx.account.accounts[6].pubkey.toString();
+      return (
+        <ListItemText
+          primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }
+  }
+  if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+    return (
+      <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
+    );
+  }
+  return <ListItemText primary={tx.publicKey.toString()} />;
+}
 
 export default function Multisig({ multisig }: { multisig?: PublicKey }) {
   return (
@@ -84,6 +285,10 @@ export default function Multisig({ multisig }: { multisig?: PublicKey }) {
     </div>
   );
 }
+
+const BPF_LOADER_UPGRADEABLE_PID = new PublicKey(
+  "BPFLoaderUpgradeab1e11111111111111111111111"
+);
 
 function NewMultisigButton() {
   const [open, setOpen] = useState(false);
@@ -601,98 +806,7 @@ function TxListItem({
   );
 }
 
-function ixLabel(tx: any, multisigClient: any) {
-  if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
-    // Upgrade instruction.
-    if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
-      return (
-        <ListItemText
-          primary="Program upgrade"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-  }
-  if (tx.account.programId.equals(multisigClient.programId)) {
-    const setThresholdSighash = multisigClient.coder.sighash(
-      "global",
-      "change_threshold"
-    );
-    if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-      return (
-        <ListItemText
-          primary="Set threshold"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-    const setOwnersSighash = multisigClient.coder.sighash(
-      "global",
-      "set_owners"
-    );
-    if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-      return (
-        <ListItemText
-          primary="Set owners"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-  }
-  if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
-    const tag = tx.account.data.slice(0, 1);
-    const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-    const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
-    if (Buffer.from([3]).equals(tag)) {
-      return (
-        <ListItemText
-          primary={`Transfer ${amountParsed.toString()} Token`}
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
 
-    if (Buffer.from([4]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Approve Token"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-
-    if (Buffer.from([7]).equals(tag)) {
-      return (
-        <ListItemText
-          primary="Mint Token To"
-          secondary={tx.publicKey.toString()}
-        />
-      );
-    }
-    return (
-      <ListItemText
-        primary="Token Instructions"
-        secondary={tx.publicKey.toString()}
-      />
-    );
-  }
-  if (tx.account.programId.equals(config.clusterConfig.programId)) {
-    const borrowerPk = tx.account.accounts[5].pubkey.toString();
-    const dealPk = tx.account.accounts[3].pubkey;
-    return (
-      <ListItemText
-        primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
-        secondary={tx.publicKey.toString()}
-      />
-    );
-  }
-  if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-    return (
-      <ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
-    );
-  }
-  return <ListItemText primary={tx.publicKey.toString()} />;
-}
 
 function AccountsList({ accounts }: { accounts: any }) {
   return (
@@ -770,979 +884,6 @@ function SignerDialog({
   );
 }
 
-function AddTransactionDialog({
-  multisig,
-  open,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  open: boolean;
-  onClose: () => void;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  return (
-    <Dialog open={open} fullWidth onClose={onClose} maxWidth="md">
-      <DialogTitle>
-        <Typography variant="h4" component="h2">
-          New Transaction
-        </Typography>
-      </DialogTitle>
-      <DialogContent style={{ paddingBottom: "16px" }}>
-        <DialogContentText>
-          Create a new transaction to be signed by the multisig. This
-          transaction will not execute until enough owners have signed the
-          transaction.
-        </DialogContentText>
-        <List disablePadding>
-          <ProgramUpdateListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <IdlUpgradeListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <MultisigSetOwnersListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <ChangeThresholdListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <TransferTokenListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-          <ActivateDealListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          />
-        </List>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ChangeThresholdListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <GavelIcon />
-        </ListItemIcon>
-        <ListItemText primary={"Change threshold"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <ChangeThresholdListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-function ChangeThresholdListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [threshold, setThreshold] = useState(2);
-  const multisigClient = useMultisigProgram();
-  // @ts-ignore
-  const { enqueueSnackbar } = useSnackbar();
-  const changeThreshold = async () => {
-    enqueueSnackbar("Creating change threshold transaction", {
-      variant: "info",
-    });
-    const data = changeThresholdData(multisigClient, threshold);
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-    const accounts = [
-      {
-        pubkey: multisig,
-        isWritable: true,
-        isSigner: false,
-      },
-      {
-        pubkey: multisigSigner,
-        isWritable: false,
-        isSigner: true,
-      },
-    ];
-    const transaction = new Account();
-    const txSize = 1000; // todo
-    const tx = await multisigClient.rpc.createTransaction(
-      multisigClient.programId,
-      accounts,
-      data,
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            txSize
-          ),
-        ],
-      }
-    );
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        paddingLeft: "24px",
-        paddingRight: "24px",
-      }}
-    >
-      <TextField
-        fullWidth
-        style={{ marginTop: "16px" }}
-        label="Threshold"
-        value={threshold}
-        type="number"
-        onChange={(e) => {
-          // @ts-ignore
-          setThreshold(e.target.value);
-        }}
-      />
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => changeThreshold()}>Change Threshold</Button>
-      </div>
-    </div>
-  );
-}
-
-function MultisigSetOwnersListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <SupervisorAccountIcon />
-        </ListItemIcon>
-        <ListItemText primary={"Set owners"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <SetOwnersListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-function SetOwnersListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const multisigClient = useMultisigProgram();
-  // @ts-ignore
-  const zeroAddr = new PublicKey("11111111111111111111111111111111").toString();
-  const [participants, setParticipants] = useState([zeroAddr]);
-  const { enqueueSnackbar } = useSnackbar();
-  const setOwners = async () => {
-    enqueueSnackbar("Creating setOwners transaction", {
-      variant: "info",
-    });
-    const owners = participants.map((p) => new PublicKey(p));
-    const data = setOwnersData(multisigClient, owners);
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-    const accounts = [
-      {
-        pubkey: multisig,
-        isWritable: true,
-        isSigner: false,
-      },
-      {
-        pubkey: multisigSigner,
-        isWritable: false,
-        isSigner: true,
-      },
-    ];
-    const transaction = new Account();
-    const txSize = 5000; // TODO: tighter bound.
-    const tx = await multisigClient.rpc.createTransaction(
-      multisigClient.programId,
-      accounts,
-      data,
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            txSize
-          ),
-        ],
-      }
-    );
-    if (!tx) {
-      return;
-    }
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        paddingLeft: "24px",
-        paddingRight: "24px",
-      }}
-    >
-      {participants.map((p, idx) => (
-        <TextField
-          fullWidth
-          style={{ marginTop: "16px" }}
-          label="Participant"
-          value={p}
-          onChange={(e) => {
-            const p = [...participants];
-            p[idx] = e.target.value;
-            setParticipants(p);
-          }}
-        />
-      ))}
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <IconButton
-          onClick={() => {
-            const p = [...participants];
-            // @ts-ignore
-            p.push(new PublicKey("11111111111111111111111111111111").toString());
-            setParticipants(p);
-          }}
-        >
-          <AddIcon />
-        </IconButton>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "16px",
-          paddingBottom: "16px",
-        }}
-      >
-        <Button onClick={() => setOwners()}>Set Owners</Button>
-      </div>
-    </div>
-  );
-}
-
-function IdlUpgradeListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <DescriptionIcon />
-        </ListItemIcon>
-        <ListItemText primary={"Upgrade IDL"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <UpgradeIdlListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-function UpgradeIdlListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-
-  const [programId, setProgramId] = useState<null | string>(null);
-  const [buffer, setBuffer] = useState<null | string>(null);
-
-  const multisigClient = useMultisigProgram();
-  const { enqueueSnackbar } = useSnackbar();
-  const createTransactionAccount = async () => {
-    enqueueSnackbar("Creating transaction", {
-      variant: "info",
-    });
-    const programAddr = new PublicKey(programId as string);
-    const bufferAddr = new PublicKey(buffer as string);
-    const idlAddr = await idlAddress(programAddr);
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-    const data = idl.encodeInstruction({ setBuffer: {} });
-    const accs = [
-      {
-        pubkey: bufferAddr,
-        isWritable: true,
-        isSigner: false,
-      },
-      { pubkey: idlAddr, isWritable: true, isSigner: false },
-      { pubkey: multisigSigner, isWritable: true, isSigner: false },
-    ];
-    const txSize = 1000; // TODO: tighter bound.
-    const transaction = new Account();
-    const tx = await multisigClient.rpc.createTransaction(
-      programAddr,
-      accs,
-      data,
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            txSize
-          ),
-        ],
-      }
-    );
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        paddingLeft: "24px",
-        paddingRight: "24px",
-      }}
-    >
-      <TextField
-        fullWidth
-        style={{ marginTop: "16px" }}
-        label="Program ID"
-        value={programId}
-        onChange={(e) => setProgramId(e.target.value as string)}
-      />
-      <TextField
-        style={{ marginTop: "16px" }}
-        fullWidth
-        label="New IDL buffer"
-        value={buffer}
-        onChange={(e) => setBuffer(e.target.value as string)}
-      />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "16px",
-          paddingBottom: "16px",
-        }}
-      >
-        <Button onClick={() => createTransactionAccount()}>
-          Create upgrade
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function ProgramUpdateListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <BuildIcon />
-        </ListItemIcon>
-        <ListItemText primary={"Upgrade program"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <UpgradeProgramListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-const BPF_LOADER_UPGRADEABLE_PID = new PublicKey(
-  "BPFLoaderUpgradeab1e11111111111111111111111"
-);
-
-function UpgradeProgramListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [programId, setProgramId] = useState<null | string>(null);
-  const [buffer, setBuffer] = useState<null | string>(null);
-
-  const multisigClient = useMultisigProgram();
-  const { enqueueSnackbar } = useSnackbar();
-  const createTransactionAccount = async () => {
-    enqueueSnackbar("Creating transaction", {
-      variant: "info",
-    });
-    const programAddr = new PublicKey(programId as string);
-    const bufferAddr = new PublicKey(buffer as string);
-    // Hard code serialization.
-    const data = Buffer.from([3, 0, 0, 0]);
-
-    const programAccount = await (async () => {
-      const programAccount = await multisigClient.provider.connection.getAccountInfo(
-        programAddr
-      );
-      if (programAccount === null) {
-        throw new Error("Invalid program ID");
-      }
-      return {
-        // Hard code deserialization.
-        programdataAddress: new PublicKey(programAccount.data.slice(4)),
-      };
-    })();
-    const spill = multisigClient.provider.wallet.publicKey;
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-    const accs = [
-      {
-        pubkey: programAccount.programdataAddress,
-        isWritable: true,
-        isSigner: false,
-      },
-      { pubkey: programAddr, isWritable: true, isSigner: false },
-      { pubkey: bufferAddr, isWritable: true, isSigner: false },
-      { pubkey: spill, isWritable: true, isSigner: false },
-      { pubkey: SYSVAR_RENT_PUBKEY, isWritable: false, isSigner: false },
-      { pubkey: SYSVAR_CLOCK_PUBKEY, isWritable: false, isSigner: false },
-      { pubkey: multisigSigner, isWritable: false, isSigner: false },
-    ];
-    const txSize = 1000; // TODO: tighter bound.
-    const transaction = new Account();
-    const tx = await multisigClient.rpc.createTransaction(
-      BPF_LOADER_UPGRADEABLE_PID,
-      accs,
-      data,
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            txSize
-          ),
-        ],
-      }
-    );
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        paddingLeft: "24px",
-        paddingRight: "24px",
-      }}
-    >
-      <TextField
-        fullWidth
-        style={{ marginTop: "16px" }}
-        label="Program ID"
-        value={programId}
-        onChange={(e) => setProgramId(e.target.value as string)}
-      />
-      <TextField
-        style={{ marginTop: "16px" }}
-        fullWidth
-        label="New program buffer"
-        value={buffer}
-        onChange={(e) => setBuffer(e.target.value as string)}
-      />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "16px",
-          paddingBottom: "16px",
-        }}
-      >
-        <Button onClick={() => createTransactionAccount()}>
-          Create upgrade
-        </Button>
-      </div>
-    </div>
-  );
-}
-function ActivateDealListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <MoneyRounded />
-        </ListItemIcon>
-        <ListItemText primary={"Activate Deal"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <ActivateDealListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-function ActivateDealListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
-  const multisigClient = useMultisigProgram();
-  const { enqueueSnackbar } = useSnackbar();
-
-  useEffect(() => {
-		if (multisigClient.provider.connection) {
-			fetchDeals();
-		}
-	}, [multisigClient.provider.connection]);
-
-  const fetchDeals = async () => {
-    const pendingDeals = await findPendingDeals(multisigClient.provider); 
-    setDeals(pendingDeals);
-  }
-
-  const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
-    enqueueSnackbar("Creating transaction", {
-      variant: "info",
-    });
-
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-
-    console.log("multi signer", multisigSigner.toString());
-    const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
-    const transaction = new Account();
-    console.log(activateIx.keys);
-    console.log(activateIx.data);
-    const tx = await multisigClient.rpc.createTransaction(
-      config.clusterConfig.programId,
-      activateIx.keys,
-      Buffer.from(activateIx.data),
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            1000
-          ),
-        ],
-      }
-    );
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-
-  let dealRows = [<p>"no pending deals"</p>];
-  if (deals) {
-    dealRows = deals.map((deal) =>
-        <div key={deal.account.borrower.toString()}
-          style={{
-            display: "flex", 
-            justifyContent: "space-between",
-            width: "100%",
-            background: "white",
-            paddingLeft: "20px",
-            paddingRight: "20px",
-            borderBottom: "1px solid grey"
-          }}
-        >
-          <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
-          <p style={{width: "200px"}}>{deal.account.name}</p> 
-          <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
-          <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
-            Activate
-          </Button>
-        </div>
-    );
-  };
-
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        padding: "24px"
-      }}
-    >
-      <div
-        style={{
-          display: "flex", 
-          justifyContent: "space-between",
-          width: "100%",
-          background: "white",
-          paddingLeft: "20px",
-          paddingRight: "20px",
-          borderBottom: "1px solid grey"
-        }}
-      >
-        <p style={{width: "500px"}}>Borrower Public Key</p> 
-        <p style={{width: "200px"}}>Deal name</p> 
-        <p style={{width: "200px"}}>Amount</p>
-        <p style={{width: "100px"}}></p>
-      </div>
-      {dealRows}
-    </div>
-  );
-}
-
-function TransferTokenListItem({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <ListItem button onClick={() => setOpen((open) => !open)}>
-        <ListItemIcon>
-          <MoneyRounded />
-        </ListItemIcon>
-        <ListItemText primary={"Transfer Token"} />
-        {open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <TransferTokenListItemDetails
-          didAddTransaction={didAddTransaction}
-          multisig={multisig}
-          onClose={onClose}
-        />
-      </Collapse>
-    </>
-  );
-}
-
-function TransferTokenListItemDetails({
-  multisig,
-  onClose,
-  didAddTransaction,
-}: {
-  multisig: PublicKey;
-  onClose: Function;
-  didAddTransaction: (tx: PublicKey) => void;
-}) {
-  const [source, setSource] = useState<null | string>(null);
-  const [destination, setDestination] = useState<null | string>(null);
-  const [amount, setAmount] = useState<null | u64>(null);
-
-
-  const multisigClient = useMultisigProgram();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)
-
-  const getAssociatedTokenAddressPK = async (ownerPk: PublicKey, mintPk: PublicKey) => {
-    return await Token.getAssociatedTokenAddress(
-      ASSOCIATED_TOKEN_PROGRAM_ID,
-      TOKEN_PROGRAM_ID,
-      mintPk,
-      ownerPk
-    );
-  }
-
-  const createTransactionAccount = async () => {
-    enqueueSnackbar("Creating transaction", {
-      variant: "info",
-    });
-    const sourceAddr = new PublicKey(source as string);
-    const destinationAccAddr = new PublicKey(destination as string);
-    const [multisigSigner] = await PublicKey.findProgramAddress(
-      [multisig.toBuffer()],
-      multisigClient.programId
-    );
-    const sourceTokenAccount = await getTokenAccount(
-      multisigClient.provider,
-      sourceAddr,
-    );
-
-    const destinationTokenAccAddr = await getAssociatedTokenAddressPK(destinationAccAddr, sourceTokenAccount.mint); 
-
-    console.log(sourceTokenAccount);
-
-    // @ts-ignore
-    try { 
-        const destinationTokenAccount = await getTokenAccount(
-        multisigClient.provider,
-        destinationTokenAccAddr
-      );
-      // @ts-ignore
-      if (sourceTokenAccount.mint.toBase58() !== destinationTokenAccount.mint.toBase58()) {
-        enqueueSnackbar("Token mint does not match", {
-          variant: "error",
-        });
-        return;
-      }
-    } catch (err) {
-        enqueueSnackbar("No token account found for the destination address. Op in for this specific token on your phantom wallet.", {variant: "error",});
-      return;
-    }
-
-    const tokenMint = await getMintInfo(
-      multisigClient.provider, sourceTokenAccount.mint);
-
-    if (!amount) {
-      enqueueSnackbar("No amount provided", {
-        variant: "warning",
-      });
-      return;
-    }
-    const TEN = new u64(10);
-    const multiplier = TEN.pow(new BN(tokenMint.decimals));
-    const amountInLamports = amount.mul(multiplier);
-    const transferIx = Token.createTransferInstruction(
-      TOKEN_PROGRAM_ID,
-      sourceAddr,
-      destinationTokenAccAddr,
-      multisigSigner,
-      [],
-      new u64(amountInLamports.toString())
-    );
-    const transaction = new Account();
-    const tx = await multisigClient.rpc.createTransaction(
-      TOKEN_PROGRAM_ID,
-      transferIx.keys,
-      Buffer.from(transferIx.data),
-      {
-        accounts: {
-          multisig,
-          transaction: transaction.publicKey,
-          proposer: multisigClient.provider.wallet.publicKey,
-          rent: SYSVAR_RENT_PUBKEY,
-        },
-        signers: [transaction],
-        instructions: [
-          await multisigClient.account.transaction.createInstruction(
-            transaction,
-            // @ts-ignore
-            1000
-          ),
-        ],
-      }
-    );
-    enqueueSnackbar("Transaction created", {
-      variant: "success",
-      action: <ViewTransactionOnExplorerButton signature={tx} />,
-    });
-    didAddTransaction(transaction.publicKey);
-    onClose();
-  };
-
-  return (
-    <div
-      style={{
-        background: "#f1f0f0",
-        paddingTop: "24px",
-        paddingLeft: "24px",
-        paddingRight: "24px",
-      }}
-    >
-      <FormControl fullWidth>
-        <InputLabel id="source-select-label">Source Token Mint</InputLabel>
-        <Select
-          autoWidth={true}
-          value={source}
-        >
-          {tokenAccounts.map(
-            tokenAccount => {
-              return (
-                <MenuItem value={tokenAccount.address.toString()} onClick={
-                  () => {
-                    setSource(tokenAccount.address.toString());
-                  }
-                }>
-                  <p>{tokenAccount.mint.toString()} - [Balance: {(tokenAccount.amount.toNumber() / 1000000).toString()}]</p>
-                </MenuItem>
-              )
-            }
-          )}
-        </Select>
-        <TextField
-          style={{ marginTop: "16px" }}
-          fullWidth
-          label="Amount"
-          value={amount}
-          onChange={(e) => setAmount(new u64(e.target.value as string))}
-        />
-        <TextField
-          style={{ marginTop: "16px" }}
-          fullWidth
-          label="Destination Address"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value as string)}
-        />
-
-      </FormControl>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginTop: "16px",
-          paddingBottom: "16px",
-        }}
-      >
-        <Button onClick={() => createTransactionAccount()}>
-          Create Token Transfer
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 // @ts-ignore
 function icon(tx, multisigClient) {
   if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
@@ -1770,22 +911,9 @@ function icon(tx, multisigClient) {
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return <DescriptionIcon />;
   }
-  return <ReceiptIcon />;
+  return <img src="/credix.svg" alt="Credix Logo" style={{width: "20px", marginLeft: "3px"}}/>; 
 }
 
-// @ts-ignore
-function changeThresholdData(multisigClient, threshold) {
-  return multisigClient.coder.instruction.encode("change_threshold", {
-    threshold: new BN(threshold),
-  });
-}
-
-// @ts-ignore
-function setOwnersData(multisigClient, owners) {
-  return multisigClient.coder.instruction.encode("set_owners", {
-    owners,
-  });
-}
 
 
 // Deterministic IDL address as a function of the program id.
