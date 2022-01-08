@@ -1,6 +1,7 @@
 name: React app deployment
 env: 
   CI: false
+  REACT_APP_CLUSTER: devnet
 on:
   push:
     branches:
