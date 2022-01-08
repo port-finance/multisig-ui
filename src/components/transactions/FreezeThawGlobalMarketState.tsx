@@ -30,7 +30,7 @@ export function FreezeThawGlobalMarketStateListItem({
       <>
         <ListItem button onClick={() => setOpen((open) => !open)}>
           <ListItemIcon>
-            <MoneyRounded />
+            <img src="/credix.svg" alt="Credix Logo" style={{width: "20px", marginLeft: "3px"}}/>
           </ListItemIcon>
           <ListItemText primary={"Freeze / Thaw market"} />
           {open ? <ExpandLess /> : <ExpandMore />}

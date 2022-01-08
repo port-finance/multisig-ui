@@ -8,21 +8,21 @@ import IDL from "./credix.json";
 const localnetConfig: ClusterConfig = {
 	name: SolanaCluster.LOCALNET,
 	RPCEndpoint: RPCEndpoint.LOCALNET,
-	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
 	gatewayProgramId: new PublicKey("8UHYR4tauzyX3MFcQXN2QjPUBHXDPt8yHcE3V5GkbnEC"),
 };
 
 const devnetConfig: ClusterConfig = {
 	name: SolanaCluster.DEVNET,
 	RPCEndpoint: RPCEndpoint.DEVNET,
-	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
 	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
 };
 
 const mainnetConfig: ClusterConfig = {
 	name: SolanaCluster.MAINNET,
 	RPCEndpoint: RPCEndpoint.MAINNET,
-	programId: new PublicKey("9jtm1v32FoMALjRiX1dZixnYunQBJvX681HdLigHx1aL"),
+	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
 	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
 };
 ///

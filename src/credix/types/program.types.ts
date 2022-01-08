@@ -14,6 +14,12 @@ export enum DealStatus {
 	PENDING,
 }
 
+export type CredixPass = {
+	isBorrower: boolean; 
+	isUnderwriter: boolean; 
+	active: boolean; 
+}
+
 export type Deal = {
 	borrower: PublicKey;
 	principal: BN;

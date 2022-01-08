@@ -147,18 +147,6 @@ const getGatewayToken = multiAsync(
 	}
 );
 
-export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
-	const globalMarketStatePDA = await findGlobalMarketStatePDA();
-	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
-	const seeds: PdaSeeds = [
-		globalMarketStatePDA[0].toBuffer(),
-		publicKey.toBuffer(),
-		credixPassSeeds,
-	];
-
-	return findPDA(seeds);
-});
-
 
 export const activateDeal = multiAsync(
 	async (dealPk: PublicKey, borrowerPk: PublicKey, multisigPk: PublicKey, provider) => {
@@ -221,6 +209,7 @@ export const activateDeal = multiAsync(
 
 export const initializeMarket = multiAsync(
 	async (
+		multisigPk: PublicKey, 
 		_withdrawalFee: number, 
 		_interestFee: number, 
 		_globalMarketSeed: string, 
@@ -253,7 +242,8 @@ export const initializeMarket = multiAsync(
 					ASSOCIATED_TOKEN_PROGRAM_ID,
 					TOKEN_PROGRAM_ID,
 					usdcMintPk,
-					treasuryPk
+					treasuryPk,
+					true
 				);
 
 			const liquidityPoolUSDCTokenAccount =
@@ -261,7 +251,8 @@ export const initializeMarket = multiAsync(
 					ASSOCIATED_TOKEN_PROGRAM_ID,
 					TOKEN_PROGRAM_ID,
 					usdcMintPk,
-					signingAuthorityPda
+					signingAuthorityPda,
+					true
 				);
 
 			const lpTokenMintKeypair = Keypair.generate();
@@ -274,8 +265,8 @@ export const initializeMarket = multiAsync(
 				withdrawalFee, // 0.5%
 				{
 				accounts: {
-					owner: provider.wallet.publicKey,
-					gatekeeperNetwork:new PublicKey(gatekeeperNetworkPk),
+					owner: multisigPk,
+					gatekeeperNetwork: new PublicKey(gatekeeperNetworkPk),
 					globalMarketState: globalMarketStatePda,
 					liquidityPoolTokenAccount: liquidityPoolUSDCTokenAccount,
 					treasury: new PublicKey(treasuryPk),
@@ -350,3 +341,86 @@ export const thawGlobalMarketState = multiAsync(
 			});
 		}
 ); 
+
+export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
+	const globalMarketStatePDA = await findGlobalMarketStatePDA();
+	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
+	const seeds: PdaSeeds = [
+		globalMarketStatePDA[0].toBuffer(),
+		publicKey.toBuffer(),
+		credixPassSeeds,
+	];
+
+	return findPDA(seeds);
+});
+
+
+export const issueCredixPass = multiAsync(
+	async (
+	multisigPk: PublicKey, 
+	publicKey: PublicKey,
+	isUnderwriter: boolean,
+	isBorrower: boolean,
+	provider
+) => {
+	const program = constructProgram(provider);
+	const _globalMarketStatePDA = findGlobalMarketStatePDA();
+	const _getCredixPassPDA = findCredixPassPDA(publicKey);
+
+	const [globalMarketStatePDA, credixPassPDA] = await Promise.all([
+		_globalMarketStatePDA,
+		_getCredixPassPDA,
+	]);
+
+	return program.instruction.createCredixPass(credixPassPDA[1], isUnderwriter, isBorrower, {
+		accounts: {
+			owner: multisigPk,
+			passHolder: publicKey,
+			credixPass: credixPassPDA[0],
+			systemProgram: SystemProgram.programId,
+			rent: web3.SYSVAR_RENT_PUBKEY,
+			globalMarketState: globalMarketStatePDA[0],
+		},
+		signers: [],
+	});
+});
+
+export const updateCredixPass = multiAsync(
+	async (
+	multisigPk: PublicKey, 
+	publicKey: PublicKey,
+	isActive: boolean,
+	isUnderwriter: boolean,
+	isBorrower: boolean,
+	provider
+) => {
+	const program = constructProgram(provider);
+
+	const _globalMarketStatePDA = findGlobalMarketStatePDA();
+	const _getCredixPassPDA = findCredixPassPDA(publicKey);
+
+	const [globalMarketStatePDA, credixPassPDA] = await Promise.all([
+		_globalMarketStatePDA,
+		_getCredixPassPDA,
+	]);
+
+	return program.instruction.updateCredixPass(isActive, isUnderwriter, isBorrower, {
+		accounts: {
+			owner: multisigPk,
+			passHolder: publicKey,
+			credixPass: credixPassPDA[0],
+			globalMarketState: globalMarketStatePDA[0],
+		},
+		signers: [],
+	});
+});
+
+export const getCredixPassInfo = multiAsync(
+	async (
+		publicKey: PublicKey, 
+		provider) => {
+		const program = constructProgram(provider);
+		const [credixPassPDA] = await findCredixPassPDA(publicKey);
+		return program.account.credixPass.fetchNullable(credixPassPDA);
+	}
+);

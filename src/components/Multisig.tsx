@@ -42,6 +42,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+// import CredixLogo from "../credix.svg"; 
 import BN from "bn.js";
 import {
   Account,
@@ -66,6 +67,8 @@ import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal"; 
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
+import { InitializeMarketListItem } from "./transactions/InitializeMarket";
+import { CredixPassListItem } from "./transactions/CredixPass";
 
 // NEW TRANSACTION 
 function AddTransactionDialog({
@@ -124,6 +127,16 @@ function AddTransactionDialog({
             onClose={onClose}
           />
           <FreezeThawGlobalMarketStateListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          {/* <InitializeMarketListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          /> */}
+          <CredixPassListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}
@@ -218,7 +231,23 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
-    } else {
+    // } else if (tx.account.accounts.length === 13) {
+    //   return (
+    //     <ListItemText
+    //       primary={"Set up new market"}
+    //       secondary={tx.publicKey.toString()}
+    //     />
+    //   );
+    } else if (tx.account.accounts.length === 4 || (tx.account.accounts.length === 6 && tx.account.data.length === 11)) {
+      const credixPassPk = tx.account.accounts[1].pubkey.toString();
+      return (
+        <ListItemText
+            primary={`Issue / update credix pass for ${credixPassPk.slice(0,5)}...${credixPassPk.slice(-5,)}`}
+            secondary={tx.publicKey.toString()}
+          />
+      );
+    }
+    else {
       const borrowerPk = tx.account.accounts[6].pubkey.toString();
       return (
         <ListItemText
@@ -882,7 +911,7 @@ function icon(tx, multisigClient) {
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return <DescriptionIcon />;
   }
-  return <ReceiptIcon />;
+  return <img src="/credix.svg" alt="Credix Logo" style={{width: "20px", marginLeft: "3px"}}/>; 
 }
 
 
