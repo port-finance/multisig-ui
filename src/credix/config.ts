@@ -8,14 +8,14 @@ import IDL from "./credix.json";
 const localnetConfig: ClusterConfig = {
 	name: SolanaCluster.LOCALNET,
 	RPCEndpoint: RPCEndpoint.LOCALNET,
-	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
+	programId: new PublicKey("DnKntCMeFpwFMpegCsbYdmLhQaKULPbAmcivfX917PNL"),
 	gatewayProgramId: new PublicKey("8UHYR4tauzyX3MFcQXN2QjPUBHXDPt8yHcE3V5GkbnEC"),
 };
 
 const devnetConfig: ClusterConfig = {
 	name: SolanaCluster.DEVNET,
 	RPCEndpoint: RPCEndpoint.DEVNET,
-	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
+	programId: new PublicKey("DnKntCMeFpwFMpegCsbYdmLhQaKULPbAmcivfX917PNL"),
 	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
 };
 

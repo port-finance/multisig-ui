@@ -332,7 +332,7 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   }, [multisig, multisigClient.account]);
   useEffect(() => {
     multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
-      console.log("transactions", txs);
+      txs.sort((a, b) => (!a.account.didExecute && b.account.didExecute) ? -1 : 1)
       setTransactions(txs);
     }).catch(err => console.log("error", err));
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
@@ -805,8 +805,6 @@ function TxListItem({
     </>
   );
 }
-
-
 
 function AccountsList({ accounts }: { accounts: any }) {
   return (

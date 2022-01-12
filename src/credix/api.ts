@@ -108,7 +108,6 @@ const getAssociatedUSDCTokenAddressPK = multiAsync(
 
 export const getGatekeeperNetwork = multiAsync(async (provider) => {
 	const globalMarketStateData = await getGlobalMarketStateAccountData(provider);
-	console.log(globalMarketStateData); 
 	return globalMarketStateData.gatekeeperNetwork;
 });
 
@@ -160,7 +159,6 @@ export const activateDeal = multiAsync(
 			provider
 		);
 		const _globalMarketStatePDA = findGlobalMarketStatePDA();
-		const _dealPDA = dealPk; 
 		const _signingAuthorityPDA = findSigningAuthorityPDA();
 		const _getGatewayToken = getGatewayToken(provider, borrowerPk);
 		const _getCredixPassPDA = findCredixPassPDA(borrowerPk);
@@ -170,7 +168,6 @@ export const activateDeal = multiAsync(
 			usdcMintPK,
 			liquidityPoolAssociatedUSDCTokenAddressPK,
 			globalMarketStatePDA,
-			dealPDA,
 			signingAuthorityPDA,
 			gatewayToken,
 			credixPass,
@@ -179,7 +176,6 @@ export const activateDeal = multiAsync(
 			_usdcMintPK,
 			_liquidityPoolAssociatedUSDCTokenAddressPK,
 			_globalMarketStatePDA,
-			_dealPDA,
 			_signingAuthorityPDA,
 			_getGatewayToken,
 			_getCredixPassPDA,
@@ -191,7 +187,7 @@ export const activateDeal = multiAsync(
 				gatewayToken: gatewayToken.publicKey,
 				globalMarketState: globalMarketStatePDA[0],
 				signingAuthority: signingAuthorityPDA[0],
-				deal: _dealPDA,
+				deal: dealPk,
 				liquidityPoolTokenAccount: liquidityPoolAssociatedUSDCTokenAddressPK,
 				borrower: borrowerPk,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
