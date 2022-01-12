@@ -90,8 +90,6 @@ export function TransferTokenListItem({
   
       const destinationTokenAccAddr = await getAssociatedTokenAddressPK(destinationAccAddr, sourceTokenAccount.mint); 
   
-      console.log(sourceTokenAccount);
-  
       // @ts-ignore
       try { 
           const destinationTokenAccount = await getTokenAccount(

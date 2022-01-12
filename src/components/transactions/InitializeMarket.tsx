@@ -58,7 +58,7 @@ function InitializeMarketListItemDetails({
     const [withdrawalFee, setWithdrawalFee] = useState<number>(10)
     const [interestFee, setInterestFee] = useState<number>(0.5)
     const [globalMarketSeed, setGlobalMarketSeed] = useState<string>("credix-marketplace")
-    const [usdcMintPk, setUsdcMintPk] = useState<string>("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr")
+    const [baseMintPk, setBaseMintPk] = useState<string>("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr")
     const [treasuryPk, setTreasuryPk] = useState<string>("FW7CiLgLKyx54hpXHVNquFpyAQuLTTFYeprswocpiVHV")
     const [gatekeeperNetworkPk, setGatekeeperNetworkPk] = useState<string>("Br5iqQaPsb3HStGfri4enwLoUVp5zfJuZhkFFdWgSqqq")
     const multisigClient = useMultisigProgram();
@@ -84,8 +84,8 @@ function InitializeMarketListItemDetails({
 		setGlobalMarketSeed(e.target.value);
 	};
 
-    const onChangeUsdcMintPk = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setUsdcMintPk(e.target.value);
+    const onChangeBaseMintPk = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setBaseMintPk(e.target.value);
 	};
 
     const onChangeTreasuryPk = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,8 +108,7 @@ function InitializeMarketListItemDetails({
         multisigClient.programId
       );
       
-      let activateIx = await initializeMarket(multisigSigner, withdrawalFee, interestFee, globalMarketSeed, usdcMintPk, treasuryPk, gatekeeperNetworkPk, multisigClient.provider); 
-      console.log(activateIx);
+      let activateIx = await initializeMarket(multisigSigner, withdrawalFee, interestFee, globalMarketSeed, baseMintPk, treasuryPk, gatekeeperNetworkPk, multisigClient.provider); 
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,
@@ -185,12 +184,12 @@ function InitializeMarketListItemDetails({
                     />
                 </label>
                 <label>
-                    (USDC) mint public key: 
+                    (Base) mint public key: 
                     <input
-                        name="usdcMintPublicKey"
+                        name="baseMintPublicKey"
                         type="text"
-                        value={usdcMintPk}
-                        onChange={onChangeUsdcMintPk}
+                        value={baseMintPk}
+                        onChange={onChangeBaseMintPk}
                         style={{marginLeft: "10px", width: "500px", margin: "10px"}}
                     />
                 </label>

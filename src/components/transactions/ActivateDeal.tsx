@@ -67,7 +67,6 @@ export function ActivateDealListItem({
     const fetchDeals = async () => {
       const pendingDeals = await findPendingDeals(multisigClient.provider); 
       setDeals(pendingDeals);
-      console.log(deals); 
     }
   
     const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
@@ -127,7 +126,7 @@ export function ActivateDealListItem({
           >
             <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
             <p style={{width: "200px"}}>{deal.account.name}</p> 
-            <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
+            <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} Base</p>
             <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
               Activate
             </Button>

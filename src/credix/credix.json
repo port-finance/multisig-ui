@@ -46,7 +46,7 @@
           "isSigner": true
         },
         {
-          "name": "usdcMintAccount",
+          "name": "baseMintAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -86,11 +86,15 @@
         },
         {
           "name": "interestFee",
-          "type": "u32"
+          "type": {
+            "defined": "Ratio"
+          }
         },
         {
           "name": "withdrawalFee",
-          "type": "u32"
+          "type": {
+            "defined": "Ratio"
+          }
         }
       ]
     },
@@ -143,7 +147,7 @@
           "isSigner": false
         },
         {
-          "name": "usdcMintAccount",
+          "name": "baseMintAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -234,7 +238,9 @@
         },
         {
           "name": "financingFeePercentage",
-          "type": "u16"
+          "type": {
+            "defined": "Ratio"
+          }
         },
         {
           "name": "leverageRatio",
@@ -242,7 +248,9 @@
         },
         {
           "name": "underwriterPerformanceFeePercentage",
-          "type": "u16"
+          "type": {
+            "defined": "Ratio"
+          }
         },
         {
           "name": "timeToMaturityDays",
@@ -303,7 +311,7 @@
           "isSigner": false
         },
         {
-          "name": "usdcMintAccount",
+          "name": "baseMintAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -379,7 +387,7 @@
           "isSigner": false
         },
         {
-          "name": "usdcMintAccount",
+          "name": "baseMintAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -461,7 +469,7 @@
           "isSigner": false
         },
         {
-          "name": "usdcMintAccount",
+          "name": "baseMintAccount",
           "isMut": false,
           "isSigner": false
         },
@@ -478,7 +486,7 @@
       ],
       "args": [
         {
-          "name": "usdcWithdrawalAmount",
+          "name": "baseWithdrawalAmount",
           "type": "u64"
         }
       ]
@@ -640,7 +648,9 @@
           },
           {
             "name": "financingFeePercentage",
-            "type": "u16"
+            "type": {
+              "defined": "Ratio"
+            }
           },
           {
             "name": "principalAmountRepaid",
@@ -668,7 +678,9 @@
           },
           {
             "name": "underwriterPerformanceFeePercentage",
-            "type": "u16"
+            "type": {
+              "defined": "Ratio"
+            }
           },
           {
             "name": "dealNumber",
@@ -689,6 +701,10 @@
           {
             "name": "private",
             "type": "bool"
+          },
+          {
+            "name": "defaulted",
+            "type": "bool"
           }
         ]
       }
@@ -703,16 +719,8 @@
             "type": "publicKey"
           },
           {
-            "name": "liquidityPoolTokenAccount",
+            "name": "liquidityPoolTokenMintAccount",
             "type": "publicKey"
-          },
-          {
-            "name": "liquidityPoolUsdcAmount",
-            "type": "u64"
-          },
-          {
-            "name": "liquidityPoolDecimals",
-            "type": "u8"
           },
           {
             "name": "lpTokenMintAccount",
@@ -736,11 +744,15 @@
           },
           {
             "name": "interestFee",
-            "type": "u32"
+            "type": {
+              "defined": "Ratio"
+            }
           },
           {
-            "name": "withrawalFee",
-            "type": "u32"
+            "name": "withdrawalFee",
+            "type": {
+              "defined": "Ratio"
+            }
           },
           {
             "name": "frozen",
@@ -775,6 +787,22 @@
     }
   ],
   "types": [
+    {
+      "name": "Ratio",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "numerator",
+            "type": "u32"
+          },
+          {
+            "name": "denominator",
+            "type": "u32"
+          }
+        ]
+      }
+    },
     {
       "name": "DealRepaymentType",
       "type": {
@@ -813,41 +841,81 @@
     },
     {
       "code": 6004,
-      "name": "MathOverflow",
-      "msg": "Math overflow."
-    },
-    {
-      "code": 6005,
       "name": "NotEnoughLiquidity",
       "msg": "Not enough liquidity."
     },
     {
-      "code": 6006,
+      "code": 6005,
       "name": "PrincipalRepaid",
       "msg": "Principal is already repaid."
     },
     {
-      "code": 6007,
+      "code": 6006,
       "name": "InterestRepaid",
       "msg": "Interest is already repaid."
     },
     {
-      "code": 6008,
+      "code": 6007,
       "name": "UnauthorizedSigner",
       "msg": "The Signer is not authorized to use this instruction."
     },
     {
-      "code": 6009,
+      "code": 6008,
       "name": "CredixPassInvalid",
       "msg": "Credix pass is invalid for this request."
     },
     {
-      "code": 6010,
+      "code": 6009,
       "name": "CredixPassInactive",
       "msg": "Credix pass is inactive at the moment."
+    },
+    {
+      "code": 6010,
+      "name": "Overflow",
+      "msg": "Overflow occured."
+    },
+    {
+      "code": 6011,
+      "name": "Underflow",
+      "msg": "Underflow occured."
+    },
+    {
+      "code": 6012,
+      "name": "ZeroDivision",
+      "msg": "Tried to divide by zero."
+    },
+    {
+      "code": 6013,
+      "name": "ZeroDenominator",
+      "msg": "Invalid Ratio: denominator can't be zero."
+    },
+    {
+      "code": 6014,
+      "name": "InvalidPreciseNumber",
+      "msg": "Invalid u64 used as value for PreciseNumber."
+    },
+    {
+      "code": 6015,
+      "name": "PreciseNumberCastFailed",
+      "msg": "Unable to cast PreciseNumber to u64"
+    },
+    {
+      "code": 6016,
+      "name": "NotEnoughLPTokens",
+      "msg": "Not enough LP tokens."
+    },
+    {
+      "code": 6017,
+      "name": "NotEnoughBaseTokens",
+      "msg": "Not enough Base tokens."
+    },
+    {
+      "code": 6018,
+      "name": "InterestBeforePrincipal",
+      "msg": "Repay interest before principal."
     }
   ],
   "metadata": {
-    "address": "HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"
+    "address": "DnKntCMeFpwFMpegCsbYdmLhQaKULPbAmcivfX917PNL"
   }
 }

@@ -69,7 +69,6 @@ function CredixPassListItemDetails({
 				publicKey,
 				multisigClient.provider
 			);
-            console.log(credixPass); 
 			setCredixPass(credixPass);
 		},
 		[multisigClient.provider.connection, multisigClient.provider.wallet]
@@ -143,7 +142,6 @@ function CredixPassListItemDetails({
         }
       
         const holderPublicKey = new PublicKey(passHolder);
-        console.log(isActive);
         let credixPassIx = await updateCredixPass(
             multisigSigner,
             holderPublicKey,
@@ -153,7 +151,6 @@ function CredixPassListItemDetails({
             multisigClient.provider
         );
         if (!credixPass) {
-            console.log("creating new one");
             credixPassIx = await issueCredixPass(
                 multisigSigner,
                 holderPublicKey,

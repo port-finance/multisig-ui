@@ -18,7 +18,6 @@ export function useMultisigProgram(): Program {
       commitment: "recent",
     };
     let provider = new Provider(connection, wallet ?? new Wallet(Keypair.generate()), opts);
-    console.log("programId", currentMultisigProgramId);
     return new Program(MultisigIdl, currentMultisigProgramId, provider);
   }, [wallet, connection]);
 }
