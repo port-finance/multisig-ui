@@ -4,7 +4,7 @@ export const SESSION_STORAGE = {
 
 // TODO: turn into enum
 export const SEEDS = {
-	GLOBAL_MARKET_STATE_PDA: "credix-marketplace",
+	GLOBAL_MARKET_STATE_PDA: "credix-test-marketplace",
 	DEAL_INFO: "deal-info",
 	CREDIX_PASS: "credix-pass",
 	BORROWER_INFO: "borrower-info",
