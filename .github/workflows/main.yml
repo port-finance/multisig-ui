@@ -1,7 +1,7 @@
 name: React app deployment
 env: 
   CI: false
-  REACT_APP_CLUSTER: mainnet
+  REACT_APP_CLUSTER: mainnet-beta
 on:
   push:
     branches:
