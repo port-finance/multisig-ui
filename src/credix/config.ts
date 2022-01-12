@@ -22,7 +22,7 @@ const devnetConfig: ClusterConfig = {
 const mainnetConfig: ClusterConfig = {
 	name: SolanaCluster.MAINNET,
 	RPCEndpoint: RPCEndpoint.MAINNET,
-	programId: new PublicKey("HQx4tE8EjdZy92swHULfs8YSpK6oYeXcKmkRtCi2a8eB"),
+	programId: new PublicKey("CRDx2YkdtYtGZXGHZ59wNv1EwKHQndnRc1gT4p8i2vPX"),
 	gatewayProgramId: new PublicKey("gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"),
 };
 ///
