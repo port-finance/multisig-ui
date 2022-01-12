@@ -73,7 +73,6 @@ function FreezeThawGlobalMarketStateListItemDetails({
     const fetchFrozen = async () => {
       try {
         const globalMarketStateInfo = await fetchGlobalMarketStateFrozen(globalMarketSeed, multisigClient.provider); 
-        console.log("frozen", globalMarketStateInfo.frozen); 
         setFrozen(globalMarketStateInfo.frozen); 
       } catch (err) {
         enqueueSnackbar(`market with name ${globalMarketSeed} does not exist`, {

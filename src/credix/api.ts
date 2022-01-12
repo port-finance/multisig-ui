@@ -51,17 +51,9 @@ export const getDealAccountData = multiAsync((provider, dealPk) => {
 });
 
 
-const getUSDCMintPK = multiAsync(async (provider) => {
-	const marketUSDCTokenAccount = await getMarketUSDCTokenAccountPK(provider);
-	const marketUSDCTokenAccountInfo = await provider.connection.getParsedAccountInfo(marketUSDCTokenAccount);
-
-	if (!marketUSDCTokenAccountInfo.value) {
-		throw Error("Couldn't fetch lp token account info");
-	}
-
-	return new PublicKey(
-		(marketUSDCTokenAccountInfo.value.data as ParsedAccountData).parsed.info.mint
-	);
+const getBaseMintPK = multiAsync(async (provider) => {
+	const globalMarketState = await getGlobalMarketStateAccountData(provider);
+	return globalMarketState.liquidityPoolTokenMintAccount;
 });
 
 export const findPendingDeals = multiAsync(async (provider) => {
@@ -89,30 +81,34 @@ export const getClusterTime = multiAsync(async (connection: Connection) => {
 });
 
 
-const getMarketUSDCTokenAccountPK = multiAsync(async (provider) => {
+const getMarketBaseTokenAccountPK = multiAsync(async (provider) => {
 	const globalMarketStateData = await getGlobalMarketStateAccountData(provider);
+	console.log("globalMarketStateData", globalMarketStateData);
 	return globalMarketStateData.liquidityPoolTokenAccount;
 });
 
-const getAssociatedUSDCTokenAddressPK = multiAsync(
-	async (provider, publicKey: PublicKey) => {
-		const _usdcMintPK = await getUSDCMintPK(provider);
+const getAssociatedBaseTokenAddressPK = multiAsync(
+	async (provider, publicKey: PublicKey, offCurve: boolean) => {
+		const _baseMintPK = await getBaseMintPK(provider);
 		return await Token.getAssociatedTokenAddress(
 			ASSOCIATED_TOKEN_PROGRAM_ID,
 			TOKEN_PROGRAM_ID,
-			_usdcMintPK,
-			publicKey
+			_baseMintPK,
+			publicKey,
+			offCurve
 		);
 	}
 );
 
 export const getGatekeeperNetwork = multiAsync(async (provider) => {
 	const globalMarketStateData = await getGlobalMarketStateAccountData(provider);
+	console.log(globalMarketStateData.gatekeeperNetwork.toString());
 	return globalMarketStateData.gatekeeperNetwork;
 });
 
 const getGatewayToken = multiAsync(
 	async (provider, userPK: PublicKey) => {
+		console.log("pk user to check civic", userPK.toString());
 		// used from node_modules/@identity.com/solana-gateway-ts/src/lib `findGatewayTokens`
 		// should be able to plug in our own program id in order to make it work locally
 		const GATEWAY_TOKEN_ACCOUNT_OWNER_FIELD_OFFSET = 2;
@@ -146,16 +142,24 @@ const getGatewayToken = multiAsync(
 	}
 );
 
+const getLiquidityPoolAssociatedBaseTokenAddressPK = multiAsync(
+	async (provider) => {
+		const signingAuthorityPDA = await findSigningAuthorityPDA();
+		return getAssociatedBaseTokenAddressPK(provider, signingAuthorityPDA[0], true);
+	}
+);
+
 
 export const activateDeal = multiAsync(
 	async (dealPk: PublicKey, borrowerPk: PublicKey, multisigPk: PublicKey, provider) => {
 		const program = constructProgram(provider);
-		const _userAssociatedUSDCTokenAddressPK = getAssociatedUSDCTokenAddressPK(
+		const _userAssociatedBaseTokenAddressPK = getAssociatedBaseTokenAddressPK(
 			provider,
-			borrowerPk
+			borrowerPk,
+			false
 		);
-		const _usdcMintPK = getUSDCMintPK(provider);
-		const _liquidityPoolAssociatedUSDCTokenAddressPK = getMarketUSDCTokenAccountPK(
+		const _baseMintPK = getBaseMintPK(provider);
+		const _liquidityPoolAssociatedBaseTokenAddressPK = getLiquidityPoolAssociatedBaseTokenAddressPK(
 			provider
 		);
 		const _globalMarketStatePDA = findGlobalMarketStatePDA();
@@ -164,17 +168,17 @@ export const activateDeal = multiAsync(
 		const _getCredixPassPDA = findCredixPassPDA(borrowerPk);
 
 		const [
-			userAssociatedUSDCTokenAddressPK,
-			usdcMintPK,
-			liquidityPoolAssociatedUSDCTokenAddressPK,
+			userAssociatedBaseTokenAddressPK,
+			baseMintPK,
+			liquidityPoolAssociatedBaseTokenAddressPK,
 			globalMarketStatePDA,
 			signingAuthorityPDA,
 			gatewayToken,
 			credixPass,
 		] = await Promise.all([
-			_userAssociatedUSDCTokenAddressPK,
-			_usdcMintPK,
-			_liquidityPoolAssociatedUSDCTokenAddressPK,
+			_userAssociatedBaseTokenAddressPK,
+			_baseMintPK,
+			_liquidityPoolAssociatedBaseTokenAddressPK,
 			_globalMarketStatePDA,
 			_signingAuthorityPDA,
 			_getGatewayToken,
@@ -188,12 +192,12 @@ export const activateDeal = multiAsync(
 				globalMarketState: globalMarketStatePDA[0],
 				signingAuthority: signingAuthorityPDA[0],
 				deal: dealPk,
-				liquidityPoolTokenAccount: liquidityPoolAssociatedUSDCTokenAddressPK,
+				liquidityPoolTokenAccount: liquidityPoolAssociatedBaseTokenAddressPK,
 				borrower: borrowerPk,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-				borrowerTokenAccount: userAssociatedUSDCTokenAddressPK,
+				borrowerTokenAccount: userAssociatedBaseTokenAddressPK,
 				credixPass: credixPass[0],
-				usdcMintAccount: usdcMintPK,
+				baseMintAccount: baseMintPK,
 				tokenProgram: TOKEN_PROGRAM_ID,
 				systemProgram: SystemProgram.programId,
 				rent: web3.SYSVAR_RENT_PUBKEY,
@@ -209,7 +213,7 @@ export const initializeMarket = multiAsync(
 		_withdrawalFee: number, 
 		_interestFee: number, 
 		_globalMarketSeed: string, 
-		_usdcMintPk: string, 
+		_baseMintPk: string, 
 		_treasuryPk: string, 
 		_gatekeeperNetworkPk: string,
 		provider
@@ -217,7 +221,7 @@ export const initializeMarket = multiAsync(
 			const program = constructProgram(provider);
 			const withdrawalFee = _withdrawalFee * 1000; 
 			const interestFee = _interestFee * 1000; 
-			const usdcMintPk = new PublicKey(_usdcMintPk); 
+			const baseMintPk = new PublicKey(_baseMintPk); 
 			const treasuryPk = new PublicKey(_treasuryPk); 
 			const gatekeeperNetworkPk = new PublicKey(_gatekeeperNetworkPk); 
 			
@@ -233,20 +237,20 @@ export const initializeMarket = multiAsync(
 					program.programId
 				);
 
-			const treasuryAssociatedUSDCTokenAddress =
+			const treasuryAssociatedBaseTokenAddress =
 				await Token.getAssociatedTokenAddress(
 					ASSOCIATED_TOKEN_PROGRAM_ID,
 					TOKEN_PROGRAM_ID,
-					usdcMintPk,
+					baseMintPk,
 					treasuryPk,
 					true
 				);
 
-			const liquidityPoolUSDCTokenAccount =
+			const liquidityPoolBaseTokenAccount =
 				await Token.getAssociatedTokenAddress(
 					ASSOCIATED_TOKEN_PROGRAM_ID,
 					TOKEN_PROGRAM_ID,
-					usdcMintPk,
+					baseMintPk,
 					signingAuthorityPda,
 					true
 				);
@@ -264,11 +268,11 @@ export const initializeMarket = multiAsync(
 					owner: multisigPk,
 					gatekeeperNetwork: new PublicKey(gatekeeperNetworkPk),
 					globalMarketState: globalMarketStatePda,
-					liquidityPoolTokenAccount: liquidityPoolUSDCTokenAccount,
+					liquidityPoolTokenAccount: liquidityPoolBaseTokenAccount,
 					treasury: new PublicKey(treasuryPk),
-					treasuryPoolTokenAccount: treasuryAssociatedUSDCTokenAddress,
+					treasuryPoolTokenAccount: treasuryAssociatedBaseTokenAddress,
 					lpTokenMintAccount: lpTokenMintKeypair.publicKey,
-					usdcMintAccount: new PublicKey(usdcMintPk),
+					baseMintAccount: new PublicKey(baseMintPk),
 					rent: anchor.web3.SYSVAR_RENT_PUBKEY,
 					tokenProgram: TOKEN_PROGRAM_ID,
 					signingAuthority: signingAuthorityPda,
