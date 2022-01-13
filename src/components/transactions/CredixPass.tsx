@@ -55,7 +55,8 @@ function CredixPassListItemDetails({
     onClose: Function;
     didAddTransaction: (tx: PublicKey) => void;
   }) {
-    const [isBorrower, setIsBorrower] = useState<boolean>(false);
+  const [globalMarketSeed, setGlobalMarketSeed] = useState<string>("credix-marketplace"); 
+  const [isBorrower, setIsBorrower] = useState<boolean>(false);
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
 	const [passHolder, setPassHolder] = useState<string>("");
@@ -66,6 +67,7 @@ function CredixPassListItemDetails({
     const fetchAndSetPassData = useCallback(
 		async (publicKey: PublicKey) => {
 			const credixPass = await getCredixPassInfo(
+        globalMarketSeed, 
 				publicKey,
 				multisigClient.provider
 			);
@@ -81,7 +83,7 @@ function CredixPassListItemDetails({
 		} catch (e) {
 			setCredixPass(null);
 		}
-	}, [passHolder, fetchAndSetPassData]);
+	}, [passHolder, globalMarketSeed, fetchAndSetPassData]);
 
 	useEffect(() => {
 		setIsActive(!!credixPass?.active);
@@ -114,6 +116,10 @@ function CredixPassListItemDetails({
 		e.target.value === "true" ? setIsUnderwriter(true) : setIsUnderwriter(false);
 	};
 
+  const onBlurGlobalMarketSeed = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setGlobalMarketSeed(e.target.value);
+	};
+
 	const submitButtonDisabled = () =>
 		!!(
 			credixPass &&
@@ -143,6 +149,7 @@ function CredixPassListItemDetails({
       
         const holderPublicKey = new PublicKey(passHolder);
         let credixPassIx = await updateCredixPass(
+            globalMarketSeed, 
             multisigSigner,
             holderPublicKey,
             isActive,
@@ -152,6 +159,7 @@ function CredixPassListItemDetails({
         );
         if (!credixPass) {
             credixPassIx = await issueCredixPass(
+                globalMarketSeed, 
                 multisigSigner,
                 holderPublicKey,
                 isUnderwriter,
@@ -204,6 +212,16 @@ function CredixPassListItemDetails({
                     flexDirection: "column"
                 }}
             >
+        <label>
+            Global marketstate seed: 
+            <input
+                name="globalMarketSeed"
+                type="text"
+                placeholder={globalMarketSeed}
+                onBlur={onBlurGlobalMarketSeed}
+                style={{marginLeft: "10px", width: "500px", margin: "10px"}}
+            />
+        </label>
 				<label>
 					PassHolder Public Key
 					<input
