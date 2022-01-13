@@ -25,8 +25,8 @@ const findPDA = multiAsync(async (seeds: PdaSeeds) => {
 	return PublicKey.findProgramAddress(seeds, programId);
 });
 
-const findGlobalMarketStatePDA = multiAsync(async () => {
-	const seed = encodeSeedString(SEEDS.GLOBAL_MARKET_STATE_PDA);
+const findGlobalMarketStatePDA = multiAsync(async (globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA) => {
+	const seed = encodeSeedString(globalMarketSeed);
 	return findPDA([seed]);
 });
 
@@ -342,8 +342,8 @@ export const thawGlobalMarketState = multiAsync(
 		}
 ); 
 
-export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
-	const globalMarketStatePDA = await findGlobalMarketStatePDA();
+export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey, globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA) => {
+	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
 	const seeds: PdaSeeds = [
 		globalMarketStatePDA[0].toBuffer(),
@@ -357,6 +357,7 @@ export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey) => {
 
 export const issueCredixPass = multiAsync(
 	async (
+    globalMarketSeed: string, 
 	multisigPk: PublicKey, 
 	publicKey: PublicKey,
 	isUnderwriter: boolean,
@@ -364,8 +365,8 @@ export const issueCredixPass = multiAsync(
 	provider
 ) => {
 	const program = constructProgram(provider);
-	const _globalMarketStatePDA = findGlobalMarketStatePDA();
-	const _getCredixPassPDA = findCredixPassPDA(publicKey);
+	const _globalMarketStatePDA = findGlobalMarketStatePDA(globalMarketSeed);
+	const _getCredixPassPDA = findCredixPassPDA(publicKey, globalMarketSeed);
 
 	const [globalMarketStatePDA, credixPassPDA] = await Promise.all([
 		_globalMarketStatePDA,
@@ -387,6 +388,7 @@ export const issueCredixPass = multiAsync(
 
 export const updateCredixPass = multiAsync(
 	async (
+	globalMarketSeed: string, 
 	multisigPk: PublicKey, 
 	publicKey: PublicKey,
 	isActive: boolean,
@@ -396,8 +398,8 @@ export const updateCredixPass = multiAsync(
 ) => {
 	const program = constructProgram(provider);
 
-	const _globalMarketStatePDA = findGlobalMarketStatePDA();
-	const _getCredixPassPDA = findCredixPassPDA(publicKey);
+	const _globalMarketStatePDA = findGlobalMarketStatePDA(globalMarketSeed);
+	const _getCredixPassPDA = findCredixPassPDA(publicKey, globalMarketSeed);
 
 	const [globalMarketStatePDA, credixPassPDA] = await Promise.all([
 		_globalMarketStatePDA,
@@ -417,10 +419,11 @@ export const updateCredixPass = multiAsync(
 
 export const getCredixPassInfo = multiAsync(
 	async (
+		globalMarketSeed: string, 
 		publicKey: PublicKey, 
 		provider) => {
 		const program = constructProgram(provider);
-		const [credixPassPDA] = await findCredixPassPDA(publicKey);
+		const [credixPassPDA] = await findCredixPassPDA(publicKey, globalMarketSeed);
 		return program.account.credixPass.fetchNullable(credixPassPDA);
 	}
 );

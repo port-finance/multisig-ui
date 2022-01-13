@@ -126,7 +126,7 @@ export function ActivateDealListItem({
           >
             <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
             <p style={{width: "200px"}}>{deal.account.name}</p> 
-            <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} Base</p>
+            <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
             <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
               Activate
             </Button>
