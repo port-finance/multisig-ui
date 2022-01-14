@@ -2,18 +2,20 @@ import { ListItem, ListItemIcon, ListItemText, Collapse, Button } from "@materia
 import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { ProgramAccount } from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
-import { useState, useEffect } from "react";
-import { findPendingDeals, activateDeal } from "../../credix/api";
+import { useState, useEffect, useCallback } from "react";
+import { findPendingDealsForMarket, activateDeal } from "../../credix/api";
 import { config } from "../../credix/config";
 import { Deal } from "../../credix/types/program.types";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
+
 import {
     Account,
     PublicKey,
     SYSVAR_RENT_PUBKEY,
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
+import { SEEDS } from "../../credix/consts";
 
 export function ActivateDealListItem({
     multisig,
@@ -55,19 +57,16 @@ export function ActivateDealListItem({
     didAddTransaction: (tx: PublicKey) => void;
   }) {
     const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
+    const [globalMarketSeed, _] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
-  
-    useEffect(() => {
-          if (multisigClient.provider.connection) {
-              fetchDeals();
-          }
-      }, [multisigClient.provider.connection]);
-  
-    const fetchDeals = async () => {
-      const pendingDeals = await findPendingDeals(multisigClient.provider); 
-      setDeals(pendingDeals);
-    }
+
+
+    const onBlurGlobalMarketSeed = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      // setGlobalMarketSeed(e.target.value);
+      console.log(e.target.value)
+      await findPendingDealsForMarket(multisigClient.provider, e.target.value, setDeals); 
+    };  
   
     const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
       enqueueSnackbar("Creating transaction", {
@@ -140,7 +139,17 @@ export function ActivateDealListItem({
           background: "#f1f0f0",
           padding: "24px"
         }}
-      >
+      > 
+        <label>
+            Global marketstate seed: 
+            <input
+                name="globalMarketSeed"
+                type="text"
+                placeholder={globalMarketSeed}
+                onBlur={onBlurGlobalMarketSeed}
+                style={{marginLeft: "10px", width: "500px", margin: "10px"}}
+            />
+        </label>
         <div
           style={{
             display: "flex", 
