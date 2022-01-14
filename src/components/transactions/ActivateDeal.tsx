@@ -57,14 +57,13 @@ export function ActivateDealListItem({
     didAddTransaction: (tx: PublicKey) => void;
   }) {
     const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
-    const [globalMarketSeed, _] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
+    const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
 
 
     const onBlurGlobalMarketSeed = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      // setGlobalMarketSeed(e.target.value);
-      console.log(e.target.value)
+      setGlobalMarketSeed(e.target.value);
       await findPendingDealsForMarket(multisigClient.provider, e.target.value, setDeals); 
     };  
   
@@ -78,7 +77,7 @@ export function ActivateDealListItem({
         multisigClient.programId
       );
   
-      const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider); 
+      const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,

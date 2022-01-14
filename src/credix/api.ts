@@ -26,21 +26,21 @@ const findPDA = multiAsync(async (seeds: PdaSeeds) => {
 	return PublicKey.findProgramAddress(seeds, programId);
 });
 
-const findGlobalMarketStatePDA = multiAsync(async (globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA) => {
+const findGlobalMarketStatePDA = multiAsync(async (globalMarketSeed) => {
 	const seed = encodeSeedString(globalMarketSeed);
 	return findPDA([seed]);
 });
 
-const findSigningAuthorityPDA = multiAsync(async () => {
-	const globalMarketStatePDA = await findGlobalMarketStatePDA();
+const findSigningAuthorityPDA = multiAsync(async (globalMarketSeed) => {
+	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 	const seeds: PdaSeeds = [globalMarketStatePDA[0].toBuffer()];
 	return findPDA(seeds);
 });
 
 const getGlobalMarketStateAccountData = multiAsync(
-	async (provider) => {
+	async (provider, globalMarketSeed) => {
 		const program = constructProgram(provider);
-		const globalMarketStatePDA = await findGlobalMarketStatePDA();
+		const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 		return program.account.globalMarketState.fetch(globalMarketStatePDA[0]);
 	}
 );
@@ -51,8 +51,8 @@ export const getDealAccountData = multiAsync((provider, dealPk) => {
 });
 
 
-const getBaseMintPK = multiAsync(async (provider) => {
-	const globalMarketState = await getGlobalMarketStateAccountData(provider);
+const getBaseMintPK = multiAsync(async (provider, globalMarketSeed) => {
+	const globalMarketState = await getGlobalMarketStateAccountData(provider, globalMarketSeed);
 	return globalMarketState.liquidityPoolTokenMintAccount;
 });
 
@@ -72,7 +72,7 @@ export const findDealPDA = multiAsync(async (publicKey: PublicKey, dealNumber: n
 	return findPDA(seeds);
 });
 
-const mapDealsToMarket = multiAsync(async (deals, globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA, setDeals) => {
+const mapDealsToMarket = multiAsync(async (deals, globalMarketSeed, setDeals) => {
 	const marketDeals: ProgramAccount<Deal>[] = [];
 	(deals as Array<ProgramAccount<Deal>>).forEach(async (deal) => {
 		const expectedDealPda = await findDealPDA(deal.account.borrower, deal.account.dealNumber, globalMarketSeed);
@@ -110,15 +110,9 @@ export const getClusterTime = multiAsync(async (connection: Connection) => {
 });
 
 
-const getMarketBaseTokenAccountPK = multiAsync(async (provider) => {
-	const globalMarketStateData = await getGlobalMarketStateAccountData(provider);
-	console.log("globalMarketStateData", globalMarketStateData);
-	return globalMarketStateData.liquidityPoolTokenAccount;
-});
-
 const getAssociatedBaseTokenAddressPK = multiAsync(
-	async (provider, publicKey: PublicKey, offCurve: boolean) => {
-		const _baseMintPK = await getBaseMintPK(provider);
+	async (provider, publicKey: PublicKey, offCurve: boolean, globalMarketSeed) => {
+		const _baseMintPK = await getBaseMintPK(provider, globalMarketSeed);
 		return await Token.getAssociatedTokenAddress(
 			ASSOCIATED_TOKEN_PROGRAM_ID,
 			TOKEN_PROGRAM_ID,
@@ -129,20 +123,20 @@ const getAssociatedBaseTokenAddressPK = multiAsync(
 	}
 );
 
-export const getGatekeeperNetwork = multiAsync(async (provider) => {
-	const globalMarketStateData = await getGlobalMarketStateAccountData(provider);
+export const getGatekeeperNetwork = multiAsync(async (provider, globalMarketSeed) => {
+	const globalMarketStateData = await getGlobalMarketStateAccountData(provider, globalMarketSeed);
 	console.log(globalMarketStateData.gatekeeperNetwork.toString());
 	return globalMarketStateData.gatekeeperNetwork;
 });
 
 const getGatewayToken = multiAsync(
-	async (provider, userPK: PublicKey) => {
+	async (provider, userPK: PublicKey, globalMarketSeed) => {
 		console.log("pk user to check civic", userPK.toString());
 		// used from node_modules/@identity.com/solana-gateway-ts/src/lib `findGatewayTokens`
 		// should be able to plug in our own program id in order to make it work locally
 		const GATEWAY_TOKEN_ACCOUNT_OWNER_FIELD_OFFSET = 2;
 		const GATEWAY_TOKEN_ACCOUNT_GATEKEEPER_NETWORK_FIELD_OFFSET = 35;
-		const gatekeeperNetwork = await getGatekeeperNetwork(provider);
+		const gatekeeperNetwork = await getGatekeeperNetwork(provider, globalMarketSeed);
 		const ownerFilter = {
 			memcmp: {
 				offset: GATEWAY_TOKEN_ACCOUNT_OWNER_FIELD_OFFSET,
@@ -172,29 +166,30 @@ const getGatewayToken = multiAsync(
 );
 
 const getLiquidityPoolAssociatedBaseTokenAddressPK = multiAsync(
-	async (provider) => {
-		const signingAuthorityPDA = await findSigningAuthorityPDA();
-		return getAssociatedBaseTokenAddressPK(provider, signingAuthorityPDA[0], true);
+	async (provider, globalMarketSeed) => {
+		const signingAuthorityPDA = await findSigningAuthorityPDA(globalMarketSeed);
+		return getAssociatedBaseTokenAddressPK(provider, signingAuthorityPDA[0], true, globalMarketSeed);
 	}
 );
 
 
 export const activateDeal = multiAsync(
-	async (dealPk: PublicKey, borrowerPk: PublicKey, multisigPk: PublicKey, provider) => {
+	async (dealPk: PublicKey, borrowerPk: PublicKey, multisigPk: PublicKey, provider, globalMarketSeed) => {
 		const program = constructProgram(provider);
 		const _userAssociatedBaseTokenAddressPK = getAssociatedBaseTokenAddressPK(
 			provider,
 			borrowerPk,
-			false
+			false,
+			globalMarketSeed
 		);
-		const _baseMintPK = getBaseMintPK(provider);
+		const _baseMintPK = getBaseMintPK(provider, globalMarketSeed);
 		const _liquidityPoolAssociatedBaseTokenAddressPK = getLiquidityPoolAssociatedBaseTokenAddressPK(
-			provider
+			provider, globalMarketSeed
 		);
-		const _globalMarketStatePDA = findGlobalMarketStatePDA();
-		const _signingAuthorityPDA = findSigningAuthorityPDA();
-		const _getGatewayToken = getGatewayToken(provider, borrowerPk);
-		const _getCredixPassPDA = findCredixPassPDA(borrowerPk);
+		const _globalMarketStatePDA = findGlobalMarketStatePDA(globalMarketSeed);
+		const _signingAuthorityPDA = findSigningAuthorityPDA(globalMarketSeed);
+		const _getGatewayToken = getGatewayToken(provider, borrowerPk, globalMarketSeed);
+		const _getCredixPassPDA = findCredixPassPDA(borrowerPk, globalMarketSeed);
 
 		const [
 			userAssociatedBaseTokenAddressPK,
@@ -213,6 +208,10 @@ export const activateDeal = multiAsync(
 			_getGatewayToken,
 			_getCredixPassPDA,
 		]);
+
+		console.log("marketstatepda", globalMarketStatePDA);
+		console.log("signing auth pda", _signingAuthorityPDA); 
+		console.log("credix pass", credixPass); 
 
 		return program.instruction.activateDeal({
 			accounts: {
@@ -371,7 +370,7 @@ export const thawGlobalMarketState = multiAsync(
 		}
 ); 
 
-export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey, globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA) => {
+export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey, globalMarketSeed) => {
 	console.log("seed", globalMarketSeed);
 	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
