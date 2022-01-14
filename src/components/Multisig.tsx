@@ -70,6 +70,9 @@ import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGl
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 
+
+const NO_SHOW_LIST = ["FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV", "7ZwEod26DTdygr4rvrYLH9yLyyzh5UgXEumvo8x9CFJ7"]; 
+
 // NEW TRANSACTION 
 function AddTransactionDialog({
   multisig,
@@ -333,7 +336,10 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   useEffect(() => {
     multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
       txs.sort((a, b) => (!a.account.didExecute && b.account.didExecute) ? -1 : 1)
-      setTransactions(txs);
+      var txsFiltered = txs.filter(function(tx){
+        return !NO_SHOW_LIST.includes(tx.publicKey.toString());
+      });
+      setTransactions(txsFiltered);
     }).catch(err => console.log("error", err));
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
   useEffect(() => {
