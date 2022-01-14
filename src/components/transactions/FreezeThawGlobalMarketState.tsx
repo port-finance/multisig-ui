@@ -3,7 +3,7 @@ import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { ProgramAccount } from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { useState, useEffect } from "react";
-import { findPendingDeals, activateDeal, fetchGlobalMarketStateFrozen, freezeGlobalMarketState, thawGlobalMarketState } from "../../credix/api";
+import { fetchGlobalMarketStateFrozen, freezeGlobalMarketState, thawGlobalMarketState } from "../../credix/api";
 import { config } from "../../credix/config";
 import { Deal } from "../../credix/types/program.types";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
@@ -15,6 +15,7 @@ import {
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
 import { serialAsync } from "../../credix/utils/async.utils";
+import { SEEDS } from "../../credix/consts";
 
 export function FreezeThawGlobalMarketStateListItem({
     multisig,
@@ -56,26 +57,26 @@ function FreezeThawGlobalMarketStateListItemDetails({
     didAddTransaction: (tx: PublicKey) => void;
   }) {
     const [frozen, setFrozen] = useState<boolean>(false); 
-    const [globalMarketSeed, setGlobalMarketSeed] = useState<string>("credix-marketplace"); 
+    const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
 
 
     const onBlurGlobalMarketSeed = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setGlobalMarketSeed(e.target.value);
-        fetchFrozen();
-	};
+      setGlobalMarketSeed(e.target.value);
+      fetchFrozen(e.target.value);
+    };
 
     const onChangeFrozen = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFrozen(e.target.checked); 
-	};
+      setFrozen(e.target.checked); 
+    };
   
-    const fetchFrozen = async () => {
+    const fetchFrozen = async (seed: string) => {
       try {
-        const globalMarketStateInfo = await fetchGlobalMarketStateFrozen(globalMarketSeed, multisigClient.provider); 
+        const globalMarketStateInfo = await fetchGlobalMarketStateFrozen(seed, multisigClient.provider); 
         setFrozen(globalMarketStateInfo.frozen); 
       } catch (err) {
-        enqueueSnackbar(`market with name ${globalMarketSeed} does not exist`, {
+        enqueueSnackbar(`market with name ${seed} does not exist`, {
             variant: "error",
           });
         setFrozen(false); 

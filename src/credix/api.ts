@@ -10,6 +10,7 @@ import { mapDealToStatus } from "./utils/deal.utils";
 import { encodeSeedString } from "./utils/format.utils";
 import { dataToGatewayToken, GatewayTokenData } from "@identity.com/solana-gateway-ts";
 import * as anchor from "@project-serum/anchor";
+import { SentimentSatisfiedAltSharp } from "@material-ui/icons";
 
 const constructProgram = (provider: Provider) => {
 	return new Program(config.idl, config.clusterConfig.programId, provider);
@@ -36,7 +37,6 @@ const findSigningAuthorityPDA = multiAsync(async () => {
 	return findPDA(seeds);
 });
 
-
 const getGlobalMarketStateAccountData = multiAsync(
 	async (provider) => {
 		const program = constructProgram(provider);
@@ -56,7 +56,36 @@ const getBaseMintPK = multiAsync(async (provider) => {
 	return globalMarketState.liquidityPoolTokenMintAccount;
 });
 
-export const findPendingDeals = multiAsync(async (provider) => {
+export const findDealPDA = multiAsync(async (publicKey: PublicKey, dealNumber: number, globalMarketSeed) => {
+	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
+	const globalMarketStateSeed = globalMarketStatePDA[0].toBuffer();
+	const borrowerSeed = publicKey.toBuffer();
+	const dealInfo = encodeSeedString(SEEDS.DEAL_INFO);
+	const dealNumberBN = new BN(dealNumber);
+
+	const seeds: PdaSeeds = [
+		globalMarketStateSeed,
+		borrowerSeed,
+		dealNumberBN.toArrayLike(Buffer, "le", 2),
+		dealInfo,
+	];
+	return findPDA(seeds);
+});
+
+const mapDealsToMarket = multiAsync(async (deals, globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA, setDeals) => {
+	const marketDeals: ProgramAccount<Deal>[] = [];
+	(deals as Array<ProgramAccount<Deal>>).forEach(async (deal) => {
+		const expectedDealPda = await findDealPDA(deal.account.borrower, deal.account.dealNumber, globalMarketSeed);
+		console.log(deal.publicKey.toString());
+		console.log(expectedDealPda[0].toString()); 
+		if (deal.publicKey.toString() === expectedDealPda[0].toString()) {
+			marketDeals.push(deal);
+		}
+		setDeals(marketDeals); 
+	});
+});
+
+export const findPendingDealsForMarket = multiAsync(async (provider, globalMarketSeed, setDeals) => {
 	const _deals = await getDealAccounts(provider);
 	const _clusterTime = getClusterTime(provider.connection);
 	const pendingDeals: ProgramAccount<Deal>[] = [];
@@ -72,7 +101,7 @@ export const findPendingDeals = multiAsync(async (provider) => {
 		}
 	});
 
-	return pendingDeals;
+	await mapDealsToMarket(pendingDeals, globalMarketSeed, setDeals); 
 });
 
 export const getClusterTime = multiAsync(async (connection: Connection) => {
@@ -343,6 +372,7 @@ export const thawGlobalMarketState = multiAsync(
 ); 
 
 export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey, globalMarketSeed = SEEDS.GLOBAL_MARKET_STATE_PDA) => {
+	console.log("seed", globalMarketSeed);
 	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
 	const seeds: PdaSeeds = [

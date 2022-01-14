@@ -15,6 +15,7 @@ import {
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
 import { serialAsync } from "../../credix/utils/async.utils";
+import { SEEDS } from "../../credix/consts";
 
 export function CredixPassListItem({
     multisig,
@@ -55,7 +56,7 @@ function CredixPassListItemDetails({
     onClose: Function;
     didAddTransaction: (tx: PublicKey) => void;
   }) {
-  const [globalMarketSeed, setGlobalMarketSeed] = useState<string>("credix-marketplace"); 
+  const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
   const [isBorrower, setIsBorrower] = useState<boolean>(false);
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
@@ -64,8 +65,8 @@ function CredixPassListItemDetails({
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
 
-    const fetchAndSetPassData = useCallback(
-		async (publicKey: PublicKey) => {
+  const fetchAndSetPassData = useCallback(
+		async (globalMarketSeed: string, publicKey: PublicKey) => {
 			const credixPass = await getCredixPassInfo(
         globalMarketSeed, 
 				publicKey,
@@ -79,7 +80,7 @@ function CredixPassListItemDetails({
 	useEffect(() => {
 		try {
 			const passholderKey = new PublicKey(passHolder);
-			fetchAndSetPassData(passholderKey);
+			fetchAndSetPassData(globalMarketSeed, passholderKey);
 		} catch (e) {
 			setCredixPass(null);
 		}
