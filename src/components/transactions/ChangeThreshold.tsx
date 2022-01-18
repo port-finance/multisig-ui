@@ -13,6 +13,7 @@ import {
     SYSVAR_RENT_PUBKEY,
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
+import { TX_SIZE } from "../../credix/consts";
 
 export function ChangeThresholdListItem({
     multisig,
@@ -79,7 +80,7 @@ export function ChangeThresholdListItem({
         },
       ];
       const transaction = new Account();
-      const txSize = 1000; // todo
+      const txSize = TX_SIZE + 100; // todo
       const tx = await multisigClient.rpc.createTransaction(
         multisigClient.programId,
         accounts,

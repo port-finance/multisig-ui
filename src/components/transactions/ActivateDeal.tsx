@@ -15,7 +15,7 @@ import {
     SYSVAR_RENT_PUBKEY,
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
-import { SEEDS } from "../../credix/consts";
+import { SEEDS, TX_SIZE } from "../../credix/consts";
 
 export function ActivateDealListItem({
     multisig,
@@ -95,7 +95,7 @@ export function ActivateDealListItem({
             await multisigClient.account.transaction.createInstruction(
               transaction,
               // @ts-ignore
-              1000
+              TX_SIZE + 500
             ),
           ],
         }

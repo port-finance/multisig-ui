@@ -8,6 +8,7 @@ import { config } from "../../credix/config";
 import { Deal } from "../../credix/types/program.types";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
+import { TX_SIZE } from "../../credix/consts";
 import {
     Account,
     PublicKey,
@@ -126,7 +127,7 @@ function InitializeMarketListItemDetails({
             await multisigClient.account.transaction.createInstruction(
               transaction,
               // @ts-ignore
-              1000
+              TX_SIZE
             ),
           ],
         }

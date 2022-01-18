@@ -13,6 +13,7 @@ import {
     SYSVAR_RENT_PUBKEY,
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
+import { TX_SIZE } from "../../credix/consts";
 
 export function IdlUpgradeListItem({
     multisig,
@@ -80,7 +81,7 @@ export function IdlUpgradeListItem({
         { pubkey: idlAddr, isWritable: true, isSigner: false },
         { pubkey: multisigSigner, isWritable: true, isSigner: false },
       ];
-      const txSize = 1000; // TODO: tighter bound.
+      const txSize = TX_SIZE; // TODO: tighter bound.
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         programAddr,

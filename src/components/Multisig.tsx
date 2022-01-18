@@ -71,7 +71,15 @@ import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 
 
-const NO_SHOW_LIST = ["FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV", "7ZwEod26DTdygr4rvrYLH9yLyyzh5UgXEumvo8x9CFJ7"]; 
+const NO_SHOW_LIST = [
+  "FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV", 
+  "7ZwEod26DTdygr4rvrYLH9yLyyzh5UgXEumvo8x9CFJ7",
+  "5cnSAp7vCadCH75R6Kat1ZW1Pq4W317hQ6bWKD35oTBN",
+  "9QXwLCgjFJYSCrHaDgti4qQJHcFmnTsuBipNVXDCWUs8",
+  "2mztM4EBhUAiFVixdaYvzqe9YdZZ3oCGTewaVojFbufR",
+  "AJKeAJgXo16NzYJcw3R8WKrK11tYhoChVCHTWGBbHxcw",
+  "9ULcD9McCETwUaT3Pw8uZxk81qriiKRTX9Uo7LJZXj6o"
+]; 
 
 // NEW TRANSACTION 
 function AddTransactionDialog({
