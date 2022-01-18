@@ -12,6 +12,7 @@ import {
     SYSVAR_RENT_PUBKEY,
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
+import { TX_SIZE } from "../../credix/consts";
 
 export function ProgramUpdateListItem({
     multisig,
@@ -100,7 +101,7 @@ export function ProgramUpdateListItem({
         { pubkey: SYSVAR_CLOCK_PUBKEY, isWritable: false, isSigner: false },
         { pubkey: multisigSigner, isWritable: false, isSigner: false },
       ];
-      const txSize = 1000; // TODO: tighter bound.
+      const txSize = TX_SIZE; // TODO: tighter bound.
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         BPF_LOADER_UPGRADEABLE_PID,

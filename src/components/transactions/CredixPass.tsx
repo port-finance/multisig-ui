@@ -15,7 +15,7 @@ import {
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
 import { serialAsync } from "../../credix/utils/async.utils";
-import { SEEDS } from "../../credix/consts";
+import { SEEDS, TX_SIZE } from "../../credix/consts";
 
 export function CredixPassListItem({
     multisig,
@@ -170,6 +170,7 @@ function CredixPassListItemDetails({
         }
         
         const transaction = new Account();
+        
         const tx = await multisigClient.rpc.createTransaction(
             config.clusterConfig.programId,
             credixPassIx.keys,
@@ -186,7 +187,7 @@ function CredixPassListItemDetails({
                 await multisigClient.account.transaction.createInstruction(
                 transaction,
                 // @ts-ignore
-                1000
+                350
                 ),
             ],
             }

@@ -15,7 +15,7 @@ import {
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
 import { serialAsync } from "../../credix/utils/async.utils";
-import { SEEDS } from "../../credix/consts";
+import { SEEDS, TX_SIZE } from "../../credix/consts";
 
 export function FreezeThawGlobalMarketStateListItem({
     multisig,
@@ -116,7 +116,7 @@ function FreezeThawGlobalMarketStateListItemDetails({
             await multisigClient.account.transaction.createInstruction(
               transaction,
               // @ts-ignore
-              1000
+              TX_SIZE + 100
             ),
           ],
         }

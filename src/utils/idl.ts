@@ -1,5 +1,6 @@
 import { struct, Layout } from "buffer-layout";
 import { rustEnum } from "@project-serum/borsh";
+import { TX_SIZE } from "../credix/consts";
 
 // Simplified since we only use the SetBuffer variant.
 export type IdlInstruction =
@@ -24,7 +25,7 @@ const IDL_INSTRUCTION_LAYOUT: Layout<IdlInstruction> = rustEnum([
 ]);
 
 export function encodeInstruction(i: IdlInstruction): Buffer {
-  const buffer = Buffer.alloc(1000); // TODO: use a tighter buffer.
+  const buffer = Buffer.alloc(TX_SIZE); // TODO: use a tighter buffer.
   const len = IDL_INSTRUCTION_LAYOUT.encode(i, buffer);
   return Buffer.concat([IDL_TAG, buffer.slice(0, len)]);
 }

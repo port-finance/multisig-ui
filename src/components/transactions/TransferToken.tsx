@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { useMultiSigOwnedTokenAccounts } from "../../hooks/useOwnedTokenAccounts";
 import { ViewTransactionOnExplorerButton } from "../Notification";
+import { TX_SIZE } from "../../credix/consts";
 import {
     Account,
     PublicKey,
@@ -145,7 +146,7 @@ export function TransferTokenListItem({
             await multisigClient.account.transaction.createInstruction(
               transaction,
               // @ts-ignore
-              1000
+              TX_SIZE + 150
             ),
           ],
         }
