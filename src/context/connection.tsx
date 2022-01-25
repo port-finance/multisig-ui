@@ -16,7 +16,7 @@ export type ENV =
 export const ENDPOINTS = [
   {
     name: "mainnet-beta" as ENV,
-    endpoint: "https://solana-api.projectserum.com/",
+    endpoint: "https://ssc-dao.genesysgo.net/",
     chainID: ChainID.MainnetBeta,
   },
   {
