@@ -58,13 +58,15 @@ export function ActivateDealListItem({
   }) {
     const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
     const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
+    const [dealRows, setDealRows] = useState([<p>"no pending deals"</p>]);
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
-
-
+    
     const onBlurGlobalMarketSeed = async (e: React.ChangeEvent<HTMLInputElement>) => {
       setGlobalMarketSeed(e.target.value);
-      await findPendingDealsForMarket(multisigClient.provider, e.target.value, setDeals); 
+      findPendingDealsForMarket(multisigClient.provider, e.target.value, setDeals).then(() => {
+        constructDealRows(); 
+      }); 
     };  
   
     const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
@@ -107,30 +109,32 @@ export function ActivateDealListItem({
       didAddTransaction(transaction.publicKey);
       onClose();
     };
-  
-    let dealRows = [<p>"no pending deals"</p>];
-    if (deals) {
-      dealRows = deals.map((deal) =>
-          <div key={deal.account.borrower.toString()}
-            style={{
-              display: "flex", 
-              justifyContent: "space-between",
-              width: "100%",
-              background: "white",
-              paddingLeft: "20px",
-              paddingRight: "20px",
-              borderBottom: "1px solid grey"
-            }}
-          >
-            <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
-            <p style={{width: "200px"}}>{deal.account.name}</p> 
-            <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
-            <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
-              Activate
-            </Button>
-          </div>
-      );
+
+    const constructDealRows = () => {
+      if (deals) {
+        let dealRowsNew = deals.map((deal) =>
+            <div key={deal.account.borrower.toString()}
+              style={{
+                display: "flex", 
+                justifyContent: "space-between",
+                width: "100%",
+                background: "white",
+                paddingLeft: "20px",
+                paddingRight: "20px",
+                borderBottom: "1px solid grey"
+              }}
+            >
+              <p style={{width: "500px"}}>{deal.account.borrower.toString()}</p> 
+              <p style={{width: "200px"}}>{deal.account.name}</p> 
+              <p style={{width: "200px"}}> {deal.account.principal.toNumber()/1000000} USDC</p>
+              <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.publicKey, deal.account.borrower)}>
+                Activate
+              </Button>
+            </div>
+        );
+        setDealRows(dealRowsNew); 
     };
+    }
   
     return (
       <div
@@ -139,7 +143,7 @@ export function ActivateDealListItem({
           padding: "24px"
         }}
       > 
-        <label>
+        <label> 
             Global marketstate seed: 
             <input
                 name="globalMarketSeed"

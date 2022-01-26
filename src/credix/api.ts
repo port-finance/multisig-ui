@@ -106,7 +106,7 @@ export const findPendingDealsForMarket = multiAsync(async (provider, globalMarke
 
 export const getClusterTime = multiAsync(async (connection: Connection) => {
 	const slot = await connection.getSlot();
-	return connection.getBlockTime(slot);
+	return connection.getBlockTime(slot).catch(() => Date.now() * 1000);
 });
 
 
