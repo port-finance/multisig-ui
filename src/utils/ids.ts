@@ -10,7 +10,7 @@ export let TOKEN_PROGRAM_ID = new PublicKey(
 export const PROGRAM_IDS = [
   {
     name: "mainnet-beta",
-    url: "https://solana-api.projectserum.com/", 
+    url: "https://ssc-dao.genesysgo.net/", 
     multisigProgramId: "msigmtwzgXJHj2ext4XJjCDmpbcMuufFb5cHuwg6Xdt"
   },
   {
