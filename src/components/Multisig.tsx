@@ -255,7 +255,7 @@ function ixLabel(tx: any, multisigClient: any) {
     //       secondary={tx.publicKey.toString()}
     //     />
     //   );
-    } else if (tx.account.accounts.length === 4 || (tx.account.accounts.length === 6 && tx.account.data.length === 11)) {
+    } else if (tx.account.accounts.length === 4 || (tx.account.accounts.length === 6 && tx.account.data.length === 19) || (tx.account.accounts.length === 6 && tx.account.data.length === 11)) {
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       return (
         <ListItemText

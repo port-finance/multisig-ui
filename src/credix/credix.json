@@ -542,6 +542,10 @@
         {
           "name": "isBorrower",
           "type": "bool"
+        },
+        {
+          "name": "releaseTimestamp",
+          "type": "i64"
         }
       ]
     },
@@ -581,6 +585,10 @@
         {
           "name": "isBorrower",
           "type": "bool"
+        },
+        {
+          "name": "releaseTimestamp",
+          "type": "i64"
         }
       ]
     },
@@ -615,6 +623,27 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "updateGlobalMarketStateSeed",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "globalMarketState",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -762,6 +791,10 @@
           {
             "name": "frozen",
             "type": "bool"
+          },
+          {
+            "name": "seed",
+            "type": "string"
           }
         ]
       }
@@ -786,6 +819,10 @@
           {
             "name": "active",
             "type": "bool"
+          },
+          {
+            "name": "releaseTimestamp",
+            "type": "i64"
           }
         ]
       }
@@ -846,6 +883,11 @@
           "name": "globalMarketState",
           "type": "publicKey",
           "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
+          "index": false
         }
       ]
     },
@@ -880,6 +922,11 @@
         {
           "name": "globalMarketState",
           "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
           "index": false
         }
       ]
@@ -921,6 +968,11 @@
           "name": "globalMarketState",
           "type": "publicKey",
           "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
+          "index": false
         }
       ]
     },
@@ -955,6 +1007,11 @@
         {
           "name": "globalMarketState",
           "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
           "index": false
         }
       ]
@@ -1001,6 +1058,11 @@
           "name": "globalMarketState",
           "type": "publicKey",
           "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
+          "index": false
         }
       ]
     },
@@ -1040,6 +1102,11 @@
         {
           "name": "globalMarketState",
           "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "globalMarketStateSeed",
+          "type": "string",
           "index": false
         }
       ]
@@ -1185,6 +1252,11 @@
       "code": 6027,
       "name": "InvalidTreasuryAccount",
       "msg": "Invalid treasury Account for this market."
+    },
+    {
+      "code": 6028,
+      "name": "NotPossibleToWithdraw",
+      "msg": "Not yet possible to withdraw funds."
     }
   ]
 }
