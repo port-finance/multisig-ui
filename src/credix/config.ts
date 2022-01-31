@@ -43,7 +43,6 @@ const getTargetClusterFromEnv = (): SolanaCluster => {
 
 const getBaseClusterConfig = (): ClusterConfig => {
 	const targetCluster = getTargetClusterFromEnv();
-
 	switch (targetCluster) {
 		case SolanaCluster.DEVNET:
 			return devnetConfig;

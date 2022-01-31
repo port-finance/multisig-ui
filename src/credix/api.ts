@@ -371,7 +371,6 @@ export const thawGlobalMarketState = multiAsync(
 ); 
 
 export const findCredixPassPDA = multiAsync(async (publicKey: PublicKey, globalMarketSeed) => {
-	console.log("seed", globalMarketSeed);
 	const globalMarketStatePDA = await findGlobalMarketStatePDA(globalMarketSeed);
 	const credixPassSeeds = encodeSeedString(SEEDS.CREDIX_PASS);
 	const seeds: PdaSeeds = [
@@ -391,6 +390,7 @@ export const issueCredixPass = multiAsync(
 	publicKey: PublicKey,
 	isUnderwriter: boolean,
 	isBorrower: boolean,
+	releaseTimestamp: BN, 
 	provider
 ) => {
 	const program = constructProgram(provider);
@@ -402,7 +402,7 @@ export const issueCredixPass = multiAsync(
 		_getCredixPassPDA,
 	]);
 
-	return program.instruction.createCredixPass(credixPassPDA[1], isUnderwriter, isBorrower, {
+	return program.instruction.createCredixPass(credixPassPDA[1], isUnderwriter, isBorrower, releaseTimestamp, {
 		accounts: {
 			owner: multisigPk,
 			passHolder: publicKey,
@@ -423,6 +423,7 @@ export const updateCredixPass = multiAsync(
 	isActive: boolean,
 	isUnderwriter: boolean,
 	isBorrower: boolean,
+	releaseTimestamp: BN, 
 	provider
 ) => {
 	const program = constructProgram(provider);
@@ -435,7 +436,7 @@ export const updateCredixPass = multiAsync(
 		_getCredixPassPDA,
 	]);
 
-	return program.instruction.updateCredixPass(isActive, isUnderwriter, isBorrower, {
+	return program.instruction.updateCredixPass(isActive, isUnderwriter, isBorrower, releaseTimestamp, {
 		accounts: {
 			owner: multisigPk,
 			passHolder: publicKey,

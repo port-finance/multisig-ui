@@ -1,6 +1,6 @@
 import { ListItem, ListItemIcon, ListItemText, Collapse, Button, Checkbox } from "@material-ui/core";
 import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
-import { ProgramAccount, Wallet } from "@project-serum/anchor";
+import { BN, ProgramAccount, Wallet } from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { useState, useEffect, useCallback } from "react";
 import { initializeMarket, fetchGlobalMarketStateFrozen, freezeGlobalMarketState, thawGlobalMarketState, updateCredixPass, getCredixPassInfo, issueCredixPass } from "../../credix/api";
@@ -8,6 +8,8 @@ import { config } from "../../credix/config";
 import { CredixPass, Deal } from "../../credix/types/program.types";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
+// @ts-ignore
+import DateTimePicker  from "react-datetime-picker";
 import {
     Account,
     PublicKey,
@@ -61,6 +63,7 @@ function CredixPassListItemDetails({
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
 	const [passHolder, setPassHolder] = useState<string>("");
+  const [releaseTimestamp, setReleaseTimestamp] = useState(new BN(0));
 	const [credixPass, setCredixPass] = useState<CredixPass | null | any>();
     const multisigClient = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
@@ -73,6 +76,13 @@ function CredixPassListItemDetails({
 				multisigClient.provider
 			);
 			setCredixPass(credixPass);
+      console.log(credixPass); 
+      try {
+        // @ts-ignore
+        setReleaseTimestamp(credixPass.releaseTimestamp)
+      } catch (err) {
+        setReleaseTimestamp(new BN(0));
+      }
 		},
 		[multisigClient.provider.connection, multisigClient.provider.wallet]
 	);
@@ -121,12 +131,17 @@ function CredixPassListItemDetails({
 		setGlobalMarketSeed(e.target.value);
 	};
 
+  const onChangeReleaseTimestamp = (e: string) => {
+    setReleaseTimestamp(new BN(Math.round(new Date(e).getTime()/1000)));
+  }
+
 	const submitButtonDisabled = () =>
 		!!(
 			credixPass &&
 			credixPass.active === isActive &&
 			credixPass.isBorrower === isBorrower &&
-			credixPass.isUnderwriter === isUnderwriter
+			credixPass.isUnderwriter === isUnderwriter &&
+      credixPass.releaseTimestamp === releaseTimestamp
 		);
     
     const onSubmit = serialAsync(async (e: React.SyntheticEvent) => {
@@ -156,6 +171,7 @@ function CredixPassListItemDetails({
             isActive,
             isUnderwriter,
             isBorrower,
+            releaseTimestamp, 
             multisigClient.provider
         );
         if (!credixPass) {
@@ -165,6 +181,7 @@ function CredixPassListItemDetails({
                 holderPublicKey,
                 isUnderwriter,
                 isBorrower,
+                releaseTimestamp, 
                 multisigClient.provider
             );
         }
@@ -272,7 +289,7 @@ function CredixPassListItemDetails({
 					<select
 						name="isUnderwriter"
 						onChange={onUnderwriterChange}
-                        style={{marginLeft: "10px", width: "100px", margin: "10px"}}
+            style={{marginLeft: "10px", width: "100px", margin: "10px"}}
 					>
 						<option selected={isUnderwriter} value="true">
 							True
@@ -282,12 +299,19 @@ function CredixPassListItemDetails({
 						</option>
 					</select>
 				</label>
+        <label>
+          Release date
+          <DateTimePicker
+            onChange={onChangeReleaseTimestamp}
+            value={new Date(releaseTimestamp.toNumber() * 1000)}
+          />
+        </label>
 				<br />
 				<input
 					type="submit"
 					value={"Issue / Update Credix Pass"}
 					disabled={submitButtonDisabled()}
-                    style={{background: "white", cursor: "pointer", width:"200px", height:"30px"}}
+          style={{background: "white", cursor: "pointer", width:"200px", height:"30px"}}
 				/>
 			</form>
 		</div>

@@ -4,20 +4,20 @@ import {
   clusterApiUrl,
   Connection,
 } from "@solana/web3.js";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { setProgramIds } from "../utils/ids";
 import { ENV as ChainID } from "@solana/spl-token-registry";
 
 export type ENV =
-  | "mainnet-beta"
+  | "localnet"
   | "devnet"
-  | "localnet";
+  | "mainnet-beta";
 
 export const ENDPOINTS = [
   {
-    name: "mainnet-beta" as ENV,
-    endpoint: "https://ssc-dao.genesysgo.net/",
-    chainID: ChainID.MainnetBeta,
+    name: "localnet" as ENV,
+    endpoint: "http://127.0.0.1:8899",
+    chainID: ChainID.Devnet,
   },
   {
     name: "devnet" as ENV,
@@ -25,9 +25,9 @@ export const ENDPOINTS = [
     chainID: ChainID.Devnet,
   },
   {
-    name: "localnet" as ENV,
-    endpoint: "http://127.0.0.1:8899",
-    chainID: ChainID.Devnet,
+    name: "mainnet-beta" as ENV,
+    endpoint: "https://ssc-dao.genesysgo.net/",
+    chainID: ChainID.MainnetBeta,
   },
 ];
 
@@ -50,11 +50,7 @@ const ConnectionContext = React.createContext<ConnectionConfig>({
 });
 
 export function ConnectionProvider({ children = undefined as any }) {
-  const [endpoint, setEndpoint] = useLocalStorageState(
-    "connectionEndpts",
-    ENDPOINTS[0].endpoint
-  );
-
+  const [endpoint, setEndpoint] = useState(ENDPOINTS[0].endpoint);
   const connection = useMemo(() => new Connection(endpoint, "recent"), [
     endpoint,
   ]);
