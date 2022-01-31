@@ -9,11 +9,16 @@ import { setProgramIds } from "../utils/ids";
 import { ENV as ChainID } from "@solana/spl-token-registry";
 
 export type ENV =
+  | "mainnet-beta"
   | "localnet"
-  | "devnet"
-  | "mainnet-beta";
+  | "devnet";
 
 export const ENDPOINTS = [
+  {
+    name: "mainnet-beta" as ENV,
+    endpoint: "https://ssc-dao.genesysgo.net/",
+    chainID: ChainID.MainnetBeta,
+  },
   {
     name: "localnet" as ENV,
     endpoint: "http://127.0.0.1:8899",
@@ -23,11 +28,6 @@ export const ENDPOINTS = [
     name: "devnet" as ENV,
     endpoint: clusterApiUrl("devnet"),
     chainID: ChainID.Devnet,
-  },
-  {
-    name: "mainnet-beta" as ENV,
-    endpoint: "https://ssc-dao.genesysgo.net/",
-    chainID: ChainID.MainnetBeta,
   },
 ];
 
