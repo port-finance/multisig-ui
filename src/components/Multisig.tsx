@@ -84,7 +84,11 @@ const NO_SHOW_LIST = [
   "8J5ChExD4pM6fPbMFk2bBKDQfkPLXXTeKSgeNkpfuEsR",
   "fiq7nyThaQdH8wyfEFgFhHS4VnYFGdA4SvTP73LdgUh",
   "387KmRLPVDUf7TQSbiEaQB8Jy36HgH7LMsbyj67LHXWu",
-  "AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv"
+  "AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv",
+  "FFu2QvyiFDg2omxLTqwyV57gAonRR5RSouVdJonFwekd",
+  "6vCbSFtMScZnqJUfQbfJGKHQVGGgHLNNBsZEtTCUHnUo",
+  "6GSHyR9HyKj2KH9PnU5Dd3uLeoayxiKqGbkcM8Y5dzeo",
+  "Crh7AQdaHbGQzMLpcgxU9xntjLfr5jxXejrPAfE9qnuR"
 ]; 
 
 // NEW TRANSACTION 
@@ -255,7 +259,49 @@ function ixLabel(tx: any, multisigClient: any) {
     //       secondary={tx.publicKey.toString()}
     //     />
     //   );
-    } else if (tx.account.accounts.length === 4 || (tx.account.accounts.length === 6 && tx.account.data.length === 19) || (tx.account.accounts.length === 6 && tx.account.data.length === 11)) {
+      
+    } else if (tx.account.accounts.length === 4 && tx.account.data.length === 19) { // update credix pass newest version
+      const credixPassPk = tx.account.accounts[1].pubkey.toString();
+      const active = tx.account.data.slice(8, 9)[0];
+      const underwriter = tx.account.data.slice(9, 10)[0];
+      const borrower = tx.account.data.slice(10,11)[0]; 
+      const releaseDateBuffer = tx.account.data.slice(11, 19);
+      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer); 
+      let releaseDate; 
+
+      if (releaseDateUnix.toNumber() === 0) {
+        releaseDate = "no lockup"; 
+      } else {
+        releaseDate = new Date(releaseDateUnix.toNumber() * 1000); 
+      }
+
+      return (
+        <ListItemText
+            primary={`Update credix pass for ${credixPassPk}`}
+            secondary={`Is active: ${!!active}, Is borrower: ${!!borrower}, Is underwriter: ${!!underwriter}, Lockup release date: ${releaseDate}`}
+          />
+      );
+    } else if (tx.account.accounts.length === 6 && tx.account.data.length === 19) { // create credix pass newest version
+      const credixPassPk = tx.account.accounts[1].pubkey.toString();
+      const underwriter = tx.account.data.slice(9, 10)[0];
+      const borrower = tx.account.data.slice(10, 11)[0];
+      const releaseDateBuffer = tx.account.data.slice(11, 19);
+      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer); 
+      let releaseDate; 
+
+      if (releaseDateUnix.toNumber() === 0) {
+        releaseDate = "no lockup"; 
+      } else {
+        releaseDate = new Date(releaseDateUnix.toNumber() * 1000); 
+      }
+
+      return (
+        <ListItemText
+            primary={`Issue credix pass for ${credixPassPk}`}
+            secondary={`Is borrower: ${!!borrower}, Is underwriter ${!!underwriter}, Lockup release date: ${releaseDate}`}
+          />
+      );
+    } else if (tx.account.data.length === 11) { // update credix pass newest version
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       return (
         <ListItemText
@@ -263,12 +309,11 @@ function ixLabel(tx: any, multisigClient: any) {
             secondary={tx.publicKey.toString()}
           />
       );
-    }
-    else {
+    } else {
       const borrowerPk = tx.account.accounts[6].pubkey.toString();
       return (
         <ListItemText
-          primary={`Activate deal for borrower ${borrowerPk.slice(0,5)}...${borrowerPk.slice(-5,)}`}
+          primary={`Activate deal for borrower ${borrowerPk}`}
           secondary={tx.publicKey.toString()}
         />
       );

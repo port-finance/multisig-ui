@@ -209,10 +209,6 @@ export const activateDeal = multiAsync(
 			_getCredixPassPDA,
 		]);
 
-		console.log("marketstatepda", globalMarketStatePDA);
-		console.log("signing auth pda", _signingAuthorityPDA); 
-		console.log("credix pass", credixPass); 
-
 		return program.instruction.activateDeal({
 			accounts: {
 				owner: multisigPk,
