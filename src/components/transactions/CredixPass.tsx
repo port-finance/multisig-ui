@@ -65,8 +65,9 @@ function CredixPassListItemDetails({
 	const [passHolder, setPassHolder] = useState<string>("");
   const [releaseTimestamp, setReleaseTimestamp] = useState(new BN(0));
 	const [credixPass, setCredixPass] = useState<CredixPass | null | any>();
-    const multisigClient = useMultisigProgram();
-    const { enqueueSnackbar } = useSnackbar();
+  const [issueUpdate, setIssueUpdate] = useState<string>("Issue"); 
+  const multisigClient = useMultisigProgram();
+  const { enqueueSnackbar } = useSnackbar();
 
   const fetchAndSetPassData = useCallback(
 		async (globalMarketSeed: string, publicKey: PublicKey) => {
@@ -75,8 +76,12 @@ function CredixPassListItemDetails({
 				publicKey,
 				multisigClient.provider
 			);
+      if (credixPass) {
+        setIssueUpdate("Update"); 
+      } else {
+        setIssueUpdate("Issue"); 
+      }
 			setCredixPass(credixPass);
-      console.log(credixPass); 
       try {
         // @ts-ignore
         setReleaseTimestamp(credixPass.releaseTimestamp)
@@ -111,7 +116,7 @@ function CredixPassListItemDetails({
 		}
     }
 
-    const onPassHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPassHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPassHolder(e.target.value);
 	};
 
@@ -187,7 +192,7 @@ function CredixPassListItemDetails({
         }
         
         const transaction = new Account();
-        
+  
         const tx = await multisigClient.rpc.createTransaction(
             config.clusterConfig.programId,
             credixPassIx.keys,
@@ -224,7 +229,7 @@ function CredixPassListItemDetails({
             padding: "24px"
             }}
         >
-			<h2>Update credix pass</h2>
+			<h2>{issueUpdate} credix pass</h2>
 			<form onSubmit={onSubmit} 
                 style={{
                     display: "flex",
@@ -309,7 +314,7 @@ function CredixPassListItemDetails({
 				<br />
 				<input
 					type="submit"
-					value={"Issue / Update Credix Pass"}
+					value={`${issueUpdate} Credix Pass`}
 					disabled={submitButtonDisabled()}
           style={{background: "white", cursor: "pointer", width:"200px", height:"30px"}}
 				/>
