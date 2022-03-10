@@ -88,7 +88,8 @@ const NO_SHOW_LIST = [
   "FFu2QvyiFDg2omxLTqwyV57gAonRR5RSouVdJonFwekd",
   "6vCbSFtMScZnqJUfQbfJGKHQVGGgHLNNBsZEtTCUHnUo",
   "6GSHyR9HyKj2KH9PnU5Dd3uLeoayxiKqGbkcM8Y5dzeo",
-  "Crh7AQdaHbGQzMLpcgxU9xntjLfr5jxXejrPAfE9qnuR"
+  "Crh7AQdaHbGQzMLpcgxU9xntjLfr5jxXejrPAfE9qnuR",
+  "FP3hjhVmkk2b5adR6hYQ4HUjXaB659Gb6fTMzeCVZoiS"
 ]; 
 
 // NEW TRANSACTION 
