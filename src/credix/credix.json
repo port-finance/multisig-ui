@@ -41,12 +41,12 @@
           "isSigner": false
         },
         {
-          "name": "lpTokenMintAccount",
+          "name": "lpTokenMint",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
-          "name": "baseMintAccount",
+          "name": "baseTokenMint",
           "isMut": false,
           "isSigner": false
         },
@@ -72,14 +72,6 @@
         }
       ],
       "args": [
-        {
-          "name": "signingAuthorityBump",
-          "type": "u8"
-        },
-        {
-          "name": "globalMarketStateBump",
-          "type": "u8"
-        },
         {
           "name": "globalMarketSeed",
           "type": "string"
@@ -132,7 +124,7 @@
           "isSigner": false
         },
         {
-          "name": "lpTokenMintAccount",
+          "name": "lpTokenMint",
           "isMut": true,
           "isSigner": false
         },
@@ -147,7 +139,7 @@
           "isSigner": false
         },
         {
-          "name": "baseMintAccount",
+          "name": "baseTokenMint",
           "isMut": false,
           "isSigner": false
         },
@@ -224,14 +216,6 @@
         }
       ],
       "args": [
-        {
-          "name": "dealBump",
-          "type": "u8"
-        },
-        {
-          "name": "borrowerInfoBump",
-          "type": "u8"
-        },
         {
           "name": "principal",
           "type": "u64"
@@ -311,7 +295,7 @@
           "isSigner": false
         },
         {
-          "name": "baseMintAccount",
+          "name": "baseTokenMint",
           "isMut": false,
           "isSigner": false
         },
@@ -387,13 +371,8 @@
           "isSigner": false
         },
         {
-          "name": "baseMintAccount",
+          "name": "baseTokenMint",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "lpTokenMintAccount",
-          "isMut": true,
           "isSigner": false
         },
         {
@@ -464,7 +443,7 @@
           "isSigner": false
         },
         {
-          "name": "lpTokenMintAccount",
+          "name": "lpTokenMint",
           "isMut": true,
           "isSigner": false
         },
@@ -474,7 +453,7 @@
           "isSigner": false
         },
         {
-          "name": "baseMintAccount",
+          "name": "baseTokenMint",
           "isMut": false,
           "isSigner": false
         },
@@ -531,10 +510,6 @@
         }
       ],
       "args": [
-        {
-          "name": "passBump",
-          "type": "u8"
-        },
         {
           "name": "isUnderwriter",
           "type": "bool"
@@ -625,22 +600,56 @@
       "args": []
     },
     {
-      "name": "updateGlobalMarketStateSeed",
+      "name": "updateLpTokenMetadata",
       "accounts": [
         {
           "name": "owner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
           "name": "globalMarketState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metadataPda",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "lpTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signingAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "globalMarketStateSeed",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
           "type": "string"
         }
       ]
@@ -753,11 +762,11 @@
             "type": "publicKey"
           },
           {
-            "name": "liquidityPoolTokenMintAccount",
+            "name": "baseTokenMint",
             "type": "publicKey"
           },
           {
-            "name": "lpTokenMintAccount",
+            "name": "lpTokenMint",
             "type": "publicKey"
           },
           {
@@ -823,6 +832,10 @@
           {
             "name": "releaseTimestamp",
             "type": "i64"
+          },
+          {
+            "name": "user",
+            "type": "publicKey"
           }
         ]
       }
@@ -956,11 +969,6 @@
         },
         {
           "name": "treasuryAmount",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "lpTokenPrice",
           "type": "u64",
           "index": false
         },
@@ -1255,7 +1263,7 @@
     },
     {
       "code": 6028,
-      "name": "NotPossibleToWithdraw",
+      "name": "WithdrawalsLocked",
       "msg": "Not yet possible to withdraw funds."
     }
   ]

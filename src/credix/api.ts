@@ -11,6 +11,8 @@ import { encodeSeedString } from "./utils/format.utils";
 import { dataToGatewayToken, GatewayTokenData } from "@identity.com/solana-gateway-ts";
 import * as anchor from "@project-serum/anchor";
 import { SentimentSatisfiedAltSharp } from "@material-ui/icons";
+// @ts-ignore
+import { MetadataProgram } from "@metaplex-foundation/mpl-token-metadata";
 
 const constructProgram = (provider: Provider) => {
 	return new Program(config.idl, config.clusterConfig.programId, provider);
@@ -398,7 +400,7 @@ export const issueCredixPass = multiAsync(
 		_getCredixPassPDA,
 	]);
 
-	return program.instruction.createCredixPass(credixPassPDA[1], isUnderwriter, isBorrower, releaseTimestamp, {
+	return program.instruction.createCredixPass(isUnderwriter, isBorrower, releaseTimestamp, {
 		accounts: {
 			owner: multisigPk,
 			passHolder: publicKey,
@@ -452,4 +454,42 @@ export const getCredixPassInfo = multiAsync(
 		const [credixPassPDA] = await findCredixPassPDA(publicKey, globalMarketSeed);
 		return program.account.credixPass.fetchNullable(credixPassPDA);
 	}
+);
+
+export const updateLpTokenMetadata = multiAsync(
+	async (
+		multisigPk: PublicKey,
+		globalMarketSeed: string,
+		lpTokenName: string,
+		lpTokenSymbol: string,
+		provider) => {
+			const program = constructProgram(provider);
+			const TOKEN_META_DATA_PROGRAM = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
+
+			const _globalMarketStatePDA = findGlobalMarketStatePDA(globalMarketSeed); 
+			const _signingAuthorityPDA = findSigningAuthorityPDA(globalMarketSeed); 
+		
+			const [globalMarketStatePDA, signingAuthorityPDA] = await Promise.all([
+				_globalMarketStatePDA,
+				_signingAuthorityPDA,
+			]);
+		
+		const globalMarketState = await program.account.globalMarketState.fetch(globalMarketStatePDA[0]);
+
+			const [metadataPda] = await MetadataProgram.findMetadataAccount(globalMarketState.lpTokenMint);
+
+			return program.instruction.updateLpTokenMetadata(lpTokenName, lpTokenSymbol, {
+				accounts: {
+					owner: multisigPk,
+					globalMarketState: globalMarketStatePDA[0],
+					metadataPda: metadataPda,
+					tokenMetadataProgram: TOKEN_META_DATA_PROGRAM,
+					lpTokenMint: globalMarketState.lpTokenMint,
+					signingAuthority: signingAuthorityPDA[0],
+					rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+					systemProgram: anchor.web3.SystemProgram.programId,
+				},
+				signers: [],
+			});
+		}
 );
