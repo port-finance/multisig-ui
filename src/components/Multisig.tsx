@@ -92,7 +92,8 @@ const NO_SHOW_LIST = [
   "Crh7AQdaHbGQzMLpcgxU9xntjLfr5jxXejrPAfE9qnuR",
   "FP3hjhVmkk2b5adR6hYQ4HUjXaB659Gb6fTMzeCVZoiS",
   "GR4bLNMD7tBRTLgFXwJq5So2QGh92QZDfDXrH3e1M3eN",
-  "GTh1AY9v5ZAQYpQ7KdzWK8K8k41nAiPRas2nfnscYxU9"
+  "GTh1AY9v5ZAQYpQ7KdzWK8K8k41nAiPRas2nfnscYxU9",
+  "56bNvH6Ckvqops5gbgM1rBaVi8nSk4aiykmXgrjNfCRn"
 ]; 
 
 // NEW TRANSACTION 
@@ -338,10 +339,10 @@ function ixLabel(tx: any, multisigClient: any) {
             secondary={tx.publicKey.toString()}
           />
       );
-    } else if (tx.account.accounts.length === 8) { // update credix pass newest version
+    } else if (tx.account.accounts.length === 8) { 
       return (
         <ListItemText
-          primary={`updating lp token name`}
+          primary={`Update LP token name`}
           secondary={tx.publicKey.toString()}
         />
       );
