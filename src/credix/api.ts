@@ -10,7 +10,7 @@ import { mapDealToStatus } from "./utils/deal.utils";
 import { encodeSeedString } from "./utils/format.utils";
 import { dataToGatewayToken, GatewayTokenData } from "@identity.com/solana-gateway-ts";
 import * as anchor from "@project-serum/anchor";
-import { SentimentSatisfiedAltSharp } from "@material-ui/icons";
+import { CompassCalibrationOutlined, SentimentSatisfiedAltSharp } from "@material-ui/icons";
 // @ts-ignore
 import { MetadataProgram } from "@metaplex-foundation/mpl-token-metadata";
 
@@ -55,7 +55,7 @@ export const getDealAccountData = multiAsync((provider, dealPk) => {
 
 const getBaseMintPK = multiAsync(async (provider, globalMarketSeed) => {
 	const globalMarketState = await getGlobalMarketStateAccountData(provider, globalMarketSeed);
-	return globalMarketState.liquidityPoolTokenMintAccount;
+	return globalMarketState.baseTokenMint;
 });
 
 export const findDealPDA = multiAsync(async (publicKey: PublicKey, dealNumber: number, globalMarketSeed) => {
@@ -115,6 +115,7 @@ export const getClusterTime = multiAsync(async (connection: Connection) => {
 const getAssociatedBaseTokenAddressPK = multiAsync(
 	async (provider, publicKey: PublicKey, offCurve: boolean, globalMarketSeed) => {
 		const _baseMintPK = await getBaseMintPK(provider, globalMarketSeed);
+
 		return await Token.getAssociatedTokenAddress(
 			ASSOCIATED_TOKEN_PROGRAM_ID,
 			TOKEN_PROGRAM_ID,
@@ -223,7 +224,7 @@ export const activateDeal = multiAsync(
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 				borrowerTokenAccount: userAssociatedBaseTokenAddressPK,
 				credixPass: credixPass[0],
-				baseMintAccount: baseMintPK,
+				baseTokenMint: baseMintPK,
 				tokenProgram: TOKEN_PROGRAM_ID,
 				systemProgram: SystemProgram.programId,
 				rent: web3.SYSVAR_RENT_PUBKEY,
@@ -298,7 +299,7 @@ export const initializeMarket = multiAsync(
 					treasury: new PublicKey(treasuryPk),
 					treasuryPoolTokenAccount: treasuryAssociatedBaseTokenAddress,
 					lpTokenMintAccount: lpTokenMintKeypair.publicKey,
-					baseMintAccount: new PublicKey(baseMintPk),
+					baseTokenMint: new PublicKey(baseMintPk),
 					rent: anchor.web3.SYSVAR_RENT_PUBKEY,
 					tokenProgram: TOKEN_PROGRAM_ID,
 					signingAuthority: signingAuthorityPda,

@@ -78,7 +78,6 @@ export function ActivateDealListItem({
         [multisig.toBuffer()],
         multisigClient.programId
       );
-  
       const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
