@@ -95,7 +95,8 @@ const NO_SHOW_LIST = [
   "GTh1AY9v5ZAQYpQ7KdzWK8K8k41nAiPRas2nfnscYxU9",
   "56bNvH6Ckvqops5gbgM1rBaVi8nSk4aiykmXgrjNfCRn",
   "5UqRdQyB4k9cwcMvZKyvVrESSVEg931Y3P2c6BjSAk6E",
-  "4hRCkqCyyMtMvraFA7fGCFF3wpvCwdNXrMxGRxSwujqo"
+  "4hRCkqCyyMtMvraFA7fGCFF3wpvCwdNXrMxGRxSwujqo", 
+  "FiLV2C198Yfw156Q1CvotjmDhNbqdwsNxZFMhB8Cbce8"
 ]; 
 
 // NEW TRANSACTION 
