@@ -99,7 +99,12 @@ const NO_SHOW_LIST = [
   "FiLV2C198Yfw156Q1CvotjmDhNbqdwsNxZFMhB8Cbce8",
   "DtTHVgjYUkubr6haRyY74Kv8rBQM7kBmdbEKmrrjrprB",
   "HhkHFd7DjGxzDCDhYe5tsz4EqLuHHe7uVoUyquP2b6MK",
-  "DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o"
+  "DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
+  "AczcRjjZ47negBzU4TVkQQRe4PYMCVsmo5C3Tt6dzXRs",
+  "BC8ZyiUT7nVSGQnBcujCEHyaJrjkmFA7SBSbfjL3qnsV",
+  "HcJcGK6zdV4EnNCHwEmpUMFGvDJYL3dRaVHCtiRFJ8z3",
+  "9Y1Xo76H1oeEhokpDGR7d5iVgioq48ktHFEXP6Pjk2Lm",
+  "GpDmfRGGF7Wz1EZ2rMU3Grn7NkVwspLMg3p7RHFtKk1S"
 ]; 
 
 // NEW TRANSACTION 
