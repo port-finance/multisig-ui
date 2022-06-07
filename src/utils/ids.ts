@@ -10,7 +10,7 @@ export let TOKEN_PROGRAM_ID = new PublicKey(
 export const PROGRAM_IDS = [
   {
     name: "mainnet-beta",
-    url: "https://solana-api.projectserum.com", 
+    url: "https://solana-api.syndica.io/access-token/P2ifE23KuXCG6Ans1VjyP7sTUBBtkSbeMxNJhfvXDkAEwR83fJEGV8qbInO2uqPY/rpc", 
     multisigProgramId: "msigmtwzgXJHj2ext4XJjCDmpbcMuufFb5cHuwg6Xdt"
   },
   {

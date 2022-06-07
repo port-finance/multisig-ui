@@ -16,7 +16,7 @@ export type ENV =
 export const ENDPOINTS = [
   {
     name: "mainnet-beta" as ENV,
-    endpoint: "https://solana-api.projectserum.com",
+    endpoint: "https://solana-api.syndica.io/access-token/P2ifE23KuXCG6Ans1VjyP7sTUBBtkSbeMxNJhfvXDkAEwR83fJEGV8qbInO2uqPY/rpc",
     chainID: ChainID.MainnetBeta,
   },
   {

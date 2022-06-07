@@ -115,7 +115,7 @@ export const getClusterTime = multiAsync(async (connection: Connection) => {
 const getAssociatedBaseTokenAddressPK = multiAsync(
 	async (provider, publicKey: PublicKey, offCurve: boolean, globalMarketSeed) => {
 		const _baseMintPK = await getBaseMintPK(provider, globalMarketSeed);
-
+		console.log(Token); 
 		return await Token.getAssociatedTokenAddress(
 			ASSOCIATED_TOKEN_PROGRAM_ID,
 			TOKEN_PROGRAM_ID,
