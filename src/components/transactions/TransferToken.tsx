@@ -60,7 +60,7 @@ export function TransferTokenListItem({
     const [amount, setAmount] = useState<null | u64>(null);
   
   
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
   
     const tokenAccounts = useMultiSigOwnedTokenAccounts(multisigClient.provider, multisig, multisigClient.programId)

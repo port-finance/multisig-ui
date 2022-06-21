@@ -62,7 +62,7 @@ function InitializeMarketListItemDetails({
     const [baseMintPk, setBaseMintPk] = useState<string>("Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr")
     const [treasuryPk, setTreasuryPk] = useState<string>("FW7CiLgLKyx54hpXHVNquFpyAQuLTTFYeprswocpiVHV")
     const [gatekeeperNetworkPk, setGatekeeperNetworkPk] = useState<string>("Br5iqQaPsb3HStGfri4enwLoUVp5zfJuZhkFFdWgSqqq")
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
 
     const onChange = (

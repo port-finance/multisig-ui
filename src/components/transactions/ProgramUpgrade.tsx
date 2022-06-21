@@ -60,7 +60,7 @@ export function ProgramUpdateListItem({
     const [programId, setProgramId] = useState<null | string>(null);
     const [buffer, setBuffer] = useState<null | string>(null);
   
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
     const createTransactionAccount = async () => {
       enqueueSnackbar("Creating transaction", {

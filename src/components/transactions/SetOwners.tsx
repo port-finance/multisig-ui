@@ -52,7 +52,7 @@ export function MultisigSetOwnersListItem({
     onClose: Function;
     didAddTransaction: (tx: PublicKey) => void;
   }) {
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     // @ts-ignore
     const zeroAddr = new PublicKey("11111111111111111111111111111111").toString();
     const [participants, setParticipants] = useState([zeroAddr]);

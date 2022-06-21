@@ -62,7 +62,7 @@ function NameTokenListItemDetails({
   const [lpTokenName, setLpTokenName] = useState<string>("");
 	const [lpTokenSymbol, setLpTokenSymbol] = useState<string>("");
 
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const { enqueueSnackbar } = useSnackbar();
 
   const onBlurGlobalMarketSeed = (e: React.ChangeEvent<HTMLInputElement>) => {

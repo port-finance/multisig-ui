@@ -55,7 +55,7 @@ export function ChangeThresholdListItem({
     didAddTransaction: (tx: PublicKey) => void;
   }) {
     const [threshold, setThreshold] = useState(2);
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     // @ts-ignore
     const { enqueueSnackbar } = useSnackbar();
     const changeThreshold = async () => {

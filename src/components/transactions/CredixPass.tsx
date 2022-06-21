@@ -8,6 +8,7 @@ import { config } from "../../credix/config";
 import { CredixPass, Deal } from "../../credix/types/program.types";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
+
 // @ts-ignore
 import DateTimePicker  from "react-datetime-picker";
 import {
@@ -18,6 +19,8 @@ import {
   } from "@solana/web3.js";
 import { serialAsync } from "../../credix/utils/async.utils";
 import { SEEDS, TX_SIZE } from "../../credix/consts";
+import { Market } from "@credix/credix-client";
+
 
 export function CredixPassListItem({
     multisig,
@@ -59,6 +62,7 @@ function CredixPassListItemDetails({
     didAddTransaction: (tx: PublicKey) => void;
   }) {
   const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
+  const [market, setMarket] = useState<Market | null>();
   const [isBorrower, setIsBorrower] = useState<boolean>(false);
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
@@ -66,16 +70,17 @@ function CredixPassListItemDetails({
   const [releaseTimestamp, setReleaseTimestamp] = useState(new BN(0));
 	const [credixPass, setCredixPass] = useState<CredixPass | null | any>();
   const [issueUpdate, setIssueUpdate] = useState<string>("Issue"); 
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const { enqueueSnackbar } = useSnackbar();
 
   const fetchAndSetPassData = useCallback(
-		async (globalMarketSeed: string, publicKey: PublicKey) => {
-			const credixPass = await getCredixPassInfo(
-        globalMarketSeed, 
-				publicKey,
-				multisigClient.provider
-			);
+    async (globalMarketSeed: string, publicKey: PublicKey) => {
+      const market = await credixClient.fetchMarket(globalMarketSeed);
+      setMarket(market); 
+      // @ts-ignore
+      const credixPass = await market.fetchCredixPass(publicKey); 
+      console.log("credix pass", credixPass); 
+      // @ts-ignore
       if (credixPass) {
         setIssueUpdate("Update"); 
       } else {
@@ -84,13 +89,15 @@ function CredixPassListItemDetails({
 			setCredixPass(credixPass);
       try {
         // @ts-ignore
-        setReleaseTimestamp(credixPass.releaseTimestamp)
+        console.log("release timestamp", credixPass.programVreleaseTimestamp)
+        // @ts-ignore
+        setReleaseTimestamp(credixPass.programVersion.releaseTimestamp)
       } catch (err) {
         setReleaseTimestamp(new BN(0));
       }
 		},
 		[multisigClient.provider.connection, multisigClient.provider.wallet]
-	);
+  );
 
 	useEffect(() => {
 		try {
@@ -101,7 +108,7 @@ function CredixPassListItemDetails({
 		}
 	}, [passHolder, globalMarketSeed, fetchAndSetPassData]);
 
-	useEffect(() => {
+  useEffect(() => {
 		setIsActive(!!credixPass?.active);
 		setIsBorrower(!!credixPass?.isBorrower);
 		setIsUnderwriter(!!credixPass?.isUnderwriter);
@@ -169,6 +176,7 @@ function CredixPassListItemDetails({
         }
       
         const holderPublicKey = new PublicKey(passHolder);
+        
         let credixPassIx = await updateCredixPass(
             globalMarketSeed, 
             multisigSigner,

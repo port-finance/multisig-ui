@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack";
 import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
 import AppBar from "@material-ui/core/AppBar";
-import StarsIcon from "@material-ui/icons/Stars"; 
+import StarsIcon from "@material-ui/icons/Stars";
 import DescriptionIcon from "@material-ui/icons/Description";
 import Paper from "@material-ui/core/Paper";
 import SupervisorAccountIcon from "@material-ui/icons/SupervisorAccount";
@@ -42,7 +42,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-// import CredixLogo from "../credix.svg"; 
+// import CredixLogo from "../credix.svg";
 import BN from "bn.js";
 import {
   Account,
@@ -53,10 +53,22 @@ import {
 import { ViewTransactionOnExplorerButton } from "./Notification";
 import * as idl from "../utils/idl";
 import { useMultisigProgram } from "../hooks/useMultisigProgram";
-import { Token, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, u64, AccountInfo as TokenAccount, AccountLayout } from "@solana/spl-token";
+import {
+  Token,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  u64,
+  AccountInfo as TokenAccount,
+  AccountLayout,
+} from "@solana/spl-token";
 import { MoneyRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
-import { getMintInfo, getTokenAccount, parseTokenAccount, ProgramAccount } from "@project-serum/common";
+import {
+  getMintInfo,
+  getTokenAccount,
+  parseTokenAccount,
+  ProgramAccount,
+} from "@project-serum/common";
 import { useMultiSigOwnedTokenAccounts } from "../hooks/useOwnedTokenAccounts";
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { config } from "../credix/config";
@@ -64,16 +76,15 @@ import { ChangeThresholdListItem } from "./transactions/ChangeThreshold";
 import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
 import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
-import { ActivateDealListItem } from "./transactions/ActivateDeal"; 
+import { ActivateDealListItem } from "./transactions/ActivateDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 import { NameTokenListItem } from "./transactions/NameToken";
 
-
 const NO_SHOW_LIST = [
-  "FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV", 
+  "FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV",
   "7ZwEod26DTdygr4rvrYLH9yLyyzh5UgXEumvo8x9CFJ7",
   "5cnSAp7vCadCH75R6Kat1ZW1Pq4W317hQ6bWKD35oTBN",
   "9QXwLCgjFJYSCrHaDgti4qQJHcFmnTsuBipNVXDCWUs8",
@@ -95,7 +106,7 @@ const NO_SHOW_LIST = [
   "GTh1AY9v5ZAQYpQ7KdzWK8K8k41nAiPRas2nfnscYxU9",
   "56bNvH6Ckvqops5gbgM1rBaVi8nSk4aiykmXgrjNfCRn",
   "5UqRdQyB4k9cwcMvZKyvVrESSVEg931Y3P2c6BjSAk6E",
-  "4hRCkqCyyMtMvraFA7fGCFF3wpvCwdNXrMxGRxSwujqo", 
+  "4hRCkqCyyMtMvraFA7fGCFF3wpvCwdNXrMxGRxSwujqo",
   "FiLV2C198Yfw156Q1CvotjmDhNbqdwsNxZFMhB8Cbce8",
   "DtTHVgjYUkubr6haRyY74Kv8rBQM7kBmdbEKmrrjrprB",
   "HhkHFd7DjGxzDCDhYe5tsz4EqLuHHe7uVoUyquP2b6MK",
@@ -104,10 +115,10 @@ const NO_SHOW_LIST = [
   "BC8ZyiUT7nVSGQnBcujCEHyaJrjkmFA7SBSbfjL3qnsV",
   "HcJcGK6zdV4EnNCHwEmpUMFGvDJYL3dRaVHCtiRFJ8z3",
   "9Y1Xo76H1oeEhokpDGR7d5iVgioq48ktHFEXP6Pjk2Lm",
-  "GpDmfRGGF7Wz1EZ2rMU3Grn7NkVwspLMg3p7RHFtKk1S"
-]; 
+  "GpDmfRGGF7Wz1EZ2rMU3Grn7NkVwspLMg3p7RHFtKk1S",
+];
 
-// NEW TRANSACTION 
+// NEW TRANSACTION
 function AddTransactionDialog({
   multisig,
   open,
@@ -273,84 +284,99 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
-    // } else if (tx.account.accounts.length === 13) {
-    //   return (
-    //     <ListItemText
-    //       primary={"Set up new market"}
-    //       secondary={tx.publicKey.toString()}
-    //     />
-    //   );
-      
-    } else if (tx.account.accounts.length === 4 && tx.account.data.length === 19) { // update credix pass newest version
+      // } else if (tx.account.accounts.length === 13) {
+      //   return (
+      //     <ListItemText
+      //       primary={"Set up new market"}
+      //       secondary={tx.publicKey.toString()}
+      //     />
+      //   );
+    } else if (
+      tx.account.accounts.length === 4 &&
+      tx.account.data.length === 19
+    ) {
+      // update credix pass newest version
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       const active = tx.account.data.slice(8, 9)[0];
       const underwriter = tx.account.data.slice(9, 10)[0];
-      const borrower = tx.account.data.slice(10,11)[0]; 
+      const borrower = tx.account.data.slice(10, 11)[0];
       const releaseDateBuffer = tx.account.data.slice(11, 19);
-      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer); 
-      let releaseDate; 
+      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
+      let releaseDate;
 
       if (releaseDateUnix.toNumber() === 0) {
-        releaseDate = "no lockup"; 
+        releaseDate = "no lockup";
       } else {
-        releaseDate = new Date(releaseDateUnix.toNumber() * 1000); 
+        releaseDate = new Date(releaseDateUnix.toNumber() * 1000);
       }
 
       return (
         <ListItemText
-            primary={`Update credix pass for ${credixPassPk}`}
-            secondary={`Is active: ${!!active}, Is borrower: ${!!borrower}, Is underwriter: ${!!underwriter}, Lockup release date: ${releaseDate}`}
-          />
+          primary={`Update credix pass for ${credixPassPk}`}
+          secondary={`Is active: ${!!active}, Is borrower: ${!!borrower}, Is underwriter: ${!!underwriter}, Lockup release date: ${releaseDate}`}
+        />
       );
-    } else if (tx.account.accounts.length === 6 && tx.account.data.length === 19) { // create credix pass newest version
+    } else if (
+      tx.account.accounts.length === 6 &&
+      tx.account.data.length === 19
+    ) {
+      // create credix pass newest version
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       const underwriter = tx.account.data.slice(9, 10)[0];
       const borrower = tx.account.data.slice(10, 11)[0];
       const releaseDateBuffer = tx.account.data.slice(11, 19);
-      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer); 
-      let releaseDate; 
+      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
+      let releaseDate;
 
       if (releaseDateUnix.toNumber() === 0) {
-        releaseDate = "no lockup"; 
+        releaseDate = "no lockup";
       } else {
-        releaseDate = new Date(releaseDateUnix.toNumber() * 1000); 
+        releaseDate = new Date(releaseDateUnix.toNumber() * 1000);
       }
 
       return (
         <ListItemText
-            primary={`Issue credix pass for ${credixPassPk}`}
-            secondary={`Is borrower: ${!!borrower}, Is underwriter ${!!underwriter}, Lockup release date: ${releaseDate}`}
-          />
+          primary={`Issue credix pass for ${credixPassPk}`}
+          secondary={`Is borrower: ${!!borrower}, Is underwriter ${!!underwriter}, Lockup release date: ${releaseDate}`}
+        />
       );
-    } else if (tx.account.accounts.length === 6 && tx.account.data.length === 18) { // create credix pass newest version
+    } else if (
+      tx.account.accounts.length === 6 &&
+      tx.account.data.length === 18
+    ) {
+      // create credix pass newest version
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       const underwriter = tx.account.data.slice(8, 9)[0];
       const borrower = tx.account.data.slice(9, 10)[0];
       const releaseDateBuffer = tx.account.data.slice(10, 18);
-      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer); 
-      let releaseDate; 
+      const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
+      let releaseDate;
 
       if (releaseDateUnix.toNumber() === 0) {
-        releaseDate = "no lockup"; 
+        releaseDate = "no lockup";
       } else {
-        releaseDate = new Date(releaseDateUnix.toNumber() * 1000); 
+        releaseDate = new Date(releaseDateUnix.toNumber() * 1000);
       }
 
       return (
         <ListItemText
-            primary={`Issue credix pass for ${credixPassPk}`}
-            secondary={`Is borrower: ${!!borrower}, Is underwriter ${!!underwriter}, Lockup release date: ${releaseDate}`}
-          />
+          primary={`Issue credix pass for ${credixPassPk}`}
+          secondary={`Is borrower: ${!!borrower}, Is underwriter ${!!underwriter}, Lockup release date: ${releaseDate}`}
+        />
       );
-    } else if (tx.account.data.length === 11) { // update credix pass newest version
+    } else if (tx.account.data.length === 11) {
+      // update credix pass newest version
       const credixPassPk = tx.account.accounts[1].pubkey.toString();
       return (
         <ListItemText
-            primary={`Issue / update credix pass for ${credixPassPk.slice(0,5)}...${credixPassPk.slice(-5,)}`}
-            secondary={tx.publicKey.toString()}
-          />
+          primary={`Issue / update credix pass for ${credixPassPk.slice(
+            0,
+            5
+          )}...${credixPassPk.slice(-5)}`}
+          secondary={tx.publicKey.toString()}
+        />
       );
-    } else if (tx.account.accounts.length === 8) { 
+    } else if (tx.account.accounts.length === 8) {
       return (
         <ListItemText
           primary={`Update LP token name`}
@@ -421,7 +447,7 @@ function NewMultisigButton() {
 }
 
 export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const [multisigAccount, setMultisigAccount] = useState<any>(undefined);
   const [transactions, setTransactions] = useState<any>(null);
   const [showSignerDialog, setShowSignerDialog] = useState(false);
@@ -430,8 +456,8 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
   );
   const [forceRefresh, setForceRefresh] = useState(false);
   useEffect(() => {
-    multisigClient.account
-      .multisig.fetch(multisig)
+    multisigClient.account.multisig
+      .fetch(multisig)
       .then((account: any) => {
         setMultisigAccount(account);
       })
@@ -441,13 +467,18 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
       });
   }, [multisig, multisigClient.account]);
   useEffect(() => {
-    multisigClient.account.transaction.all(multisig.toBuffer()).then((txs) => {
-      txs.sort((a, b) => (!a.account.didExecute && b.account.didExecute) ? -1 : 1)
-      var txsFiltered = txs.filter(function(tx){
-        return !NO_SHOW_LIST.includes(tx.publicKey.toString());
-      });
-      setTransactions(txsFiltered);
-    }).catch(err => console.log("error", err));
+    multisigClient.account.transaction
+      .all(multisig.toBuffer())
+      .then((txs) => {
+        txs.sort((a, b) =>
+          !a.account.didExecute && b.account.didExecute ? -1 : 1
+        );
+        var txsFiltered = txs.filter(function (tx) {
+          return !NO_SHOW_LIST.includes(tx.publicKey.toString());
+        });
+        setTransactions(txsFiltered);
+      })
+      .catch((err) => console.log("error", err));
   }, [multisigClient.account.transaction, multisig, forceRefresh]);
   useEffect(() => {
     multisigClient.account.multisig
@@ -527,14 +558,19 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
                   <ListItemText primary="No transactions found" />
                 </ListItem>
               ) : (
-                transactions.map((tx: any) => (
-                  <TxListItem
-                    key={tx.publicKey.toString()}
-                    multisig={multisig}
-                    multisigAccount={multisigAccount}
-                    tx={tx}
-                  />
-                ))
+                // eslint-disable-next-line array-callback-return
+                transactions.map((tx: any) => {
+                  if (!tx.account.didExecute) {
+                    return (
+                      <TxListItem
+                        key={tx.publicKey.toString()}
+                        multisig={multisig}
+                        multisigAccount={multisigAccount}
+                        tx={tx}
+                      />
+                    );
+                  }
+                })
               )}
             </List>
           </Paper>
@@ -567,7 +603,7 @@ export function NewMultisigDialog({
   onClose: () => void;
 }) {
   const history = useHistory();
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const { enqueueSnackbar } = useSnackbar();
   const [threshold, setThreshold] = useState(2);
   // @ts-ignore
@@ -644,7 +680,9 @@ export function NewMultisigDialog({
           label="Max Number of Participants (cannot grow the owner set past this)"
           value={maxParticipantLength}
           type="number"
-          onChange={(e) => setMaxParticipantLength(parseInt(e.target.value) as number)}
+          onChange={(e) =>
+            setMaxParticipantLength(parseInt(e.target.value) as number)
+          }
         />
         {participants.map((p, idx) => (
           <TextField
@@ -664,7 +702,9 @@ export function NewMultisigDialog({
             onClick={() => {
               const p = [...participants];
               // @ts-ignore
-              p.push(new PublicKey("11111111111111111111111111111111").toString());
+              p.push(
+                new PublicKey("11111111111111111111111111111111").toString()
+              );
               setParticipants(p);
             }}
           >
@@ -705,7 +745,7 @@ function TxListItem({
   tx: any;
 }) {
   const { enqueueSnackbar } = useSnackbar();
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const [open, setOpen] = useState(false);
   const [txAccount, setTxAccount] = useState(tx.account);
   useEffect(() => {
@@ -810,7 +850,11 @@ function TxListItem({
   };
   return (
     <>
-      <ListItem button onClick={() => setOpen(!open)} key={tx.publicKey.toString()}>
+      <ListItem
+        button
+        onClick={() => setOpen(!open)}
+        key={tx.publicKey.toString()}
+      >
         <ListItemIcon>{icon(tx, multisigClient)}</ListItemIcon>
         {ixLabel(tx, multisigClient)}
         {txAccount.didExecute && (
@@ -870,7 +914,9 @@ function TxListItem({
                   {rows.map((r) => (
                     <TableRow>
                       <TableCell key={r.field}>{r.field}</TableCell>
-                      <TableCell align="right" key={`${r.field}-value`}>{r.value}</TableCell>
+                      <TableCell align="right" key={`${r.field}-value`}>
+                        {r.value}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -953,7 +999,7 @@ function SignerDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const multisigClient = useMultisigProgram();
+  const [multisigClient, credixClient] = useMultisigProgram();
   const [signer, setSigner] = useState<null | string>(null);
   useEffect(() => {
     PublicKey.findProgramAddress(
@@ -1017,15 +1063,19 @@ function icon(tx, multisigClient) {
     }
   }
   if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
-    return <MoneyRounded />
+    return <MoneyRounded />;
   }
   if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
     return <DescriptionIcon />;
   }
-  return <img src="/credix.svg" alt="Credix Logo" style={{width: "20px", marginLeft: "3px"}}/>; 
+  return (
+    <img
+      src="/credix.svg"
+      alt="Credix Logo"
+      style={{ width: "20px", marginLeft: "3px" }}
+    />
+  );
 }
-
-
 
 // Deterministic IDL address as a function of the program id.
 async function idlAddress(programId: PublicKey): Promise<PublicKey> {
@@ -1040,30 +1090,24 @@ function seed(): string {
 
 export async function getOwnedTokenAccounts(
   connection: Connection,
-  publicKey: PublicKey,
+  publicKey: PublicKey
 ): Promise<TokenAccount[]> {
-  const accounts = await connection.getProgramAccounts(
-    TOKEN_PROGRAM_ID,
-    {
-      filters: [
-        {
-          memcmp: {
-            offset: 32,
-            bytes: publicKey.toBase58(),
-          }
+  const accounts = await connection.getProgramAccounts(TOKEN_PROGRAM_ID, {
+    filters: [
+      {
+        memcmp: {
+          offset: 32,
+          bytes: publicKey.toBase58(),
         },
-        {
-          dataSize: AccountLayout.span,
-        }
-      ]
-    }
-  );
-  return (
-    accounts
-      .map(r => {
-        const tokenAccount = parseTokenAccount(r.account.data);
-        tokenAccount.address = r.pubkey;
-        return tokenAccount;
-      })
-  );
+      },
+      {
+        dataSize: AccountLayout.span,
+      },
+    ],
+  });
+  return accounts.map((r) => {
+    const tokenAccount = parseTokenAccount(r.account.data);
+    tokenAccount.address = r.pubkey;
+    return tokenAccount;
+  });
 }

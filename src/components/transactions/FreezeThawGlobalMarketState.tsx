@@ -58,7 +58,7 @@ function FreezeThawGlobalMarketStateListItemDetails({
   }) {
     const [frozen, setFrozen] = useState<boolean>(false); 
     const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
 
 

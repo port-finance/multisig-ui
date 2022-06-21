@@ -44,7 +44,7 @@ interface Interface {
 const Context = React.createContext<Interface>(undefined!);
 
 export function AccountProvider({ children = null as any }) {
-  const multisigProgram = useMultisigProgram();
+  const [multisigProgram, credixClient] = useMultisigProgram();
 
   const [splAccounts, reloadSplAccounts, isReloadingSplAccounts] =
     useProgramSubscription<AccountInfo>(

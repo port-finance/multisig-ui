@@ -59,7 +59,7 @@ export function ActivateDealListItem({
     const [deals, setDeals] = useState<ProgramAccount<Deal>[]>(); 
     const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(SEEDS.GLOBAL_MARKET_STATE_PDA); 
     const [dealRows, setDealRows] = useState([<p>"no pending deals"</p>]);
-    const multisigClient = useMultisigProgram();
+    const [multisigClient, credixClient] = useMultisigProgram();
     const { enqueueSnackbar } = useSnackbar();
     
     const onBlurGlobalMarketSeed = async (e: React.ChangeEvent<HTMLInputElement>) => {
