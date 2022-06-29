@@ -77,6 +77,7 @@ import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
 import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal";
+import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
@@ -165,6 +166,11 @@ function AddTransactionDialog({
             onClose={onClose}
           />
           <TransferTokenListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <OpenDealListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}

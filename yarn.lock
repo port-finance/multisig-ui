@@ -1077,6 +1077,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.17.2":
+  version "7.18.6"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.18.6.tgz#6a1ef59f838debd670421f8c7f2cbb8da9751580"
+  integrity sha512-t9wi7/AW6XtKahAe20Yw0/mMljKq0B1r2fPdvaAdV/KPDZewFXdaaa6K7lxmZBZ8FBNpCiAT6iHPmd6QO9bKfQ==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/template@^7.10.4", "@babel/template@^7.12.13", "@babel/template@^7.3.3":
   version "7.12.13"
   resolved "https://registry.npmjs.org/@babel/template/-/template-7.12.13.tgz"
@@ -1147,19 +1154,18 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@credix/credix-client@^0.1.0-beta.4":
-  version "0.1.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-0.1.0-beta.4.tgz#4bceaeeac5ca1df93f4559d326468cddfc996320"
-  integrity sha512-Rq++cgrF5ngZfIajK4w+e5ObDbnJ48EK1r5/lDzktsBN7w/QPbSNGUHsxvqycB07s/VCB/IRyJWNakz1h02lQQ==
+"@credix/credix-client@0.7.1-beta.1":
+  version "0.7.1-beta.1"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-0.7.1-beta.1.tgz#44c3c43361a4e13dee207ad3388054fde3302ef4"
+  integrity sha512-GVENAfDWmLgp5CQuaWpTexEF+3DRo4aJ8vgkv0cRBgQxcGqAHAcYexOjXTOQrlsv+FVptcGFmSdSWIBdH3A32g==
   dependencies:
     "@identity.com/solana-gateway-ts" "^0.8.2"
-    "@project-serum/anchor" "0.22.1"
-    "@saberhq/anchor-contrib" "^1.12.55"
+    "@project-serum/anchor" "0.24.2"
+    "@saberhq/anchor-contrib" "^1.12.62"
     "@solana/spl-token" "^0.1.8"
-    "@solana/web3.js" "^1.36.0"
+    "@solana/web3.js" "^1.45.0"
     big.js "^6.1.1"
     bn.js "^5.2.0"
-    fraction.js "^4.2.0"
 
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
@@ -1682,13 +1688,13 @@
     schema-utils "^2.6.5"
     source-map "^0.7.3"
 
-"@project-serum/anchor@0.22.1":
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.22.1.tgz#698a9620f94691de0a12bbc650a5c8380e2f0e8a"
-  integrity sha512-5pHeyvQhzLahIQ8aZymmDMZJAJFklN0joZdI+YIqFkK2uU/mlKr6rBLQjxysf/j1mLLiNG00tdyLfUtTAdQz7w==
+"@project-serum/anchor@0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@project-serum/anchor/-/anchor-0.24.2.tgz#a3c52a99605c80735f446ca9b3a4885034731004"
+  integrity sha512-0/718g8/DnEuwAidUwh5wLYphUYXhUbiClkuRNhvNoa+1Y8a4g2tJyxoae+emV+PG/Gikd/QUBNMkIcimiIRTA==
   dependencies:
     "@project-serum/borsh" "^0.2.5"
-    "@solana/web3.js" "^1.17.0"
+    "@solana/web3.js" "^1.36.0"
     base64-js "^1.5.1"
     bn.js "^5.1.2"
     bs58 "^4.0.1"
@@ -1697,7 +1703,6 @@
     cross-fetch "^3.1.5"
     crypto-hash "^1.3.0"
     eventemitter3 "^4.0.7"
-    find "^0.3.0"
     js-sha256 "^0.9.0"
     pako "^2.0.3"
     snake-case "^3.0.4"
@@ -1812,21 +1817,21 @@
     lodash.mapvalues "^4.6.0"
     tslib "^2.3.1"
 
-"@saberhq/anchor-contrib@^1.12.55":
-  version "1.13.27"
-  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-1.13.27.tgz#b2381002b6c1057445752ed501d870742db41d92"
-  integrity sha512-mToSYahxz/PSo0uY3j35WJx7uUmYWWN+7PGkpmLHyeAQP8XqX2MNyB06zp/rNDIxSJXR+qJo5OErsU9LW29H7w==
+"@saberhq/anchor-contrib@^1.12.62":
+  version "1.13.30"
+  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-1.13.30.tgz#dde19c2bf051fc758999fc94a36229a214298e4c"
+  integrity sha512-DJlVEDImxvSStfGO6WxUfB7Y7ebUm8A2c8MJG+hsTiV5Xr7IgtsxIGSeNnStUWfDEA/73eHC/dPyBMV09I1uJQ==
   dependencies:
-    "@saberhq/solana-contrib" "^1.13.27"
+    "@saberhq/solana-contrib" "^1.13.30"
     eventemitter3 "^4.0.7"
     lodash.camelcase "^4.3.0"
     lodash.mapvalues "^4.6.0"
     tslib "^2.4.0"
 
-"@saberhq/option-utils@^1.13.27":
-  version "1.13.27"
-  resolved "https://registry.yarnpkg.com/@saberhq/option-utils/-/option-utils-1.13.27.tgz#38356796f0c404c4efb00ffcabda7aa46a82c369"
-  integrity sha512-dmrMmKb17TrTCRaY4guwoSPinFhv5tcMRkxTsSGUQQRaTsNH5R1+6KQXgQTcxFwPr2ro6ZXAyvH1WI6QjPn26Q==
+"@saberhq/option-utils@^1.13.30":
+  version "1.13.30"
+  resolved "https://registry.yarnpkg.com/@saberhq/option-utils/-/option-utils-1.13.30.tgz#96d76dc87fc137bc7ae84cf515fbd758df88734d"
+  integrity sha512-/YtbfR1pUqHD9umByNdM5Qf5u2p2TcAa4RKpq2dnBhf56bk/N1e2n2h0UJ+cZXKH6WAqTaN/cuoh13QTtE1Y5w==
   dependencies:
     tslib "^2.4.0"
 
@@ -1843,12 +1848,12 @@
     tiny-invariant "^1.2.0"
     tslib "^2.3.1"
 
-"@saberhq/solana-contrib@^1.13.27":
-  version "1.13.27"
-  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.13.27.tgz#75fc66403d9d69a784f0ad475b3920f5cbb5db9c"
-  integrity sha512-tbK8AE1Rv71j9Ae5uqeUoVa3p+VuQCJZzm3DN1yzfXccpClnUiOP8iBIASeDmFiI8dkp5wwnWTO0qBpEt42FYg==
+"@saberhq/solana-contrib@^1.13.30":
+  version "1.13.30"
+  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.13.30.tgz#3b35ab351f33522bcae0ae3b3e231fec07dbfd35"
+  integrity sha512-4itF/Dw8O3AP/51vDoxExEF8WD7xcnXGKGWo6D3ITQlrLPZd3PboZHQVuhByoz0VB2j9hZeP3sLCtN9vh9Nd7w==
   dependencies:
-    "@saberhq/option-utils" "^1.13.27"
+    "@saberhq/option-utils" "^1.13.30"
     "@solana/buffer-layout" "^4.0.0"
     "@types/promise-retry" "^1.1.3"
     "@types/retry" "^0.12.2"
@@ -2117,6 +2122,28 @@
     js-sha3 "^0.8.0"
     node-fetch "2"
     rpc-websockets "^7.4.2"
+    secp256k1 "^4.0.2"
+    superstruct "^0.14.2"
+    tweetnacl "^1.0.0"
+
+"@solana/web3.js@^1.45.0":
+  version "1.45.0"
+  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.45.0.tgz#30a4a3014f8add3ac90b647d50ee1d02386b72b8"
+  integrity sha512-76NbpGLr0oOq8e5pULOjxwG0vZrSONkiC0rKBZM4Mu7qPvFD58Jp2GeXNGQcplmfHI+Zs2T4LPOVCdlrwRkA+g==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    "@ethersproject/sha2" "^5.5.0"
+    "@solana/buffer-layout" "^4.0.0"
+    bigint-buffer "^1.1.5"
+    bn.js "^5.0.0"
+    borsh "^0.7.0"
+    bs58 "^4.0.1"
+    buffer "6.0.1"
+    fast-stable-stringify "^1.0.0"
+    jayson "^3.4.4"
+    js-sha3 "^0.8.0"
+    node-fetch "2"
+    rpc-websockets "^7.5.0"
     secp256k1 "^4.0.2"
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
@@ -6306,11 +6333,6 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.npmjs.org/forwarded/-/forwarded-0.1.2.tgz"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
-
-fraction.js@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.2.0.tgz#448e5109a313a3527f5a3ab2119ec4cf0e0e2950"
-  integrity sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -11358,6 +11380,19 @@ rpc-websockets@^7.4.2:
     bufferutil "^4.0.1"
     utf-8-validate "^5.0.2"
 
+rpc-websockets@^7.5.0:
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-7.5.0.tgz#bbeb87572e66703ff151e50af1658f98098e2748"
+  integrity sha512-9tIRi1uZGy7YmDjErf1Ax3wtqdSSLIlnmL5OtOzgd5eqPKbsPpwDP5whUDO2LQay3Xp0CcHlcNSGzacNRluBaQ==
+  dependencies:
+    "@babel/runtime" "^7.17.2"
+    eventemitter3 "^4.0.7"
+    uuid "^8.3.2"
+    ws "^8.5.0"
+  optionalDependencies:
+    bufferutil "^4.0.1"
+    utf-8-validate "^5.0.2"
+
 rsvp@^4.8.4:
   version "4.8.5"
   resolved "https://registry.npmjs.org/rsvp/-/rsvp-4.8.5.tgz"
@@ -12892,7 +12927,7 @@ uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.4.0.tgz"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.3.0:
+uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
@@ -13409,6 +13444,11 @@ ws@^7.0.0, ws@^7.2.3, ws@^7.4.0, ws@^7.4.5:
   version "7.5.5"
   resolved "https://registry.npmjs.org/ws/-/ws-7.5.5.tgz"
   integrity sha512-BAkMFcAzl8as1G/hArkxOxq3G7pjUqQ3gzYbLL0/5zNkph70e+lCoxBGnm6AW1+/aiNeV4fnKqZ8m4GZewmH2w==
+
+ws@^8.5.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.8.0.tgz#8e71c75e2f6348dbf8d78005107297056cb77769"
+  integrity sha512-JDAgSYQ1ksuwqfChJusw1LSJ8BizJ2e/vVu5Lxjq3YvNJNlROv1ui4i+c/kUUrPheBvQl4c5UbERhTwKa6QBJQ==
 
 xml-name-validator@^3.0.0:
   version "3.0.0"

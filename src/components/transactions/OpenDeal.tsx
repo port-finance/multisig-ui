@@ -3,7 +3,6 @@ import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { ProgramAccount } from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { useState, useEffect, useCallback } from "react";
-import { findPendingDealsForMarket, activateDeal } from "../../credix/api";
 import { config } from "../../credix/config";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
@@ -17,7 +16,7 @@ import {
 import { SEEDS, TX_SIZE } from "../../credix/consts";
 import { Market, Deal } from "@credix/credix-client";
 
-export function ActivateDealListItem({
+export function OpenDealListItem({
     multisig,
     onClose,
     didAddTransaction,
@@ -33,11 +32,11 @@ export function ActivateDealListItem({
           <ListItemIcon>
             <img src="/credix.svg" alt="Credix Logo" style={{width: "20px", marginLeft: "3px"}}/>
           </ListItemIcon>
-          <ListItemText primary={"Activate Deal"} />
+          <ListItemText primary={"Open Deal"} />
           {open ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
         <Collapse in={open} timeout="auto" unmountOnExit>
-          <ActivateDealListItemDetails
+          <OpenDealListItemDetails
             didAddTransaction={didAddTransaction}
             multisig={multisig}
             onClose={onClose}
@@ -47,7 +46,7 @@ export function ActivateDealListItem({
     );
   }
   
-  function ActivateDealListItemDetails({
+  function OpenDealListItemDetails({
     multisig,
     onClose,
     didAddTransaction,
@@ -72,7 +71,7 @@ export function ActivateDealListItem({
       const marketDeals: Deal[] = [];
       if (deals) {
         deals.forEach(async (deal: Deal) => {
-          const pending = await deal.isOpenForFunding();
+          const pending = await deal.isPending();
           if (pending) {
             marketDeals.push(deal);
           }
@@ -83,7 +82,7 @@ export function ActivateDealListItem({
       }
     };  
   
-    const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
+    const createTransactionAccount = async (deal: Deal, dealPk: PublicKey, borrowerPk: PublicKey) => {
       enqueueSnackbar("Creating transaction", {
         variant: "info",
       });
@@ -92,12 +91,15 @@ export function ActivateDealListItem({
         [multisig.toBuffer()],
         multisigClient.programId
       );
-      const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
+      
+      const openDealIx = await deal.openForFundingIx(multisigSigner); 
+      console.log(openDealIx); 
+      // const openDealIx = await openDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,
-        activateIx.keys,
-        Buffer.from(activateIx.data),
+        openDealIx.keys,
+        Buffer.from(openDealIx.data),
         {
           accounts: {
             multisig,
@@ -141,8 +143,8 @@ export function ActivateDealListItem({
               <p style={{width: "500px"}}>{deal.borrower.toString()}</p> 
               <p style={{width: "200px"}}>{deal.name}</p> 
               {/* <p style={{width: "200px"}}> {deal.principal.toNumber()/1000000} USDC</p> */}
-              <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.address, deal.borrower)}>
-                Activate
+              <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal, deal.address, deal.borrower)}>
+                Open
               </Button>
             </div>
         );

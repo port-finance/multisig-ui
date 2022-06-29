@@ -1,22 +1,16 @@
 import { useLocalStorageState } from "../utils/utils";
-import {
-  Keypair,
-  clusterApiUrl,
-  Connection,
-} from "@solana/web3.js";
+import { Keypair, clusterApiUrl, Connection } from "@solana/web3.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { setProgramIds } from "../utils/ids";
 import { ENV as ChainID } from "@solana/spl-token-registry";
 
-export type ENV =
-  | "mainnet-beta"
-  | "localnet"
-  | "devnet";
+export type ENV = "mainnet-beta" | "localnet" | "devnet";
 
 export const ENDPOINTS = [
   {
     name: "mainnet-beta" as ENV,
-    endpoint: "https://solana-api.syndica.io/access-token/P2ifE23KuXCG6Ans1VjyP7sTUBBtkSbeMxNJhfvXDkAEwR83fJEGV8qbInO2uqPY/rpc",
+    endpoint:
+      "https://solana-api.syndica.io/access-token/P2ifE23KuXCG6Ans1VjyP7sTUBBtkSbeMxNJhfvXDkAEwR83fJEGV8qbInO2uqPY/rpc",
     chainID: ChainID.MainnetBeta,
   },
   {
@@ -129,4 +123,3 @@ export function useConnectionConfig() {
     env: context.env,
   };
 }
-
