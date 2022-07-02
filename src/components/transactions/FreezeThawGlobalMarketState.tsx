@@ -107,12 +107,10 @@ function FreezeThawGlobalMarketStateListItemDetails({
       [multisig.toBuffer()],
       multisigClient.programId
     );
-    console.log(multisigSigner);
-    let activateIx = await market?.freezeIx(multisigSigner);
+    let activateIx = await market?.thawIx(multisigSigner);
     if (frozen) {
-      activateIx = await market?.thawIx(multisigSigner);
+      activateIx = await market?.freezeIx(multisigSigner);
     }
-    console.log("actiave ix", activateIx);
     const transaction = new Account();
     // @ts-ignore
     const tx = await multisigClient.rpc.createTransaction(

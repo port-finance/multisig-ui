@@ -82,6 +82,7 @@ import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
+import { TranchePassListItem } from "./transactions/TranchePass";
 import { NameTokenListItem } from "./transactions/NameToken";
 
 const NO_SHOW_LIST = [
@@ -117,6 +118,10 @@ const NO_SHOW_LIST = [
   "HcJcGK6zdV4EnNCHwEmpUMFGvDJYL3dRaVHCtiRFJ8z3",
   "9Y1Xo76H1oeEhokpDGR7d5iVgioq48ktHFEXP6Pjk2Lm",
   "GpDmfRGGF7Wz1EZ2rMU3Grn7NkVwspLMg3p7RHFtKk1S",
+  "EQ73zgjJPJU71qjzofCDJ6zexntvDttFBxwG9jbFunTh",
+  "AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
+  "5fuFHNcQebNdsEQhaMwgZs7tpcdSy8LA2LFuDKG1bNAH",
+  "DeEHzBxtQyDVK2vZyB3euvgL6cnYU6cfsPHTgdm7euXz"
 ];
 
 // NEW TRANSACTION
@@ -170,6 +175,11 @@ function AddTransactionDialog({
             multisig={multisig}
             onClose={onClose}
           />
+          <TranchePassListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
           <OpenDealListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
@@ -208,6 +218,9 @@ function AddTransactionDialog({
 
 // LABELS FOR TRANSACTIONS
 function ixLabel(tx: any, multisigClient: any) {
+  console.log(tx);
+  console.log(tx.account.accounts.length);
+  console.log(tx.account.data.length);
   if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
     // Upgrade instruction.
     if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
@@ -389,6 +402,12 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
+    } else if (tx.account.accounts.length === 4) { 
+      const dealPk = tx.account.accounts[2].pubkey.toString();
+      return (<ListItemText
+        primary={`Opening deal ${dealPk}`}
+        secondary={tx.publicKey.toString()}
+      />); 
     } else {
       const borrowerPk = tx.account.accounts[6].pubkey.toString();
       return (

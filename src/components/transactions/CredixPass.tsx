@@ -196,18 +196,11 @@ function CredixPassListItemDetails({
         releaseTimestamp: releaseTimestamp.toNumber(),
       };
 
-      console.log("market", market); 
-      console.log("holderPublicKey", holderPublicKey); 
-      console.log("multisigSigner", multisigSigner); 
-      console.log("credixPassConfig", credixPassConfig); 
-
       let credixPassIx = await market.updateCredixPassIx(
         holderPublicKey,
         credixPassConfig,
         multisigSigner
       );
-
-      console.log(credixPassIx);
 
       if (!credixPass) {
         credixPassIx = await market.issueCredixPassIx(
@@ -216,7 +209,6 @@ function CredixPassListItemDetails({
           multisigSigner
         );
       }
-      console.log("credixpass ix", credixPassIx);
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,

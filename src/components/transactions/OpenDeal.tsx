@@ -14,7 +14,7 @@ import {
     SYSVAR_CLOCK_PUBKEY,
   } from "@solana/web3.js";
 import { SEEDS, TX_SIZE } from "../../credix/consts";
-import { Market, Deal } from "@credix/credix-client";
+import { Market, Deal, DealStatus } from "@credix/credix-client";
 
 export function OpenDealListItem({
     multisig,
@@ -71,8 +71,9 @@ export function OpenDealListItem({
       const marketDeals: Deal[] = [];
       if (deals) {
         deals.forEach(async (deal: Deal) => {
-          const pending = await deal.isPending();
-          if (pending) {
+          const dealStatus = await deal.status(); 
+          // const pending = await deal.isPending();
+          if (dealStatus === DealStatus.PENDING) {
             marketDeals.push(deal);
           }
         })
@@ -93,7 +94,6 @@ export function OpenDealListItem({
       );
       
       const openDealIx = await deal.openForFundingIx(multisigSigner); 
-      console.log(openDealIx); 
       // const openDealIx = await openDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
@@ -127,7 +127,6 @@ export function OpenDealListItem({
 
     const constructDealRows = () => {
       if (deals) {
-        console.log(deals);
         let dealRowsNew = deals.map((deal) =>
             <div key={deal.borrower.toString()}
               style={{
