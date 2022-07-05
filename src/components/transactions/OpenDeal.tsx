@@ -72,8 +72,9 @@ export function OpenDealListItem({
       if (deals) {
         deals.forEach(async (deal: Deal) => {
           const dealStatus = await deal.status(); 
+          const createdAt = await deal.createdAt; 
           // const pending = await deal.isPending();
-          if (dealStatus === DealStatus.PENDING) {
+          if (dealStatus === DealStatus.PENDING && createdAt > 1654224815) {
             marketDeals.push(deal);
           }
         })

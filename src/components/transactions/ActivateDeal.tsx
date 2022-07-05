@@ -3,7 +3,6 @@ import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
 import { ProgramAccount } from "@project-serum/anchor";
 import { useSnackbar } from "notistack";
 import { useState, useEffect, useCallback } from "react";
-import { findPendingDealsForMarket, activateDeal } from "../../credix/api";
 import { config } from "../../credix/config";
 import { useMultisigProgram } from "../../hooks/useMultisigProgram";
 import { ViewTransactionOnExplorerButton } from "../Notification";
@@ -72,9 +71,10 @@ export function ActivateDealListItem({
       const marketDeals: Deal[] = [];
       if (deals) {
         deals.forEach(async (deal: Deal) => {
-          const dealStatus = await deal.status(); 
+          const dealStatus = await deal.status();
+          const createdAt = await deal.createdAt; 
           // const pending = await deal.isPending();
-          if (dealStatus === DealStatus.PENDING) {
+          if (dealStatus === DealStatus.OPEN_FOR_FUNDING && createdAt > 1654224815) {
             marketDeals.push(deal);
           }
         })
@@ -84,7 +84,7 @@ export function ActivateDealListItem({
       }
     };  
   
-    const createTransactionAccount = async (dealPk: PublicKey, borrowerPk: PublicKey) => {
+    const createTransactionAccount = async (deal: Deal) => {
       enqueueSnackbar("Creating transaction", {
         variant: "info",
       });
@@ -93,7 +93,8 @@ export function ActivateDealListItem({
         [multisig.toBuffer()],
         multisigClient.programId
       );
-      const activateIx = await activateDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed); 
+      const activateIx = await deal.activateIx(multisigSigner);
+      console.log(activateIx);
       const transaction = new Account();
       const tx = await multisigClient.rpc.createTransaction(
         config.clusterConfig.programId,
@@ -111,7 +112,7 @@ export function ActivateDealListItem({
             await multisigClient.account.transaction.createInstruction(
               transaction,
               // @ts-ignore
-              TX_SIZE + 500
+              TX_SIZE + 1000
             ),
           ],
         }
@@ -126,7 +127,6 @@ export function ActivateDealListItem({
 
     const constructDealRows = () => {
       if (deals) {
-        console.log(deals);
         let dealRowsNew = deals.map((deal) =>
             <div key={deal.borrower.toString()}
               style={{
@@ -142,7 +142,7 @@ export function ActivateDealListItem({
               <p style={{width: "500px"}}>{deal.borrower.toString()}</p> 
               <p style={{width: "200px"}}>{deal.name}</p> 
               {/* <p style={{width: "200px"}}> {deal.principal.toNumber()/1000000} USDC</p> */}
-              <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal.address, deal.borrower)}>
+              <Button style={{width: "100px"}} onClick={() => createTransactionAccount(deal)}>
                 Activate
               </Button>
             </div>

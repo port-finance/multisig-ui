@@ -121,7 +121,8 @@ const NO_SHOW_LIST = [
   "EQ73zgjJPJU71qjzofCDJ6zexntvDttFBxwG9jbFunTh",
   "AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
   "5fuFHNcQebNdsEQhaMwgZs7tpcdSy8LA2LFuDKG1bNAH",
-  "DeEHzBxtQyDVK2vZyB3euvgL6cnYU6cfsPHTgdm7euXz"
+  "DeEHzBxtQyDVK2vZyB3euvgL6cnYU6cfsPHTgdm7euXz",
+  "Dc2DrnKfAcnnTwf9bJYGi8ot6qsr5BwPXLH6GNNy93cP"
 ];
 
 // NEW TRANSACTION
@@ -395,7 +396,15 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
-    } else if (tx.account.accounts.length === 8) {
+    } else if (tx.account.accounts.length === 8 && tx.account.data.length === 9) {
+      const investorPk = tx.account.accounts[1].pubkey.toString();
+      return (
+        <ListItemText
+          primary={`Issue Tranche pass for ${investorPk}`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    }  else if (tx.account.accounts.length === 8) {
       return (
         <ListItemText
           primary={`Update LP token name`}

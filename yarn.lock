@@ -1154,10 +1154,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@credix/credix-client@0.7.3-beta.1":
-  version "0.7.3-beta.1"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-0.7.3-beta.1.tgz#d9bf09670ef78239f3b15923a2b4baa4c670c2ac"
-  integrity sha512-KoL1TdJem30bIr1AzfiA0UZimenzgTExKJRZ/T8oZlypP5MYZK6S8O5FwwCBTMEZqafYAXmF/hM60rdrLthZVA==
+"@credix/credix-client@0.7.4-beta.0":
+  version "0.7.4-beta.0"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-0.7.4-beta.0.tgz#1b01887dce1933482ac0685d2a82eec437172530"
+  integrity sha512-vmpz17yJgD1cdda41XMkAcwO5de2iil1uiaLWMyH39+GMQF+nYC+GvsNlM4DRq8Z2t8FIx8OG/+w5yaQfUeLPw==
   dependencies:
     "@identity.com/solana-gateway-ts" "^0.8.2"
     "@project-serum/anchor" "0.24.2"
