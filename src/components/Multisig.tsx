@@ -122,7 +122,13 @@ const NO_SHOW_LIST = [
   "AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
   "5fuFHNcQebNdsEQhaMwgZs7tpcdSy8LA2LFuDKG1bNAH",
   "DeEHzBxtQyDVK2vZyB3euvgL6cnYU6cfsPHTgdm7euXz",
-  "Dc2DrnKfAcnnTwf9bJYGi8ot6qsr5BwPXLH6GNNy93cP"
+  "Dc2DrnKfAcnnTwf9bJYGi8ot6qsr5BwPXLH6GNNy93cP",
+  "8R4svSBvqEQV4twfiCZeZVbfdjUGgTmMT1GpHhWMBrA6",
+  "2Z6TsJVg7YhS3RtYUjzxUXab6cYLgaQsEvhWnusJcUnK",
+  "9YkX6vfZKg9vD4E7P46UMzkeqYtsXiTm2WLfrZS4tA8L",
+  "Ap3sqH2ka1XgxS11PbrjTaVLwSQVbQj8QdwbE96mREyR",
+  "J9QvJTf8y9Vm4Q69zSBqzXLjTvdc8zgbqBmrC3TJwdJW",
+  "2Mbj3epHTv6Q2NHESqU4pCv8KjMRynhQtNULsEBjPWeY",
 ];
 
 // NEW TRANSACTION
@@ -396,7 +402,10 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
-    } else if (tx.account.accounts.length === 8 && tx.account.data.length === 9) {
+    } else if (
+      tx.account.accounts.length === 8 &&
+      tx.account.data.length === 9
+    ) {
       const investorPk = tx.account.accounts[1].pubkey.toString();
       return (
         <ListItemText
@@ -404,19 +413,21 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
-    }  else if (tx.account.accounts.length === 8) {
+    } else if (tx.account.accounts.length === 8) {
       return (
         <ListItemText
           primary={`Update LP token name`}
           secondary={tx.publicKey.toString()}
         />
       );
-    } else if (tx.account.accounts.length === 4) { 
+    } else if (tx.account.accounts.length === 4) {
       const dealPk = tx.account.accounts[2].pubkey.toString();
-      return (<ListItemText
-        primary={`Opening deal ${dealPk}`}
-        secondary={tx.publicKey.toString()}
-      />); 
+      return (
+        <ListItemText
+          primary={`Opening deal ${dealPk}`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
     } else {
       const borrowerPk = tx.account.accounts[6].pubkey.toString();
       return (
