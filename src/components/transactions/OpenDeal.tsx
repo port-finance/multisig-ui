@@ -23,7 +23,7 @@ import {
 import { SEEDS, TX_SIZE } from "../../credix/consts";
 import { Market, Deal, DealStatus } from "@credix/credix-client";
 
-export function ActivateDealListItem({
+export function OpenDealListItem({
   multisig,
   onClose,
   didAddTransaction,
@@ -43,11 +43,11 @@ export function ActivateDealListItem({
             style={{ width: "20px", marginLeft: "3px" }}
           />
         </ListItemIcon>
-        <ListItemText primary={"Activate Deal"} />
+        <ListItemText primary={"Open Deal"} />
         {open ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
-        <ActivateDealListItemDetails
+        <OpenDealListItemDetails
           didAddTransaction={didAddTransaction}
           multisig={multisig}
           onClose={onClose}
@@ -57,7 +57,7 @@ export function ActivateDealListItem({
   );
 }
 
-function ActivateDealListItemDetails({
+function OpenDealListItemDetails({
   multisig,
   onClose,
   didAddTransaction,
@@ -91,10 +91,7 @@ function ActivateDealListItemDetails({
         const dealStatus = await deal.status();
         const createdAt = await deal.createdAt;
         // const pending = await deal.isPending();
-        if (
-          dealStatus === DealStatus.OPEN_FOR_FUNDING &&
-          createdAt > 1654224815
-        ) {
+        if (dealStatus === DealStatus.PENDING && createdAt > 1654224815) {
           marketDeals.push(deal);
         }
       });
@@ -104,7 +101,11 @@ function ActivateDealListItemDetails({
     }
   };
 
-  const createTransactionAccount = async (deal: Deal) => {
+  const createTransactionAccount = async (
+    deal: Deal,
+    dealPk: PublicKey,
+    borrowerPk: PublicKey
+  ) => {
     enqueueSnackbar("Creating transaction", {
       variant: "info",
     });
@@ -113,13 +114,14 @@ function ActivateDealListItemDetails({
       [multisig.toBuffer()],
       multisigClient.programId
     );
-    const activateIx = await deal.activateIx(multisigSigner);
-    console.log(activateIx);
+
+    const openDealIx = await deal.openForFundingIx(multisigSigner);
+    // const openDealIx = await openDeal(dealPk, borrowerPk, multisigSigner, multisigClient.provider, globalMarketSeed);
     const transaction = new Account();
     const tx = await multisigClient.rpc.createTransaction(
       config.clusterConfig.programId,
-      activateIx.keys,
-      Buffer.from(activateIx.data),
+      openDealIx.keys,
+      Buffer.from(openDealIx.data),
       {
         accounts: {
           multisig,
@@ -132,7 +134,7 @@ function ActivateDealListItemDetails({
           await multisigClient.account.transaction.createInstruction(
             transaction,
             // @ts-ignore
-            TX_SIZE + 1000
+            TX_SIZE + 500
           ),
         ],
       }
@@ -165,9 +167,11 @@ function ActivateDealListItemDetails({
           {/* <p style={{width: "200px"}}> {deal.principal.toNumber()/1000000} USDC</p> */}
           <Button
             style={{ width: "100px" }}
-            onClick={() => createTransactionAccount(deal)}
+            onClick={() =>
+              createTransactionAccount(deal, deal.address, deal.borrower)
+            }
           >
-            Activate
+            Open
           </Button>
         </div>
       ));

@@ -49,7 +49,7 @@ const getGlobalMarketStateAccountData = multiAsync(
 
 export const getDealAccountData = multiAsync((provider, dealPk) => {
 	const program = constructProgram(provider);
-	return program.account.deal.fetch(dealPk);;
+	return program.account.deal.fetch(dealPk);
 });
 
 
@@ -78,8 +78,8 @@ const mapDealsToMarket = multiAsync(async (deals, globalMarketSeed, setDeals) =>
 	const marketDeals: ProgramAccount<Deal>[] = [];
 	(deals as Array<ProgramAccount<Deal>>).forEach(async (deal) => {
 		const expectedDealPda = await findDealPDA(deal.account.borrower, deal.account.dealNumber, globalMarketSeed);
-		console.log(deal.publicKey.toString());
-		console.log(expectedDealPda[0].toString()); 
+		// console.log(deal.publicKey.toString());
+		// console.log(expectedDealPda[0].toString()); 
 		if (deal.publicKey.toString() === expectedDealPda[0].toString()) {
 			marketDeals.push(deal);
 		}

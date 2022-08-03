@@ -77,10 +77,12 @@ import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
 import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal";
+import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
+import { TranchePassListItem } from "./transactions/TranchePass";
 import { NameTokenListItem } from "./transactions/NameToken";
 
 const NO_SHOW_LIST = [
@@ -116,6 +118,17 @@ const NO_SHOW_LIST = [
   "HcJcGK6zdV4EnNCHwEmpUMFGvDJYL3dRaVHCtiRFJ8z3",
   "9Y1Xo76H1oeEhokpDGR7d5iVgioq48ktHFEXP6Pjk2Lm",
   "GpDmfRGGF7Wz1EZ2rMU3Grn7NkVwspLMg3p7RHFtKk1S",
+  "EQ73zgjJPJU71qjzofCDJ6zexntvDttFBxwG9jbFunTh",
+  "AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
+  "5fuFHNcQebNdsEQhaMwgZs7tpcdSy8LA2LFuDKG1bNAH",
+  "DeEHzBxtQyDVK2vZyB3euvgL6cnYU6cfsPHTgdm7euXz",
+  "Dc2DrnKfAcnnTwf9bJYGi8ot6qsr5BwPXLH6GNNy93cP",
+  "8R4svSBvqEQV4twfiCZeZVbfdjUGgTmMT1GpHhWMBrA6",
+  "2Z6TsJVg7YhS3RtYUjzxUXab6cYLgaQsEvhWnusJcUnK",
+  "9YkX6vfZKg9vD4E7P46UMzkeqYtsXiTm2WLfrZS4tA8L",
+  "Ap3sqH2ka1XgxS11PbrjTaVLwSQVbQj8QdwbE96mREyR",
+  "J9QvJTf8y9Vm4Q69zSBqzXLjTvdc8zgbqBmrC3TJwdJW",
+  "2Mbj3epHTv6Q2NHESqU4pCv8KjMRynhQtNULsEBjPWeY",
 ];
 
 // NEW TRANSACTION
@@ -169,6 +182,16 @@ function AddTransactionDialog({
             multisig={multisig}
             onClose={onClose}
           />
+          <TranchePassListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
+          <OpenDealListItem
+            didAddTransaction={didAddTransaction}
+            multisig={multisig}
+            onClose={onClose}
+          />
           <ActivateDealListItem
             didAddTransaction={didAddTransaction}
             multisig={multisig}
@@ -202,6 +225,9 @@ function AddTransactionDialog({
 
 // LABELS FOR TRANSACTIONS
 function ixLabel(tx: any, multisigClient: any) {
+  console.log(tx);
+  console.log(tx.account.accounts.length);
+  console.log(tx.account.data.length);
   if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
     // Upgrade instruction.
     if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
@@ -376,10 +402,29 @@ function ixLabel(tx: any, multisigClient: any) {
           secondary={tx.publicKey.toString()}
         />
       );
+    } else if (
+      tx.account.accounts.length === 8 &&
+      tx.account.data.length === 9
+    ) {
+      const investorPk = tx.account.accounts[1].pubkey.toString();
+      return (
+        <ListItemText
+          primary={`Issue Tranche pass for ${investorPk}`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
     } else if (tx.account.accounts.length === 8) {
       return (
         <ListItemText
           primary={`Update LP token name`}
+          secondary={tx.publicKey.toString()}
+        />
+      );
+    } else if (tx.account.accounts.length === 4) {
+      const dealPk = tx.account.accounts[2].pubkey.toString();
+      return (
+        <ListItemText
+          primary={`Opening deal ${dealPk}`}
           secondary={tx.publicKey.toString()}
         />
       );
