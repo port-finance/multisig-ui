@@ -183,7 +183,7 @@ function TranchePassListItemDetails({
     if (tranches) {
       tranches.forEach((trnchs, idx) => {
         trnchs.tranches.forEach((tranche, index) => {
-          if (index !== 1) {
+          if (tranche.index !== 1) {
             let name = "";
             if (tranche.index === 0) {
               name = "super senior";
