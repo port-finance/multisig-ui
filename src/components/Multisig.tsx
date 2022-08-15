@@ -429,7 +429,7 @@ function ixLabel(tx: any, multisigClient: any) {
         />
       );
     } else {
-      const borrowerPk = tx.account.accounts[6].pubkey.toString();
+      const borrowerPk = tx.account.accounts[9].pubkey.toString();
       return (
         <ListItemText
           primary={`Activate deal for borrower ${borrowerPk}`}
