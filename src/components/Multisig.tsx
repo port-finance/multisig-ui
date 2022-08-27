@@ -343,7 +343,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={`Update credix pass for ${credixPassPk}`}
-					secondary={`Is active: ${!!active}, Is borrower: ${!!borrower}, Is underwriter: ${!!underwriter}, Lockup release date: ${releaseDate}`}
+					secondary={`Is active: ${!!active}, Is borrower: ${!!borrower}, Is LP: ${!!underwriter}, Lockup release date: ${releaseDate}`}
 				/>
 			);
 		} else if (
