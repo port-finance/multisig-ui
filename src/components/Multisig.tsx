@@ -81,9 +81,11 @@ import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { InitializeMarketListItem } from "./transactions/InitializeMarket";
+import { UpdateMarketListItem } from "./transactions/UpdateMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
 import { NameTokenListItem } from "./transactions/NameToken";
+import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 
 const NO_SHOW_LIST = [
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
@@ -91,6 +93,7 @@ const NO_SHOW_LIST = [
 	"AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv",
 	"AczcRjjZ47negBzU4TVkQQRe4PYMCVsmo5C3Tt6dzXRs",
 	"56bNvH6Ckvqops5gbgM1rBaVi8nSk4aiykmXgrjNfCRn",
+	"4gAmLrY61STRGrPL2eLmyXz2eE3x9XZSJPkbUBF3LDwB",
 	"387KmRLPVDUf7TQSbiEaQB8Jy36HgH7LMsbyj67LHXWu",
 	"BC8ZyiUT7nVSGQnBcujCEHyaJrjkmFA7SBSbfjL3qnsV",
 	"9YkX6vfZKg9vD4E7P46UMzkeqYtsXiTm2WLfrZS4tA8L",
@@ -132,8 +135,10 @@ const NO_SHOW_LIST = [
 	"7u3n13SDjBgz5Q6tmKRZzXnWCUmZJpva4Db1PUFXU9BE",
 	"FP3hjhVmkk2b5adR6hYQ4HUjXaB659Gb6fTMzeCVZoiS",
 	"8J5ChExD4pM6fPbMFk2bBKDQfkPLXXTeKSgeNkpfuEsR",
-	"EigpveeSn5jVPL78m4x7M83er3Czz5Gw2aeJ5XtSgPgr",
-	"35GhRoQNbtB8h5zAWWFNo4vvqpAqfYhwGMGyDQahg8pJ",
+	"BGkL2E8h9m1W6Ea7ekjqC7QZd7ewGkuQH14aTdnAPd61",
+	"4Erf8j8fzEqbRwpfmsPu4EmrzSSusBTpURiKbNkrATp4",
+	"DP4VKAYv5LSK7Cry4MRaUig9KPvrAkTcAUwK759P6Zxt",
+	"CUPTwXBcUQZUqw5mw9B6GJ2GmuU2Yjww5Wrw4NpDgQ4k",
 ];
 
 // NEW TRANSACTION
@@ -217,6 +222,16 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
+					<MarketAdminsListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
+					<UpdateMarketListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
 					<NameTokenListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -231,8 +246,8 @@ function AddTransactionDialog({
 // LABELS FOR TRANSACTIONS
 function ixLabel(tx: any, multisigClient: any) {
 	console.log(tx);
-	console.log(tx.account.accounts.length);
-	console.log(tx.account.data.length);
+	console.log("account length", tx.account.accounts.length);
+	console.log("data length", tx.account.data.length);
 	if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
 		// Upgrade instruction.
 		if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
@@ -308,7 +323,7 @@ function ixLabel(tx: any, multisigClient: any) {
 		);
 	}
 	if (tx.account.programId.equals(config.clusterConfig.programId)) {
-		if (tx.account.accounts.length === 2) {
+		if (tx.account.accounts.length === 4 && tx.account.data.length === 8) {
 			return (
 				<ListItemText
 					primary={"Freeze / Thaw market"}
@@ -323,7 +338,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			//     />
 			//   );
 		} else if (
-			tx.account.accounts.length === 4 &&
+			tx.account.accounts.length === 6 &&
 			tx.account.data.length === 19
 		) {
 			// update credix pass newest version
@@ -372,7 +387,7 @@ function ixLabel(tx: any, multisigClient: any) {
 				/>
 			);
 		} else if (
-			tx.account.accounts.length === 6 &&
+			tx.account.accounts.length === 8 &&
 			tx.account.data.length === 18
 		) {
 			// create credix pass newest version
@@ -408,7 +423,7 @@ function ixLabel(tx: any, multisigClient: any) {
 				/>
 			);
 		} else if (
-			tx.account.accounts.length === 8 &&
+			tx.account.accounts.length === 10 &&
 			tx.account.data.length === 9
 		) {
 			const investorPk = tx.account.accounts[1].pubkey.toString();
@@ -426,10 +441,27 @@ function ixLabel(tx: any, multisigClient: any) {
 				/>
 			);
 		} else if (tx.account.accounts.length === 4) {
+			return (
+				<ListItemText
+					primary={"Update market admins"}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (
+			tx.account.accounts.length === 5 &&
+			tx.account.data.length === 8
+		) {
 			const dealPk = tx.account.accounts[2].pubkey.toString();
 			return (
 				<ListItemText
 					primary={`Opening deal ${dealPk}`}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (tx.account.accounts.length === 3) {
+			return (
+				<ListItemText
+					primary={"Update market config"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
