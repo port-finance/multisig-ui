@@ -101,6 +101,8 @@ const NO_SHOW_LIST = [
 	"9ULcD9McCETwUaT3Pw8uZxk81qriiKRTX9Uo7LJZXj6o",
 	"7ZwEod26DTdygr4rvrYLH9yLyyzh5UgXEumvo8x9CFJ7",
 	"9QXwLCgjFJYSCrHaDgti4qQJHcFmnTsuBipNVXDCWUs8",
+	"35GhRoQNbtB8h5zAWWFNo4vvqpAqfYhwGMGyDQahg8pJ",
+	"EigpveeSn5jVPL78m4x7M83er3Czz5Gw2aeJ5XtSgPgr",
 	"AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
 	"HhkHFd7DjGxzDCDhYe5tsz4EqLuHHe7uVoUyquP2b6MK",
 	"6vCbSFtMScZnqJUfQbfJGKHQVGGgHLNNBsZEtTCUHnUo",
@@ -466,10 +468,10 @@ function ixLabel(tx: any, multisigClient: any) {
 				/>
 			);
 		} else {
-			const borrowerPk = tx.account.accounts[9].pubkey.toString();
+			// const borrowerPk = tx.account.accounts[9].pubkey.toString();
 			return (
 				<ListItemText
-					primary={`Activate deal for borrower ${borrowerPk}`}
+					primary={`Activate deal for borrower ${"add borrower again"}`}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
