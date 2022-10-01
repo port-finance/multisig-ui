@@ -118,7 +118,7 @@ function CredixPassListItemDetails({
 	useEffect(() => {
 		setIsActive(!!credixPass?.isActive);
 		setIsBorrower(!!credixPass?.isBorrower);
-		setIsUnderwriter(credixPass?.isInvestor);
+		setIsUnderwriter(!!credixPass?.isInvestor);
 	}, [credixPass]);
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -228,7 +228,7 @@ function CredixPassListItemDetails({
 						await multisigClient.account.transaction.createInstruction(
 							transaction,
 							// @ts-ignore
-							350
+							500
 						),
 					],
 				}
