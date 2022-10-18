@@ -181,47 +181,50 @@ function TranchePassListItemDetails({
 
 	const constructDealRows = () => {
 		let tranchesElements: JSX.Element[] = [];
+		console.log(tranches);
 		if (tranches) {
 			tranches.forEach((trnchs, idx) => {
-				trnchs.tranches.forEach((tranche, index) => {
-					// @ts-ignore
-					if (tranche.index !== 1 && tranche.size.uiAmount > 0) {
-						let name = "";
-						if (tranche.index === 0) {
-							name = "super senior";
-						}
-						if (tranche.index === 2) {
-							name = "mezzanine";
-						}
-						if (tranche.index === 3) {
-							name = "junior";
-						}
-						let trancheRowNew = (
-							<div
-								key={tranche.deal.borrower.toString()}
-								style={{
-									display: "flex",
-									justifyContent: "space-between",
-									width: "100%",
-									background: "white",
-									paddingLeft: "20px",
-									paddingRight: "20px",
-									borderBottom: "1px solid grey",
-								}}
-							>
-								<p style={{ width: "200px" }}>{tranche.deal.name}</p>
-								<p style={{ width: "200px" }}>{name}</p>
-								<Button
-									style={{ width: "100px" }}
-									onClick={() => createTransactionAccount(tranche)}
+				if (trnchs) {
+					trnchs.tranches.forEach((tranche, index) => {
+						// @ts-ignore
+						if (tranche.index !== 1 && tranche.size.uiAmount > 0) {
+							let name = "";
+							if (tranche.index === 0) {
+								name = "super senior";
+							}
+							if (tranche.index === 2) {
+								name = "mezzanine";
+							}
+							if (tranche.index === 3) {
+								name = "junior";
+							}
+							let trancheRowNew = (
+								<div
+									key={tranche.deal.borrower.toString()}
+									style={{
+										display: "flex",
+										justifyContent: "space-between",
+										width: "100%",
+										background: "white",
+										paddingLeft: "20px",
+										paddingRight: "20px",
+										borderBottom: "1px solid grey",
+									}}
 								>
-									Issue pass
-								</Button>
-							</div>
-						);
-						tranchesElements.push(trancheRowNew);
-					}
-				});
+									<p style={{ width: "200px" }}>{tranche.deal.name}</p>
+									<p style={{ width: "200px" }}>{name}</p>
+									<Button
+										style={{ width: "100px" }}
+										onClick={() => createTransactionAccount(tranche)}
+									>
+										Issue pass
+									</Button>
+								</div>
+							);
+							tranchesElements.push(trancheRowNew);
+						}
+					});
+				}
 			});
 			setDealRows(tranchesElements);
 		}
