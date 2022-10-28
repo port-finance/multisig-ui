@@ -1154,11 +1154,12 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@credix/credix-client@2.3.0-beta.1":
-  version "2.3.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.3.0-beta.1.tgz#aee41fbfe17ae946e3f041466ff21fe818f06997"
-  integrity sha512-qEvQTkXy4QvITZ9H/iKV9ifkhxzHdnMSbzdvvKfSnI/77h5MYDu2D0wzQQqsQSg2lOb7D8t9S6y4cSawQ6rj/Q==
+"@credix/credix-client@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.1.0.tgz#75a716c9a57c6f0a590deeb6cb4308f22f7d5be4"
+  integrity sha512-E1meIm+BRT3/QX+Tdo9ec0tGEDHxS9ZeNlYbwIDSu/5z9qMpWgTkJOtKGjZ59HLTdwhRBCpvjyKFXi0+W4YLTg==
   dependencies:
+    "@metaplex-foundation/mpl-token-metadata" "^1.2.5"
     "@project-serum/anchor" "^0.24.2"
     "@saberhq/anchor-contrib" "^1.13.32"
     "@solana/spl-token" "^0.1.8"
@@ -1622,7 +1623,7 @@
     "@solana/web3.js" "^1.31.0"
     bs58 "^4.0.1"
 
-"@metaplex-foundation/mpl-token-metadata@^1.2.4":
+"@metaplex-foundation/mpl-token-metadata@^1.2.4", "@metaplex-foundation/mpl-token-metadata@^1.2.5":
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/@metaplex-foundation/mpl-token-metadata/-/mpl-token-metadata-1.2.5.tgz#1a927b1c7d30cd634a1e4782022712a02f6865c2"
   integrity sha512-pxRG53JsTSwXpiJJMHNulJhH8kO3hHztQ3QxslUoKw2hBYKXsg9TGsiHgNIhN2MPZGBJ2pDeK6kNGv0sd54HhA==
