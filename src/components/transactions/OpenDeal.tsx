@@ -149,7 +149,14 @@ function OpenDealListItemDetails({
 
 	const constructDealRows = () => {
 		if (deals) {
-			let dealRowsNew = deals.map((deal) => (
+			const dealsFiltered = deals.filter(
+				(deal) =>
+					![
+						"FGPhvKCp18hv6mXwLHcdYAjPDBo5DquzH86xGyyPcUEp",
+						"9SK24nt6Dx1Rw3fZdwdztnovMVqU3nsQdfZdLaQKJrJA",
+					].includes(deal.address.toString())
+			);
+			let dealRowsNew = dealsFiltered.map((deal) => (
 				<div
 					key={deal.borrower.toString()}
 					style={{
