@@ -129,6 +129,7 @@ function UpdateMarketListItemDetails({
 		const market: Market | null = await credixClient.fetchMarket(
 			globalMarketSeed
 		);
+		console.log("globalmarket", market?.address.toString());
 		setMarket(market);
 		await fetchMarketConfig();
 	};

@@ -19,6 +19,7 @@ import {
 	Deal,
 	Fraction,
 	UpdateDealConfig,
+	MarketAdmins,
 } from "@credix/credix-client";
 import { serialAsync } from "../../credix/utils/async.utils";
 
@@ -129,8 +130,10 @@ function UpdateDealListItemDetails({
 			return;
 		}
 		const dealPubkey = new PublicKey(e.target.value);
+		console.log("market name", market?.name);
 		const dealForPubkey = await market?.fetchDealByPublicKey(dealPubkey);
 		setDeal(dealForPubkey);
+
 		await fetchDealConfig();
 	};
 
@@ -179,7 +182,6 @@ function UpdateDealListItemDetails({
 		};
 
 		const updateDealConfigIx = await deal?.updateIx(dealConfig, multisigSigner);
-
 		const transaction = new Account();
 		const tx = await multisigClient.rpc.createTransaction(
 			config.clusterConfig.programId,
