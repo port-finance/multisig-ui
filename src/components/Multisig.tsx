@@ -86,6 +86,7 @@ import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
 import { NameTokenListItem } from "./transactions/NameToken";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
+import { UpdateDealListItem } from "./transactions/UpdateDeal";
 
 const NO_SHOW_LIST = [
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
@@ -121,6 +122,7 @@ const NO_SHOW_LIST = [
 	"3pnafRSCgSuU7yCeuUCXRgeNJKbbC25sXGnybW3GvipY",
 	"GR4bLNMD7tBRTLgFXwJq5So2QGh92QZDfDXrH3e1M3eN",
 	"FFu2QvyiFDg2omxLTqwyV57gAonRR5RSouVdJonFwekd",
+	"CE7cQRSbYBXXWu9MvBj6MoMbfzNhJgJux7Rg1JAhZtqy",
 	"GTh1AY9v5ZAQYpQ7KdzWK8K8k41nAiPRas2nfnscYxU9",
 	"5fuFHNcQebNdsEQhaMwgZs7tpcdSy8LA2LFuDKG1bNAH",
 	"9Y1Xo76H1oeEhokpDGR7d5iVgioq48ktHFEXP6Pjk2Lm",
@@ -207,6 +209,11 @@ function AddTransactionDialog({
 						onClose={onClose}
 					/>
 					<ActivateDealListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
+					<UpdateDealListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
@@ -434,6 +441,16 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={`Issue Tranche pass for ${investorPk}`}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (
+			tx.account.accounts.length === 4 &&
+			tx.account.data.length === 33
+		) {
+			return (
+				<ListItemText
+					primary={"Update deal config"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
