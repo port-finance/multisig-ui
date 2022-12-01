@@ -20,10 +20,11 @@ import {
 	Fraction,
 	UpdateDealConfig,
 	MarketAdmins,
+	RepaymentPeriodConfig,
 } from "@credix/credix-client";
 import { serialAsync } from "../../credix/utils/async.utils";
 
-export function UpdateDealListItem({
+export function AdjustRepaymentScheduleListItem({
 	multisig,
 	onClose,
 	didAddTransaction,
@@ -43,11 +44,11 @@ export function UpdateDealListItem({
 						style={{ width: "20px", marginLeft: "3px" }}
 					/>
 				</ListItemIcon>
-				<ListItemText primary={"Update deal config"} />
+				<ListItemText primary={"Adjust repayment schedule"} />
 				{open ? <ExpandLess /> : <ExpandMore />}
 			</ListItem>
 			<Collapse in={open} timeout="auto" unmountOnExit>
-				<UpdateDealListItemDetails
+				<AdjustRepaymentScheduleListItemDetails
 					didAddTransaction={didAddTransaction}
 					multisig={multisig}
 					onClose={onClose}
@@ -57,7 +58,7 @@ export function UpdateDealListItem({
 	);
 }
 
-function UpdateDealListItemDetails({
+function AdjustRepaymentScheduleListItemDetails({
 	multisig,
 	onClose,
 	didAddTransaction,
@@ -67,14 +68,18 @@ function UpdateDealListItemDetails({
 	didAddTransaction: (tx: PublicKey) => void;
 }) {
 	const [deal, setDeal] = useState<Deal | null>();
-	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
-	const [serviceFees, setServiceFees] = useState<number>();
-	const [serviceFeesRepaid, setServiceFeesRepaid] = useState<number>();
+	const [indexToStart, setIndexToStart] = useState<number>(0);
 	const [
-		yearLatestServiceFeesCharged,
-		setYearLatestServiceFeesCharged,
-	] = useState<number>();
+		repaymentSchedulePrincipal,
+		setRepaymentSchedulePrincipal,
+	] = useState<string>("");
+	const [
+		repaymentScheduleInterest,
+		setRepaymentScheduleInterest,
+	] = useState<string>("");
+
 	const [multisigClient, credixClient] = useMultisigProgram();
+	const decimals = 1000000;
 	const { enqueueSnackbar } = useSnackbar();
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -86,62 +91,60 @@ function UpdateDealListItemDetails({
 		}
 	};
 
-	const fractionToString = (inputFraction: Fraction) => {
-		const num = inputFraction.numerator.toString();
-		const den = inputFraction.denominator.toString();
-		return num + "/" + den;
-	};
-
-	const stringToFraction = (inputString: string) => {
-		const numDen = inputString.split("/");
-		return new Fraction(Number(numDen[0]), Number(numDen[1]));
-	};
-
-	const fetchDealConfig = async () => {
+	const fetchRepaymentSchedule = async () => {
+		let lastRepaidIndex = 0;
+		// @ts-ignore
+		const principals = [];
+		// @ts-ignore
+		const interests = [];
 		if (deal) {
-			setServiceFeePercentage(fractionToString(deal.serviceFeePercentage));
-			setServiceFees(Number(deal.serviceFees.amount) / 1000000);
-			setServiceFeesRepaid(Number(deal.serviceFeesRepaid.amount) / 1000000);
-			setYearLatestServiceFeesCharged(
-				Number(deal.yearLatestServiceFeesCharged)
-			);
+			const schedule = await deal.fetchRepaymentSchedule();
+			// @ts-ignore
+			schedule.periods.forEach((p) => {
+				principals.push(Number(p.principal.amount) / decimals);
+				interests.push(Number(p.interest.amount) / decimals);
+				if (Number(p.interestRepaid.amount) > 0) {
+					lastRepaidIndex += 1;
+				}
+			});
+			setIndexToStart(lastRepaidIndex);
 		}
+		// @ts-ignore
+		const principalString = principals.join(",");
+		// @ts-ignore
+		const interestString = interests.join(",");
+
+		setRepaymentSchedulePrincipal(principalString);
+		setRepaymentScheduleInterest(interestString);
 	};
 
 	const onBlurDeal = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (!isValidPublicKey(e.target.value)) {
-			enqueueSnackbar(`Non valid PassHolder Public Key`, {
+			enqueueSnackbar(`Non valid Deal Public Key`, {
 				variant: "error",
 			});
 			return;
 		}
 		const dealPubkey = new PublicKey(e.target.value);
-		const dealForPubkey = await credixClient?.fetchDealByPublicKey(dealPubkey);
+		const dealForPubkey = await credixClient.fetchDealByPublicKey(dealPubkey);
 		setDeal(dealForPubkey);
-
-		await fetchDealConfig();
+		await fetchRepaymentSchedule();
 	};
 
-	const onChangeServiceFeePercentage = (
+	const onChangeIndexToStart = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setIndexToStart(Number(e.target.value));
+	};
+
+	const onChangeRepaymentSchedulePrincipal = async (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setServiceFeePercentage(e.target.value);
+		setRepaymentSchedulePrincipal(e.target.value);
 	};
 
-	const onChangeServiceFees = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setServiceFees(Number(e.target.value));
-	};
-
-	const onChangeServiceFeesRepaid = (
+	const onChangeRepaymentScheduleInterest = async (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setServiceFeesRepaid(Number(e.target.value));
-	};
-
-	const onChangeYearLatestServiceFeesCharged = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setYearLatestServiceFeesCharged(Number(e.target.value));
+		setRepaymentScheduleInterest(e.target.value);
 	};
 
 	const onSubmit = serialAsync(async (e: React.SyntheticEvent) => {
@@ -150,30 +153,55 @@ function UpdateDealListItemDetails({
 			variant: "info",
 		});
 
+		let newPrincipalSchedule = repaymentSchedulePrincipal
+			.split(",")
+			.map((e) => Math.round(Number(e) * decimals));
+		newPrincipalSchedule = newPrincipalSchedule.splice(
+			indexToStart - 1,
+			newPrincipalSchedule.length - 1
+		);
+
+		let newInterestSchedule = repaymentScheduleInterest
+			.split(",")
+			.map((e) => Math.round(Number(e) * decimals));
+		newInterestSchedule = newInterestSchedule.splice(
+			indexToStart - 1,
+			newInterestSchedule.length - 1
+		);
+
+		console.log("newPrincipalSchedule", newPrincipalSchedule);
+		console.log("newInterestSchedule", newInterestSchedule);
+
+		const periods: RepaymentPeriodConfig[] = [];
+		newPrincipalSchedule.forEach((principal, idx) => {
+			const interest = newInterestSchedule[idx];
+			periods.push({ principal: principal, interest: interest });
+		});
+
 		const [multisigSigner] = await PublicKey.findProgramAddress(
 			[multisig.toBuffer()],
 			multisigClient.programId
 		);
 
-		const dealConfig: UpdateDealConfig = {
-			// @ts-ignore
-			serviceFeePercentage: stringToFraction(serviceFeePercentage),
-			// @ts-ignore
-			serviceFees: serviceFees * 1000000,
-			// @ts-ignore
-			serviceFeesRepaid: serviceFeesRepaid * 1000000,
-			// @ts-ignore
-			yearLatestServiceFeesCharged: yearLatestServiceFeesCharged,
+		const adjustRepaymentScheduleConfig = {
+			changeFrom: indexToStart,
+			periods: periods,
 		};
 
-		const updateDealConfigIx = await deal?.updateIx(dealConfig, multisigSigner);
+		const adjustRepaymentScheduleIx = await deal?.adjustRepaymentScheduleIx(
+			adjustRepaymentScheduleConfig,
+			multisigSigner
+		);
+
+		console.log(adjustRepaymentScheduleIx);
+
 		const transaction = new Account();
 		const tx = await multisigClient.rpc.createTransaction(
 			config.clusterConfig.programId,
 			// @ts-ignore
-			updateDealConfigIx.keys,
+			adjustRepaymentScheduleIx[0].keys,
 			// @ts-ignore
-			Buffer.from(updateDealConfigIx.data),
+			Buffer.from(adjustRepaymentScheduleIx[0].data),
 			{
 				accounts: {
 					multisig,
@@ -220,12 +248,12 @@ function UpdateDealListItemDetails({
 				<Checkbox checked={!(deal === undefined)} />
 				<br />
 				<label>
-					serviceFeePercentage:
+					repaymentSchedule Principal:
 					<input
 						type="text"
-						name="serviceFeePercentage"
-						value={serviceFeePercentage}
-						onChange={onChangeServiceFeePercentage}
+						name="repaymentSchedulePrincipal"
+						value={repaymentSchedulePrincipal}
+						onChange={onChangeRepaymentSchedulePrincipal}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
@@ -235,12 +263,12 @@ function UpdateDealListItemDetails({
 				</label>
 				<br />
 				<label>
-					serviceFees:
+					repaymentSchedule Interest:
 					<input
-						type="number"
-						name="serviceFees"
-						value={serviceFees}
-						onChange={onChangeServiceFees}
+						type="text"
+						name="repaymentScheduleInterest"
+						value={repaymentScheduleInterest}
+						onChange={onChangeRepaymentScheduleInterest}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
@@ -249,35 +277,19 @@ function UpdateDealListItemDetails({
 					/>
 				</label>
 				<br />
-				<label>
-					serviceFeesRepaid:
+				{/* <label>
 					<input
 						type="number"
 						name="serviceFeesRepaid"
-						value={serviceFeesRepaid}
-						onChange={onChangeServiceFeesRepaid}
+						value={indexToStart}
+						onChange={onChangeIndexToStart}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
 							margin: "10px",
 						}}
 					/>
-				</label>
-				<br />
-				<label>
-					yearLatestServiceFeesCharged:
-					<input
-						type="number"
-						name="yearLatestServiceFeesCharged"
-						value={yearLatestServiceFeesCharged}
-						onChange={onChangeYearLatestServiceFeesCharged}
-						style={{
-							marginLeft: "10px",
-							width: "500px",
-							margin: "10px",
-						}}
-					/>
-				</label>
+				</label> */}
 				<br />
 				<input
 					type="submit"
