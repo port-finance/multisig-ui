@@ -76,6 +76,9 @@ function CredixPassListItemDetails({
 	const [isBorrower, setIsBorrower] = useState<boolean>(false);
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
+	const [disableWithdrawalFee, setDisableWithdrawalFee] = useState<boolean>(
+		false
+	);
 	const [passHolder, setPassHolder] = useState<string>("");
 	const [releaseTimestamp, setReleaseTimestamp] = useState(new BN(0));
 	const [credixPass, setCredixPass] = useState<CredixPass | null | any>();
@@ -119,6 +122,7 @@ function CredixPassListItemDetails({
 		setIsActive(!!credixPass?.isActive);
 		setIsBorrower(!!credixPass?.isBorrower);
 		setIsUnderwriter(!!credixPass?.isInvestor);
+		setDisableWithdrawalFee(!!credixPass?.isDisableWithdrawalFee);
 	}, [credixPass]);
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -148,6 +152,14 @@ function CredixPassListItemDetails({
 			: setIsUnderwriter(false);
 	};
 
+	const onDisableWithdrawalFeeChange = (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		e.target.value === "true"
+			? setDisableWithdrawalFee(true)
+			: setDisableWithdrawalFee(false);
+	};
+
 	const onBlurGlobalMarketSeed = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setGlobalMarketSeed(e.target.value);
 	};
@@ -162,6 +174,7 @@ function CredixPassListItemDetails({
 			credixPass.active === isActive &&
 			credixPass.isBorrower === isBorrower &&
 			credixPass.isUnderwriter === isUnderwriter &&
+			credixPass.disableWithdrawalFee === disableWithdrawalFee &&
 			credixPass.releaseTimestamp === releaseTimestamp
 		);
 
@@ -173,9 +186,6 @@ function CredixPassListItemDetails({
 		});
 
 		if (market) {
-			console.log(globalMarketSeed);
-			console.log(market);
-
 			const [multisigSigner] = await PublicKey.findProgramAddress(
 				[multisig.toBuffer()],
 				multisigClient.programId
@@ -193,6 +203,7 @@ function CredixPassListItemDetails({
 				active: isActive,
 				borrower: isBorrower,
 				underwriter: isUnderwriter,
+				disableWithdrawalFee: disableWithdrawalFee,
 				releaseTimestamp: releaseTimestamp.toNumber(),
 			};
 
@@ -321,6 +332,22 @@ function CredixPassListItemDetails({
 							True
 						</option>
 						<option selected={!isUnderwriter} value="false">
+							False
+						</option>
+					</select>
+				</label>
+				<br />
+				<label>
+					disableWithdrawalFee
+					<select
+						name="isUnderwriter"
+						onChange={onDisableWithdrawalFeeChange}
+						style={{ marginLeft: "10px", width: "100px", margin: "10px" }}
+					>
+						<option selected={disableWithdrawalFee} value="true">
+							True
+						</option>
+						<option selected={!disableWithdrawalFee} value="false">
 							False
 						</option>
 					</select>

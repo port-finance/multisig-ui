@@ -1154,10 +1154,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@credix/credix-client@2.3.0-beta.4":
-  version "2.3.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.3.0-beta.4.tgz#eeafb9d739b8adfc50279b129567335d6c81b90a"
-  integrity sha512-re75mlOHrxSnLu2J9wFU/PFqv3FjbBl8c1OafNydLXE80JPLQVB/S5QLoTs8NmOD7xoYg/A7CxZBELmeLUVufw==
+"@credix/credix-client@2.3.0-beta.6":
+  version "2.3.0-beta.6"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.3.0-beta.6.tgz#12e68567b58cf69a21f88c715d2bb1cef8db0229"
+  integrity sha512-2hGDF+rRox2oCvVKmQUTV+L+P9dSuXC7Hhuha+UIfEwBkHFo1NFv9bcEjJjDcGPudsDRDjqqO7Xra5G11EGxgA==
   dependencies:
     "@metaplex-foundation/mpl-token-metadata" "^1.2.5"
     "@project-serum/anchor" "^0.24.2"
