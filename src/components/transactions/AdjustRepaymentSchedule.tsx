@@ -157,7 +157,7 @@ function AdjustRepaymentScheduleListItemDetails({
 			.split(",")
 			.map((e) => Math.round(Number(e) * decimals));
 		newPrincipalSchedule = newPrincipalSchedule.splice(
-			indexToStart - 1,
+			indexToStart,
 			newPrincipalSchedule.length - 1
 		);
 
@@ -165,7 +165,7 @@ function AdjustRepaymentScheduleListItemDetails({
 			.split(",")
 			.map((e) => Math.round(Number(e) * decimals));
 		newInterestSchedule = newInterestSchedule.splice(
-			indexToStart - 1,
+			indexToStart,
 			newInterestSchedule.length - 1
 		);
 
