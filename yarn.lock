@@ -1154,17 +1154,17 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@credix/credix-client@2.3.0-beta.6":
-  version "2.3.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.3.0-beta.6.tgz#12e68567b58cf69a21f88c715d2bb1cef8db0229"
-  integrity sha512-2hGDF+rRox2oCvVKmQUTV+L+P9dSuXC7Hhuha+UIfEwBkHFo1NFv9bcEjJjDcGPudsDRDjqqO7Xra5G11EGxgA==
+"@credix/credix-client@2.3.0-beta.7":
+  version "2.3.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.3.0-beta.7.tgz#0e4b823e27c4a1654358f1a94de3c8d60432517a"
+  integrity sha512-SnvzF+Gs4q3dStg/bxVd50R0oY8UNKRJ9xfStZk5dQv9SB7zbe3U7IRct1iG/9zMA+YkRitmNeZway9t62H9JA==
   dependencies:
     "@metaplex-foundation/mpl-token-metadata" "^1.2.5"
     "@project-serum/anchor" "^0.24.2"
     "@saberhq/anchor-contrib" "^1.13.32"
     "@solana/spl-token" "^0.1.8"
-    "@solana/web3.js" "^1.43.4"
-    big.js "^6.1.1"
+    "@solana/web3.js" "^1.66.2"
+    big.js "^6.2.1"
     bn.js "^5.2.0"
     node-irr "^2.0.3"
 
@@ -2131,10 +2131,10 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@solana/web3.js@^1.43.4":
-  version "1.63.1"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.63.1.tgz#88a19a17f5f4aada73ad70a94044c1067cab2b4d"
-  integrity sha512-wgEdGVK5FTS2zENxbcGSvKpGZ0jDS6BUdGu8Gn6ns0CzgJkK83u4ip3THSnBPEQ5i/jrqukg998BwV1H67+qiQ==
+"@solana/web3.js@^1.66.2":
+  version "1.70.1"
+  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.70.1.tgz#4a2df47cc32a0f67be5161e772b2ceb6512281fa"
+  integrity sha512-AnaqCF1cJ3w7d0yhvLGAKAcRI+n5o+ursQihhoTe4cUh8/9d4gbT73SoHYElS7e67OtAgLmSfbcC5hcOAgdvnQ==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@noble/ed25519" "^1.7.0"
@@ -3701,6 +3701,11 @@ big.js@^6.1.1:
   version "6.1.1"
   resolved "https://registry.npmjs.org/big.js/-/big.js-6.1.1.tgz"
   integrity sha512-1vObw81a8ylZO5ePrtMay0n018TcftpTA5HFKDaSuiUDBo8biRBtjIobw60OpwuvrGk+FsxKamqN4cnmj/eXdg==
+
+big.js@^6.2.1:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/big.js/-/big.js-6.2.1.tgz#7205ce763efb17c2e41f26f121c420c6a7c2744f"
+  integrity sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==
 
 bigint-buffer@^1.1.5:
   version "1.1.5"
