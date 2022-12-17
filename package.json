@@ -42,7 +42,7 @@
 		"web-vitals": "^1.0.1",
 		"object-sizeof": "^1.6.1",
 		"react-datetime-picker": "^3.4.3",
-		"@credix/credix-client": "2.3.0-beta.7"
+		"@credix/credix-client": "2.3.0-beta.9"
 	},
 	"scripts": {
 		"start": "react-scripts start",
