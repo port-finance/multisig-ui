@@ -72,11 +72,8 @@ function TranchePassListItemDetails({
 	onClose: Function;
 	didAddTransaction: (tx: PublicKey) => void;
 }) {
-	const [market, setMarket] = useState<Market | null>();
-	const [tranches, setTranches] = useState<Tranches[]>();
-	const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(
-		SEEDS.GLOBAL_MARKET_STATE_PDA
-	);
+	const [deal, setDeal] = useState<Deal | null>();
+	const [tranches, setTranches] = useState<Tranches>();
 	const [investorPublicKey, setInvestorPublicKey] = useState<PublicKey>();
 	const [dealRows, setDealRows] = useState([<p>"no pending deals"</p>]);
 	const [multisigClient, credixClient] = useMultisigProgram();
@@ -104,32 +101,21 @@ function TranchePassListItemDetails({
 		setInvestorPublicKey(pubKey);
 	};
 
-	const onBlurGlobalMarketSeed = async (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setGlobalMarketSeed(e.target.value);
-		const market: Market | null = await credixClient.fetchMarket(
-			globalMarketSeed
-		);
-		setMarket(market);
-		const deals = await market?.fetchDeals();
-		// @ts-ignore
-		const marketTranches: Tranches[] = [];
-		if (deals) {
-			deals.forEach(async (deal: Deal) => {
-				const dealStatus = await deal.status();
-				// const createdAt = await deal.createdAt;
-				// const pending = await deal.isPending();
-				if (dealStatus === DealStatus.OPEN_FOR_FUNDING) {
-					const tranches = await deal.fetchTranches();
-					// @ts-ignore
-					marketTranches.push(tranches);
-				}
+	const onBlurDeal = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (!isValidPublicKey(e.target.value)) {
+			enqueueSnackbar(`Non valid PassHolder Public Key`, {
+				variant: "error",
 			});
-			// @ts-ignore
-			setTranches(marketTranches);
-			constructDealRows();
+			return;
 		}
+		const dealPubkey = new PublicKey(e.target.value);
+		const dealForPubkey = await credixClient?.fetchDealByPublicKey(dealPubkey);
+		const tranchesForDeal = await dealForPubkey?.fetchTranches();
+		setDeal(dealForPubkey);
+
+		// @ts-ignore
+		setTranches(tranchesForDeal);
+		constructDealRows();
 	};
 
 	const createTransactionAccount = async (tranche: Tranche) => {
@@ -183,47 +169,43 @@ function TranchePassListItemDetails({
 		let tranchesElements: JSX.Element[] = [];
 		console.log(tranches);
 		if (tranches) {
-			tranches.forEach((trnchs, idx) => {
-				if (trnchs) {
-					trnchs.tranches.forEach((tranche, index) => {
-						// @ts-ignore
-						if (tranche.index !== 1 && tranche.size.uiAmount > 0) {
-							let name = "";
-							if (tranche.index === 0) {
-								name = "super senior";
-							}
-							if (tranche.index === 2) {
-								name = "mezzanine";
-							}
-							if (tranche.index === 3) {
-								name = "junior";
-							}
-							let trancheRowNew = (
-								<div
-									key={tranche.deal.borrower.toString()}
-									style={{
-										display: "flex",
-										justifyContent: "space-between",
-										width: "100%",
-										background: "white",
-										paddingLeft: "20px",
-										paddingRight: "20px",
-										borderBottom: "1px solid grey",
-									}}
-								>
-									<p style={{ width: "200px" }}>{tranche.deal.name}</p>
-									<p style={{ width: "200px" }}>{name}</p>
-									<Button
-										style={{ width: "100px" }}
-										onClick={() => createTransactionAccount(tranche)}
-									>
-										Issue pass
-									</Button>
-								</div>
-							);
-							tranchesElements.push(trancheRowNew);
-						}
-					});
+			tranches.tranches.forEach((tranche, index) => {
+				// @ts-ignore
+				if (tranche.index !== 1 && tranche.size.uiAmount > 0) {
+					let name = "";
+					if (tranche.index === 0) {
+						name = "super senior";
+					}
+					if (tranche.index === 2) {
+						name = "mezzanine";
+					}
+					if (tranche.index === 3) {
+						name = "junior";
+					}
+					let trancheRowNew = (
+						<div
+							key={tranche.deal.borrower.toString()}
+							style={{
+								display: "flex",
+								justifyContent: "space-between",
+								width: "100%",
+								background: "white",
+								paddingLeft: "20px",
+								paddingRight: "20px",
+								borderBottom: "1px solid grey",
+							}}
+						>
+							<p style={{ width: "200px" }}>{tranche.deal.name}</p>
+							<p style={{ width: "200px" }}>{name}</p>
+							<Button
+								style={{ width: "100px" }}
+								onClick={() => createTransactionAccount(tranche)}
+							>
+								Issue pass
+							</Button>
+						</div>
+					);
+					tranchesElements.push(trancheRowNew);
 				}
 			});
 			setDealRows(tranchesElements);
@@ -249,17 +231,18 @@ function TranchePassListItemDetails({
 			</label>
 			<Checkbox checked={!(investorPublicKey === undefined)} />
 			<div></div>
+			<br />
 			<label>
-				Global marketstate seed:
+				Deal Pubkey:
 				<input
-					name="globalMarketSeed"
+					name="dealPubkey"
 					type="text"
-					placeholder={globalMarketSeed}
-					onBlur={onBlurGlobalMarketSeed}
+					onBlur={onBlurDeal}
 					style={{ marginLeft: "10px", width: "500px", margin: "10px" }}
 				/>
 			</label>
-			<Checkbox checked={!(market === undefined)} />
+			<Checkbox checked={!(deal === undefined)} />
+			<br />
 			<div
 				style={{
 					display: "flex",

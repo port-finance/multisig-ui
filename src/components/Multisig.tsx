@@ -88,17 +88,21 @@ import { NameTokenListItem } from "./transactions/NameToken";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 import { UpdateDealListItem } from "./transactions/UpdateDeal";
 import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
+import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDeal";
 
 const NO_SHOW_LIST = [
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
 	"FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV",
 	"AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv",
+	"3PRgK6SPnJZD8C34esq2fW13pMU1Ky8GagjEqxJVcmXK",
 	"AczcRjjZ47negBzU4TVkQQRe4PYMCVsmo5C3Tt6dzXRs",
 	"2CPEs3TizBopukcHTrPPeVYy8DRr4RVoLfp5ccgchDEn",
+	"CrWf9XdZwL8iy8Jhbu4DRJLAUmn7iv5pT67c8Wyj2pUu",
 	"BA4gCkzBYcrVv6CmrWoia4cV7GqwSV2Aay18wM2Jf8Fu",
 	"56bNvH6Ckvqops5gbgM1rBaVi8nSk4aiykmXgrjNfCRn",
 	"4gAmLrY61STRGrPL2eLmyXz2eE3x9XZSJPkbUBF3LDwB",
 	"387KmRLPVDUf7TQSbiEaQB8Jy36HgH7LMsbyj67LHXWu",
+	"9Do5Eh2oeQjVNW75c6gmSBbcnM2Z8FK6AQNPsjmLWcX6",
 	"AaXXDNBDESnrN3wWGsXV7ke1v5mTY6m46ok418FeQ1mt",
 	"BC8ZyiUT7nVSGQnBcujCEHyaJrjkmFA7SBSbfjL3qnsV",
 	"9YkX6vfZKg9vD4E7P46UMzkeqYtsXiTm2WLfrZS4tA8L",
@@ -258,6 +262,11 @@ function AddTransactionDialog({
 						onClose={onClose}
 					/>
 					<AdjustRepaymentScheduleListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
+					<ActivateMigratedDealListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
@@ -483,6 +492,14 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={"Adjust repayment schedule"}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (tx.account.accounts.length === 19) {
+			const borrowerPk = tx.account.accounts[11].pubkey.toString();
+			return (
+				<ListItemText
+					primary={`Activate migrated deal for borrower ${borrowerPk.toString()}`}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
