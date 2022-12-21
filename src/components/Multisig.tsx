@@ -470,7 +470,7 @@ function ixLabel(tx: any, multisigClient: any) {
 				/>
 			);
 		} else if (
-			tx.account.accounts.length === 5 &&
+			tx.account.accounts.length === 6 &&
 			tx.account.data.length === 8
 		) {
 			const dealPk = tx.account.accounts[2].pubkey.toString();

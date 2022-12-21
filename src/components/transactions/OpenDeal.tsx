@@ -66,8 +66,7 @@ function OpenDealListItemDetails({
 	onClose: Function;
 	didAddTransaction: (tx: PublicKey) => void;
 }) {
-	const [market, setMarket] = useState<Market | null>();
-	const [deals, setDeals] = useState<Deal[]>();
+	const [deal, setDeal] = useState<Deal | null>();
 	const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(
 		SEEDS.GLOBAL_MARKET_STATE_PDA
 	);
@@ -75,30 +74,26 @@ function OpenDealListItemDetails({
 	const [multisigClient, credixClient] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
-	const onBlurGlobalMarketSeed = async (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setGlobalMarketSeed(e.target.value);
-		const market: Market | null = await credixClient.fetchMarket(
-			globalMarketSeed
-		);
-		setMarket(market);
-		const deals = await market?.fetchDeals();
-		// @ts-ignore
-		const marketDeals: Deal[] = [];
-		if (deals) {
-			deals.forEach(async (deal: Deal) => {
-				const dealStatus = await deal.status();
-				const createdAt = await deal.createdAt;
-				// const pending = await deal.isPending();
-				if (dealStatus === DealStatus.PENDING && createdAt > 1654224815) {
-					marketDeals.push(deal);
-				}
-			});
-			// @ts-ignore
-			setDeals(marketDeals);
-			constructDealRows();
+	const isValidPublicKey = (publicKey: string) => {
+		try {
+			new PublicKey(publicKey);
+			return true;
+		} catch (e) {
+			return false;
 		}
+	};
+
+	const onBlurDeal = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (!isValidPublicKey(e.target.value)) {
+			enqueueSnackbar(`Non valid PassHolder Public Key`, {
+				variant: "error",
+			});
+			return;
+		}
+		const dealPubkey = new PublicKey(e.target.value);
+		const dealForPubkey = await credixClient?.fetchDealByPublicKey(dealPubkey);
+		setDeal(dealForPubkey);
+		constructDealRows();
 	};
 
 	const createTransactionAccount = async (
@@ -148,15 +143,8 @@ function OpenDealListItemDetails({
 	};
 
 	const constructDealRows = () => {
-		if (deals) {
-			const dealsFiltered = deals.filter(
-				(deal) =>
-					![
-						"FGPhvKCp18hv6mXwLHcdYAjPDBo5DquzH86xGyyPcUEp",
-						"9SK24nt6Dx1Rw3fZdwdztnovMVqU3nsQdfZdLaQKJrJA",
-					].includes(deal.address.toString())
-			);
-			let dealRowsNew = dealsFiltered.map((deal) => (
+		if (deal) {
+			let dealRowsNew = (
 				<div
 					key={deal.borrower.toString()}
 					style={{
@@ -181,8 +169,8 @@ function OpenDealListItemDetails({
 						Open
 					</Button>
 				</div>
-			));
-			setDealRows(dealRowsNew);
+			);
+			setDealRows([dealRowsNew]);
 		}
 	};
 
@@ -193,17 +181,17 @@ function OpenDealListItemDetails({
 				padding: "24px",
 			}}
 		>
+			<br />
 			<label>
-				Global marketstate seed:
+				Deal Pubkey:
 				<input
-					name="globalMarketSeed"
+					name="dealPubkey"
 					type="text"
-					placeholder={globalMarketSeed}
-					onBlur={onBlurGlobalMarketSeed}
+					onBlur={onBlurDeal}
 					style={{ marginLeft: "10px", width: "500px", margin: "10px" }}
 				/>
 			</label>
-			<Checkbox checked={!(market === undefined)} />
+			<Checkbox checked={!(deal === undefined)} />
 			<div
 				style={{
 					display: "flex",
