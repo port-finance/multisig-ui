@@ -122,7 +122,7 @@ function CredixPassListItemDetails({
 		setIsActive(!!credixPass?.isActive);
 		setIsBorrower(!!credixPass?.isBorrower);
 		setIsUnderwriter(!!credixPass?.isInvestor);
-		setDisableWithdrawalFee(!!credixPass?.isDisableWithdrawalFee);
+		setDisableWithdrawalFee(!!credixPass?.withdrawalFeeDisabled);
 	}, [credixPass]);
 
 	const isValidPublicKey = (publicKey: string) => {
