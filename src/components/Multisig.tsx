@@ -92,6 +92,8 @@ import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDea
 
 const NO_SHOW_LIST = [
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
+	"7ezaSsbSoHJWqA59KAq1ENZGgJjhNtVpzULPbyzFNRqF",
+	"59y9hWxMbW3MVFP36TJbipaXzXMAWJfoBisP6NtFKDrU",
 	"FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV",
 	"AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv",
 	"3PRgK6SPnJZD8C34esq2fW13pMU1Ky8GagjEqxJVcmXK",
