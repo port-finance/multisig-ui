@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation, Routes } from "react-router";
 import { HashRouter, Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { MuiThemeProvider } from "@material-ui/core/styles";
@@ -39,11 +39,13 @@ function App() {
 							<AccountProvider>
 								<HashRouter basename={"/"}>
 									<Layout>
-										<Route path="/" element={<MultisigPage />} />
-										<Route
-											path="/:address"
-											element={<MultisigInstancePage />}
-										/>
+										<Routes>
+											<Route path="/" element={<MultisigPage />} />
+											<Route
+												path="/:address"
+												element={<MultisigInstancePage />}
+											/>
+										</Routes>
 									</Layout>
 								</HashRouter>
 							</AccountProvider>

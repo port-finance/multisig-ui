@@ -51,7 +51,7 @@ import {
 	SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
 import { ViewTransactionOnExplorerButton } from "./Notification";
-import * as idl from "../utils/idl";
+// import * as idl from "../utils/idl";
 import { useMultisigProgram } from "../hooks/useMultisigProgram";
 import {
 	Token,
@@ -74,11 +74,11 @@ import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { config } from "../credix/config";
 import { ChangeThresholdListItem } from "./transactions/ChangeThreshold";
 import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
-import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
+// import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal";
 import { OpenDealListItem } from "./transactions/OpenDeal";
-import { TransferTokenListItem } from "./transactions/TransferToken";
+// import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { UpdateMarketListItem } from "./transactions/UpdateMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
@@ -191,11 +191,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					<IdlUpgradeListItem
+					{/* <IdlUpgradeListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
-					/>
+					/> */}
 					<MultisigSetOwnersListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -206,11 +206,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					<TransferTokenListItem
+					{/* <TransferTokenListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
-					/>
+					/> */}
 					<TranchePassListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -283,32 +283,32 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		}
 	}
-	if (tx.account.programId.equals(multisigClient.programId)) {
-		const setThresholdSighash = multisigClient.coder.sighash(
-			"global",
-			"change_threshold"
-		);
-		if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-			return (
-				<ListItemText
-					primary="Set threshold"
-					secondary={tx.publicKey.toString()}
-				/>
-			);
-		}
-		const setOwnersSighash = multisigClient.coder.sighash(
-			"global",
-			"set_owners"
-		);
-		if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-			return (
-				<ListItemText
-					primary="Set owners"
-					secondary={tx.publicKey.toString()}
-				/>
-			);
-		}
-	}
+	// if (tx.account.programId.equals(multisigClient.programId)) {
+	// 	const setThresholdSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"change_threshold"
+	// 	);
+	// 	if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return (
+	// 			<ListItemText
+	// 				primary="Set threshold"
+	// 				secondary={tx.publicKey.toString()}
+	// 			/>
+	// 		);
+	// 	}
+	// 	const setOwnersSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"set_owners"
+	// 	);
+	// 	if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return (
+	// 			<ListItemText
+	// 				primary="Set owners"
+	// 				secondary={tx.publicKey.toString()}
+	// 			/>
+	// 		);
+	// 	}
+	// }
 	if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
 		const tag = tx.account.data.slice(0, 1);
 		const amountBuf = tx.account.data.slice(1, 9) as Buffer;
@@ -317,6 +317,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={`Transfer ${amountParsed.toString()} Token`}
+					// primary={"yey"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
@@ -503,11 +504,11 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		}
 	}
-	if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-		return (
-			<ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
-		);
-	}
+	// if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+	// 	return (
+	// 		<ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
+	// 	);
+	// }
 	return <ListItemText primary={tx.publicKey.toString()} />;
 }
 
@@ -669,7 +670,10 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
 							) : (
 								// eslint-disable-next-line array-callback-return
 								transactions.map((tx: any) => {
-									if (!tx.account.didExecute) {
+									if (
+										!tx.account.didExecute &&
+										multisigAccount.ownerSetSeqno === tx.account.ownerSetSeqno
+									) {
 										return (
 											<TxListItem
 												key={tx.publicKey.toString()}
@@ -1156,28 +1160,28 @@ function icon(tx, multisigClient) {
 	if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
 		return <BuildIcon />;
 	}
-	if (tx.account.programId.equals(multisigClient.programId)) {
-		const setThresholdSighash = multisigClient.coder.sighash(
-			"global",
-			"change_threshold"
-		);
-		if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-			return <GavelIcon />;
-		}
-		const setOwnersSighash = multisigClient.coder.sighash(
-			"global",
-			"set_owners"
-		);
-		if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-			return <SupervisorAccountIcon />;
-		}
-	}
+	// if (tx.account.programId.equals(multisigClient.programId)) {
+	// 	const setThresholdSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"change_threshold"
+	// 	);
+	// 	if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return <GavelIcon />;
+	// 	}
+	// 	const setOwnersSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"set_owners"
+	// 	);
+	// 	if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return <SupervisorAccountIcon />;
+	// 	}
+	// }
 	if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
 		return <MoneyRounded />;
 	}
-	if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-		return <DescriptionIcon />;
-	}
+	// if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+	// 	return <DescriptionIcon />;
+	// }
 	return (
 		<img
 			src="/credix.svg"

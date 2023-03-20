@@ -27,6 +27,7 @@ function getFilters(provider: Provider): GetProgramAccountsFilter[] {
 		{
 			memcmp: {
 				offset: 32,
+				// @ts-ignore
 				bytes: provider.publicKey?.toBase58(),
 			},
 		},
