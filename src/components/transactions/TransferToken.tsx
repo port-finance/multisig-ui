@@ -11,7 +11,7 @@ import {
 	Button,
 } from "@material-ui/core";
 import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
-import { getTokenAccount, getMintInfo } from "@project-serum/common";
+import { getTokenAccount, getMintInfo, Provider } from "@project-serum/common";
 import {
 	u64,
 	Token,
@@ -75,11 +75,11 @@ function TransferTokenListItemDetails({
 	const [destination, setDestination] = useState<null | string>(null);
 	const [amount, setAmount] = useState<null | u64>(null);
 
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const tokenAccounts = useMultiSigOwnedTokenAccounts(
-		multisigClient.provider,
+		provider,
 		multisig,
 		multisigClient.programId
 	);
@@ -106,10 +106,7 @@ function TransferTokenListItemDetails({
 			[multisig.toBuffer()],
 			multisigClient.programId
 		);
-		const sourceTokenAccount = await getTokenAccount(
-			multisigClient.provider,
-			sourceAddr
-		);
+		const sourceTokenAccount = await getTokenAccount(provider, sourceAddr);
 
 		const destinationTokenAccAddr = destinationAccAddr;
 		// UNCOMMENT THE BELOW IF YOU WANT TO PASS A WALLET ADDRESS AND DERIVE THE TOKEN ADDRESS
@@ -118,7 +115,7 @@ function TransferTokenListItemDetails({
 		// @ts-ignore
 		try {
 			const destinationTokenAccount = await getTokenAccount(
-				multisigClient.provider,
+				provider,
 				destinationTokenAccAddr
 			);
 			// @ts-ignore
@@ -139,8 +136,9 @@ function TransferTokenListItemDetails({
 			return;
 		}
 
-		const tokenMint = await getMintInfo(
-			multisigClient.provider,
+		// const tokenMint = await getMintInfo(provider, sourceTokenAccount.mint);
+
+		let tokenMint = await provider.connection.getTokenSupply(
 			sourceTokenAccount.mint
 		);
 
@@ -151,7 +149,7 @@ function TransferTokenListItemDetails({
 			return;
 		}
 		const TEN = new u64(10);
-		const multiplier = TEN.pow(new BN(tokenMint.decimals));
+		const multiplier = TEN.pow(new BN(tokenMint.value.decimals));
 		const amountInLamports = amount.mul(multiplier);
 		const transferIx = Token.createTransferInstruction(
 			TOKEN_PROGRAM_ID,
@@ -167,10 +165,11 @@ function TransferTokenListItemDetails({
 			transferIx.keys,
 			Buffer.from(transferIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

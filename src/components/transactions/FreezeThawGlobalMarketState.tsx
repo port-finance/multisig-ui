@@ -70,7 +70,7 @@ function FreezeThawGlobalMarketStateListItemDetails({
 	const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(
 		SEEDS.GLOBAL_MARKET_STATE_PDA
 	);
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const onBlurGlobalMarketSeed = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,10 +120,11 @@ function FreezeThawGlobalMarketStateListItemDetails({
 			// @ts-ignore
 			Buffer.from(activateIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

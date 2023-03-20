@@ -70,11 +70,9 @@ function UpdateDealListItemDetails({
 	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
 	const [serviceFees, setServiceFees] = useState<number>();
 	const [serviceFeesRepaid, setServiceFeesRepaid] = useState<number>();
-	const [
-		yearLatestServiceFeesCharged,
-		setYearLatestServiceFeesCharged,
-	] = useState<number>();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [yearLatestServiceFeesCharged, setYearLatestServiceFeesCharged] =
+		useState<number>();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -175,10 +173,11 @@ function UpdateDealListItemDetails({
 			// @ts-ignore
 			Buffer.from(updateDealConfigIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

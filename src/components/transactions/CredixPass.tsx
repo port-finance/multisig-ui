@@ -76,14 +76,13 @@ function CredixPassListItemDetails({
 	const [isBorrower, setIsBorrower] = useState<boolean>(false);
 	const [isUnderwriter, setIsUnderwriter] = useState<boolean>(false);
 	const [isActive, setIsActive] = useState<boolean>(false);
-	const [disableWithdrawalFee, setDisableWithdrawalFee] = useState<boolean>(
-		false
-	);
+	const [disableWithdrawalFee, setDisableWithdrawalFee] =
+		useState<boolean>(false);
 	const [passHolder, setPassHolder] = useState<string>("");
 	const [releaseTimestamp, setReleaseTimestamp] = useState(new BN(0));
 	const [credixPass, setCredixPass] = useState<CredixPass | null | any>();
 	const [issueUpdate, setIssueUpdate] = useState<string>("Issue");
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const fetchAndSetPassData = useCallback(
@@ -106,7 +105,7 @@ function CredixPassListItemDetails({
 				setReleaseTimestamp(new BN(0));
 			}
 		},
-		[multisigClient.provider.connection, multisigClient.provider.wallet]
+		[multisigClient.provider.connection, multisigClient.provider.publicKey]
 	);
 
 	useEffect(() => {
@@ -231,7 +230,7 @@ function CredixPassListItemDetails({
 					accounts: {
 						multisig,
 						transaction: transaction.publicKey,
-						proposer: multisigClient.provider.wallet.publicKey,
+						proposer: multisigClient.provider.publicKey as PublicKey,
 						rent: SYSVAR_RENT_PUBKEY,
 					},
 					signers: [transaction],

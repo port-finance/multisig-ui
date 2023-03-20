@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
 import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
@@ -43,7 +43,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 // import CredixLogo from "../credix.svg";
-import BN from "bn.js";
+import { BN } from "bn.js";
 import {
 	Account,
 	PublicKey,
@@ -80,11 +80,9 @@ import { ActivateDealListItem } from "./transactions/ActivateDeal";
 import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
-import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { UpdateMarketListItem } from "./transactions/UpdateMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
-import { NameTokenListItem } from "./transactions/NameToken";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 import { UpdateDealListItem } from "./transactions/UpdateDeal";
 import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
@@ -238,11 +236,6 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					{/* <InitializeMarketListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          /> */}
 					<CredixPassListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -254,11 +247,6 @@ function AddTransactionDialog({
 						onClose={onClose}
 					/>
 					<UpdateMarketListItem
-						didAddTransaction={didAddTransaction}
-						multisig={multisig}
-						onClose={onClose}
-					/>
-					<NameTokenListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
@@ -569,13 +557,12 @@ function NewMultisigButton() {
 }
 
 export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [multisigAccount, setMultisigAccount] = useState<any>(undefined);
 	const [transactions, setTransactions] = useState<any>(null);
 	const [showSignerDialog, setShowSignerDialog] = useState(false);
-	const [showAddTransactionDialog, setShowAddTransactionDialog] = useState(
-		false
-	);
+	const [showAddTransactionDialog, setShowAddTransactionDialog] =
+		useState(false);
 	const [forceRefresh, setForceRefresh] = useState(false);
 	useEffect(() => {
 		multisigClient.account.multisig
@@ -706,7 +693,7 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
 			/>
 			{multisigAccount && (
 				<SignerDialog
-					key={multisigClient.provider.wallet.publicKey.toString()}
+					key={multisigClient.provider.publicKey?.toString()}
 					multisig={multisig}
 					multisigAccount={multisigAccount}
 					open={showSignerDialog}
@@ -724,8 +711,8 @@ export function NewMultisigDialog({
 	open: boolean;
 	onClose: () => void;
 }) {
-	const history = useHistory();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const navigate = useNavigate();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 	const [threshold, setThreshold] = useState(2);
 	// @ts-ignore
@@ -780,7 +767,7 @@ export function NewMultisigDialog({
 			action: <ViewTransactionOnExplorerButton signature={tx} />,
 		});
 		_onClose();
-		history.push(`/${multisig.publicKey.toString()}`);
+		navigate(`/${multisig.publicKey.toString()}`);
 	};
 	return (
 		<Dialog fullWidth open={open} onClose={_onClose} maxWidth="md">
@@ -867,7 +854,7 @@ function TxListItem({
 	tx: any;
 }) {
 	const { enqueueSnackbar } = useSnackbar();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [open, setOpen] = useState(false);
 	const [txAccount, setTxAccount] = useState(tx.account);
 	useEffect(() => {
@@ -928,11 +915,12 @@ function TxListItem({
 		enqueueSnackbar("Approving transaction", {
 			variant: "info",
 		});
+		//@ts-ignore
 		await multisigClient.rpc.approve({
 			accounts: {
 				multisig,
 				transaction: tx.publicKey,
-				owner: multisigClient.provider.wallet.publicKey,
+				owner: multisigClient.provider.publicKey,
 			},
 		});
 		enqueueSnackbar("Transaction approved", {
@@ -1121,7 +1109,7 @@ function SignerDialog({
 	open: boolean;
 	onClose: () => void;
 }) {
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [signer, setSigner] = useState<null | string>(null);
 	useEffect(() => {
 		PublicKey.findProgramAddress(

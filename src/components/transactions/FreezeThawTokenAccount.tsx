@@ -73,7 +73,7 @@ function FreezeThawTokenAccountListItemDetails({
 		SEEDS.GLOBAL_MARKET_STATE_PDA
 	);
 	const [tokenAccountPk, setTokenAccountPk] = useState<PublicKey>();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const onBlurFrozenThawn = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,10 +160,11 @@ function FreezeThawTokenAccountListItemDetails({
 			// @ts-ignore
 			Buffer.from(freezeThawIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

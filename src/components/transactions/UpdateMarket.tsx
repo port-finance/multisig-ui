@@ -79,19 +79,15 @@ function UpdateMarketListItemDetails({
 	const [performanceFee, setPerformanceFee] = useState<string>();
 	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
 	const [withdrawalFee, setWithdrawalFee] = useState<string>();
-	const [
-		poolSizeLimitPercentage,
-		setPoolSizeLimitPercentage,
-	] = useState<string>();
-	const [
-		treasuryPoolTokenAccount,
-		setTreasuryPoolTokenAccount,
-	] = useState<string>();
+	const [poolSizeLimitPercentage, setPoolSizeLimitPercentage] =
+		useState<string>();
+	const [treasuryPoolTokenAccount, setTreasuryPoolTokenAccount] =
+		useState<string>();
 
 	const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(
 		SEEDS.GLOBAL_MARKET_STATE_PDA
 	);
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const fractionToString = (inputFraction: Fraction) => {
@@ -195,10 +191,11 @@ function UpdateMarketListItemDetails({
 			// @ts-ignore
 			Buffer.from(updateMarketConfigIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

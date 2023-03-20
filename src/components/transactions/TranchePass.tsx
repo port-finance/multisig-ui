@@ -76,7 +76,7 @@ function TranchePassListItemDetails({
 	const [tranches, setTranches] = useState<Tranches>();
 	const [investorPublicKey, setInvestorPublicKey] = useState<PublicKey>();
 	const [dealRows, setDealRows] = useState([<p>"no pending deals"</p>]);
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -143,7 +143,7 @@ function TranchePassListItemDetails({
 					accounts: {
 						multisig,
 						transaction: transaction.publicKey,
-						proposer: multisigClient.provider.wallet.publicKey,
+						proposer: multisigClient.provider.publicKey as PublicKey,
 						rent: SYSVAR_RENT_PUBKEY,
 					},
 					signers: [transaction],
