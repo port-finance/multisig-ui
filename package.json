@@ -17,7 +17,7 @@
 		"@project-serum/sol-wallet-adapter": "^0.2.0",
 		"@saberhq/anchor-contrib": "^1.14.11",
 		"@solana/buffer-layout": "^4.0.1",
-		"@solana/spl-token": "^0.1.8",
+		"@solana/spl-token": "^0.3.7",
 		"@solana/spl-token-registry": "^0.2.4574",
 		"@solana/wallet-adapter-base": "^0.9.22",
 		"@solana/wallet-adapter-material-ui": "^0.16.29",

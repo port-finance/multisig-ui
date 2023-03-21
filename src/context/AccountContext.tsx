@@ -1,11 +1,7 @@
 import React, { useCallback, useContext, useMemo } from "react";
 
 import { GetProgramAccountsFilter } from "@solana/web3.js";
-import {
-	AccountInfo,
-	AccountLayout,
-	TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import { Provider } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
@@ -34,7 +30,7 @@ function getFilters(provider: Provider): GetProgramAccountsFilter[] {
 	];
 }
 
-function parse(raw: KeyedAccountInfo): AccountInfo {
+function parse(raw: KeyedAccountInfo): any {
 	const res = parseTokenAccount(raw.accountInfo.data);
 	res.address = raw.accountId;
 	return res;
@@ -42,7 +38,7 @@ function parse(raw: KeyedAccountInfo): AccountInfo {
 
 interface Interface {
 	tokens: TokenAccountContext;
-	reload: () => Promise<AccountInfo[]>;
+	reload: () => Promise<any[]>;
 	isLoading: boolean;
 }
 
@@ -52,7 +48,7 @@ export function AccountProvider({ children = null as any }) {
 	const [multisigProgram, credixClient] = useMultisigProgram();
 
 	const [splAccounts, reloadSplAccounts, isReloadingSplAccounts] =
-		useProgramSubscription<AccountInfo>(
+		useProgramSubscription<any>(
 			getProgramId,
 			getFilters,
 			parse,
