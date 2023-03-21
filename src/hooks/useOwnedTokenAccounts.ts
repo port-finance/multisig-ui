@@ -24,21 +24,21 @@ export function useMultiSigOwnedTokenAccounts(
 				signer
 			);
 			const ownedTokenAccountsResolved = await Promise.all(ownedTokenAccounts);
-			console.log({ ownedTokenAccountsResolved });
 			setResults(ownedTokenAccountsResolved);
 			return ownedTokenAccountsResolved;
 		};
-		onLoad().then((results) => {
-			console.log(
-				`Fetched ${results.length} accounts for multisig ${multiSig}.`
-			);
-		});
-		// .catch(() => {
-		// 	console.error(
-		// 		"Connection Failed",
-		// 		`Failed to fetch token accounts owned by ${multiSig}`
-		// 	);
-		// });
+		onLoad()
+			.then((results) => {
+				console.log(
+					`Fetched ${results.length} accounts for multisig ${multiSig}.`
+				);
+			})
+			.catch(() => {
+				console.error(
+					"Connection Failed",
+					`Failed to fetch token accounts owned by ${multiSig}`
+				);
+			});
 
 		return () => {
 			setResults([]);
