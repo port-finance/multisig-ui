@@ -274,6 +274,7 @@ const NO_SHOW_LIST = [
 	"9A6FDPsP1C256akJUuheexE2W7WeovvpwLPb2jUnLUDK",
 	"Cvbip8WAghcGxMvpLxiBduutweJjmq7VXd2TXUQ8PSMh",
 	"6GWcq4hMtrHHBSd3vDSQC1rs9Cy36rGhk2HjD9XmsytK",
+	"B7EhUTi65sMD4xPgBjwhXeX3F91vnb3WHCvHfYcGa8qc",
 	"8jrp9cBekXPEDZfR979ttxG3FxYB7fWkMjHUa3b9Ljth",
 	"7s1zs85aLgGXBa92M8xzLWwS34GRoxZQTdHaFYMaD5fp",
 	"HtRpoDNv6vLDLajMcEa2M1sBamaSY1wAxJgcLXWXAFao",
@@ -552,14 +553,15 @@ function ixLabel(tx: any, multisigClient: any) {
 			tx.account.accounts.length === 6 &&
 			tx.account.data.length === 20
 		) {
+			console.log("helloooo");
 			// update credix pass newest version
 			const credixPassPk = tx.account.accounts[1].pubkey.toString();
 			const active = tx.account.data.slice(8, 9)[0];
 			const underwriter = tx.account.data.slice(9, 10)[0];
 			const borrower = tx.account.data.slice(10, 11)[0];
-			const releaseDateBuffer = tx.account.data.slice(11, 19);
+			const releaseDateBuffer = tx.account.data.slice(11, 19) as Buffer;
 			// @ts-ignore
-			const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
+			const releaseDateUnix = new BN(releaseDateBuffer.readBigInt64LE());
 			const disableWithdrawalFee = tx.account.data.slice(19, 20)[0];
 			let releaseDate;
 
@@ -583,9 +585,9 @@ function ixLabel(tx: any, multisigClient: any) {
 			const credixPassPk = tx.account.accounts[1].pubkey.toString();
 			const underwriter = tx.account.data.slice(8, 9)[0];
 			const borrower = tx.account.data.slice(9, 10)[0];
-			const releaseDateBuffer = tx.account.data.slice(10, 18);
+			const releaseDateBuffer = tx.account.data.slice(10, 18) as Buffer;
 			// @ts-ignore
-			const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
+			const releaseDateUnix = new BN(releaseDateBuffer.readBigInt64LE());
 			const disableWithdrawalFee = tx.account.data.slice(18, 19)[0];
 			let releaseDate;
 
