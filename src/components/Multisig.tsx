@@ -496,8 +496,9 @@ function ixLabel(tx: any, multisigClient: any) {
 	if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
 		const tag = tx.account.data.slice(0, 1);
 		const amountBuf = tx.account.data.slice(1, 9) as Buffer;
+		const amountInt = amountBuf.readBigInt64LE();
 		// @ts-ignore
-		const amountParsed = new BN(u64.fromBuffer(amountBuf)).div(new BN(1000));
+		const amountParsed = Number(amountInt.toString()) / 1000000;
 		if (Buffer.from([3]).equals(tag)) {
 			return (
 				<ListItemText
