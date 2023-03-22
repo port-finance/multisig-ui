@@ -82,7 +82,7 @@ function MarketAdminsListItemDetails({
 	);
 	const [investorPublicKey, setInvestorPublicKey] = useState<PublicKey>();
 	const [dealRows, setDealRows] = useState([<p>"no pending deals"</p>]);
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const isValidPublicKey = (publicKey: string) => {
@@ -193,10 +193,11 @@ function MarketAdminsListItemDetails({
 			// @ts-ignore
 			Buffer.from(updateMarketAdminsIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

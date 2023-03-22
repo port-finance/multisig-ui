@@ -72,7 +72,7 @@ function ActivateMigratedDealListItemDetails({
 	const [lpClaims, setLpClaims] = useState<string>("");
 	const [trancheClaims, setTrancheClaims] = useState<string>("");
 
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const decimals = 1000000;
 	const { enqueueSnackbar } = useSnackbar();
 
@@ -203,9 +203,8 @@ function ActivateMigratedDealListItemDetails({
 		console.log({ transformedLpClaims });
 		const parsedTrancheClaims = JSON.parse(trancheClaims);
 		console.log({ parsedTrancheClaims });
-		const transformedTrancheClaims = transformTrancheClaims(
-			parsedTrancheClaims
-		);
+		const transformedTrancheClaims =
+			transformTrancheClaims(parsedTrancheClaims);
 		console.log({ transformedTrancheClaims });
 
 		const [multisigSigner] = await PublicKey.findProgramAddress(
@@ -235,10 +234,11 @@ function ActivateMigratedDealListItemDetails({
 			// @ts-ignore
 			Buffer.from(activateMigratedDealIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

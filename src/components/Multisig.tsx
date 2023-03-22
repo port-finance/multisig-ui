@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
 import { encode as encodeBase64 } from "js-base64";
 import Container from "@material-ui/core/Container";
@@ -43,7 +43,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 // import CredixLogo from "../credix.svg";
-import BN from "bn.js";
+import { BN } from "bn.js";
 import {
 	Account,
 	PublicKey,
@@ -51,16 +51,9 @@ import {
 	SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
 import { ViewTransactionOnExplorerButton } from "./Notification";
-import * as idl from "../utils/idl";
+// import * as idl from "../utils/idl";
 import { useMultisigProgram } from "../hooks/useMultisigProgram";
-import {
-	Token,
-	ASSOCIATED_TOKEN_PROGRAM_ID,
-	TOKEN_PROGRAM_ID,
-	u64,
-	AccountInfo as TokenAccount,
-	AccountLayout,
-} from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID, AccountLayout, getAccount } from "@solana/spl-token";
 import { MoneyRounded } from "@material-ui/icons";
 import { Connection } from "@solana/web3.js";
 import {
@@ -74,23 +67,51 @@ import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { config } from "../credix/config";
 import { ChangeThresholdListItem } from "./transactions/ChangeThreshold";
 import { ProgramUpdateListItem } from "./transactions/ProgramUpgrade";
-import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
+// import { IdlUpgradeListItem } from "./transactions/IdlUpgrade";
 import { MultisigSetOwnersListItem } from "./transactions/SetOwners";
 import { ActivateDealListItem } from "./transactions/ActivateDeal";
 import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
-import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { UpdateMarketListItem } from "./transactions/UpdateMarket";
 import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
-import { NameTokenListItem } from "./transactions/NameToken";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 import { UpdateDealListItem } from "./transactions/UpdateDeal";
 import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
 import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDeal";
+import { u64 } from "@project-serum/borsh";
 
 const NO_SHOW_LIST = [
+	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
+	"EsQJUXtfz5BQJya9e5sYZdeGUgsN61KyqABRybWyHx2r",
+	"9f7DQZVCcrAwbZqdaPzZmvgCsKJeuyat8vX1Pf2dUgUt",
+	"Fu9E3uxbwy5TmFQneYzrwh1KHcqdgqpZUunLgUEXkUkX",
+	"AHoRfLLjdubrzEXyjqKrMoRWCT89Ld8gVVV1XMyKPKTh",
+	"Gk5h7TZ2HqRfnTewmpyirj9dMhozXUcjYoEf4UL5hJU1",
+	"6xxwD7NdsMcFLaiLKRyJfYyYMozqrmYFV6u5GT6AjPRj",
+	"2rQ6KmUbw4vEmLGfetoaWS9CU1Vyt15GgwqEbtx9fwtR",
+	"EcgopxcRz2Byn7EUJRV7WEBAdr2SQVHaRwsBAuu7URfP",
+	"6uAwRDhirmgnE7EJeh9n6iAKDSzJrE46CAdM8WzY5U1f",
+	"Ge671HMHqxkwP6Q432ddkKk4VobXXByCXGmq769iMpiK",
+	"ayiDB95vJ2cEytyLgdtJT4Nyoo2xasYvpchnLta4kzF",
+	"GSJafVfeatmr9z5XEioKy8gtXKuDk64WoXqxd4n9P3PD",
+	"GH8nBK1X4wkcpHRQwKnZcrwHFwnXWo21ZZBjn6hoE1MH",
+	"CsAmxJJ6Mnuy1Jwb4QGk4NgYGitJDRP7ytKw3x8DB68w",
+	"8i5E1gAEcrJU4KRUrYJwGhFCHZAt27QrguJrypiJmKFb",
+	"6j6VYhuqHNs5x1BLxopbjVqKojn3Qy3VmbAb2nmNgn7K",
+	"DheryLuiGDC2amNNPcCRkJ5ML9DLqLqsNFwuZ2Un4J7g",
+	"GEb3sK26tcg8aYoGxeEdWfnWun57XQ6fV91KDJDPXB6P",
+	"2nQQEEBsiUSRiS4Q49Ro7LWAyV65zLYCkLE4SMPee2Jj",
+	"GwwXVrBD7r2FS2UdewBjFx8bG4C2SEq59WHk7LAgNjP9",
+	"Cjg9WED7M6jQznCqvdpLpkLuixp61Ht7DktG8MMM7Tka",
+	"2ku116ffxiu2mkybCHixnHBFVw6ZY7FARARmzwe3tatp",
+	"APiCuumSsEXUQLtMEEq7jp5dvKBPv6NZVxS1XZ3NwF8a",
+	"HEjFY96S96rPLVtPW1iFZ2bmMNg7SsvdvZkE5L7MLcsK",
+	"6Q7JidT3eA1H8KAoKSVPSPwxW1WsR9ycLB86jrAqh1Db",
+	"Azec2baAs7g86tYEjoJsibp6jBJKpvSxFeJk5cc4SuTa",
+	"BURPA2yzMb6JMqLA4cJHuaN43oJ8o5Lfga66ru2wcVgH",
+	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
 	"7ezaSsbSoHJWqA59KAq1ENZGgJjhNtVpzULPbyzFNRqF",
 	"59y9hWxMbW3MVFP36TJbipaXzXMAWJfoBisP6NtFKDrU",
@@ -114,6 +135,8 @@ const NO_SHOW_LIST = [
 	"9QXwLCgjFJYSCrHaDgti4qQJHcFmnTsuBipNVXDCWUs8",
 	"35GhRoQNbtB8h5zAWWFNo4vvqpAqfYhwGMGyDQahg8pJ",
 	"EigpveeSn5jVPL78m4x7M83er3Czz5Gw2aeJ5XtSgPgr",
+	"3kFi2X6WV3R5twcs21SWmTwUrt8w596o28GdCrrCVCyx",
+	"DcUqaEubCEwpHVykCx3QQmrbm6BomtStnkFNjPxEvNxF",
 	"AGnNFEp49utYtqMCRFGZo1t5J9mZVY4CA5rGWWdiyLqr",
 	"HhkHFd7DjGxzDCDhYe5tsz4EqLuHHe7uVoUyquP2b6MK",
 	"6vCbSFtMScZnqJUfQbfJGKHQVGGgHLNNBsZEtTCUHnUo",
@@ -160,6 +183,165 @@ const NO_SHOW_LIST = [
 	"HuwWNPWEW8fkkLe4LuvNXpcoMhjNznhRZxQxFYVwjKz3",
 	"G6TvM8C79sd2YJ3T48HQCQJQjKXTeid5RWYWN1fuB3V",
 	"2rWbzXDwQJmuk5tQRTVcNd4NtTXAD2Ef818KvPVMiKyM",
+	"4Nze5JiKfGto3gWX8GavSEBzS4Lk7AjX2y2zGAXXHsoj",
+	"E2PdfEuHJtBphswMQZszWUvd1s9qXVEDKFYW12yqtGQK",
+	"5exYBKsNX2GKk2SKiryc52ShjVfGNcJ4XWj4VBozjZ4q",
+	"A82xKtY9e2843KvUHDtHQu4scCFkpkQy9Dqdm97F84Rh",
+	"4NstAjLkfK9ZroAhXzpYZJnvZP1bfskzsjbmxjnUdBrJ",
+	"FZrcwZGXNRdbpeqguceQ6FF9MJ6MHQQ3bsZxnp9rCXV2",
+	"BPEZo8oGtM5WUS2CBS7SevDuKg6MEDMpPqvEV8xPVWwJ",
+	"GxKz1fqPHiN4qKWnFnM6vPYL4g1WnZu7BVu9BdZSTp3J",
+	"Ak9qm4TVV7cvjAb845ahQzVXgAqHtRyukz6qNZL7GvhJ",
+	"4Ag98qAUuZ7NgNmwqFBhC7c79Sf7BrbCmta3QwBGRE1r",
+	"GaGM8KVreknmZ97qoHN97HMg8HcJ6ZbeeGKy15n6n3Ze",
+	"G9ssXpeQgvCr31DW6X65ydgCrQFrvuaJ5pNZ7x2hwa8Y",
+	"98iK6nnM1tGZ5Fu4sMMt8EQ8kS8XRiXNA6L5p6jLNG9P",
+	"G2M4doqrefm8sZZUHur44iTNxhC9TBV1tGswV7s1Y6hg",
+	"Ex4JjJRgSdfdB6RtT8Wz4zE3XCskcWkPk6KVLRJSss4B",
+	"7owPfQwzVtQTjcexe75QvndN7BmQ8nyoLdMvsPGFrnFF",
+	"EdaX7pxgidLkG75MybfkY4xiQb9JrwofqrZejJ2Vby4Q",
+	"5kmkh6KbX4vhAwagyY7K7FdndvqaAysoDzahDopL3ECX",
+	"J6pw9EFSjFa6DcAVYqsiiuBZgJL7tyJfvrhH6Ui5mbNw",
+	"7dPKjoQ8KuZoxLFy7cdq2zAQZbXzE5oiG7iyfLUycgx1",
+	"3RiYVRYpGzHpopesjvcvQQ57mzhZLHQQpD7F9bqpmXtA",
+	"E5p1TCVFYysYn1hVU8TMhanAfuK6Vq17zwXh8KcumzSC",
+	"972A9xK9vVGhKxr9w8iuQnjrPGCPQCNHNNkW1Ghyh1H2",
+	"AjmGFS9JsCypv3XWBZGz4E6Qtq7d2sPLZyQFKKRoMmgd",
+	"EdE8QfZm5PCthUfhoXRah5SGBGiSosrFovqBbgXJj2HK",
+	"DYkcRPihE16pVMQHrT4NC3A76rWhBdiHWWSNGaw9uAR2",
+	"4pEiTxKVEyCsVVSB2zW25VHqu7R7gqr1yHbxwhgsisMZ",
+	"AGUkdPWf6xPv3gNGpTLT2d2R9gtAxRKtEWcyF25sCfvh",
+	"7pzn2B6mmLDSwNxzW9Wwh46NdZdVQAveSSxg8UeQmobb",
+	"C2Lz5Zd9GXduQbqvrogw9nbd4kbQyiW4vBmYdD4aMQda",
+	"2N9Ef9YikP14VGCpTcRQMG4B7zQZnN6RuJVmTq8isNRZ",
+	"G4YvQz9y1YXkDzPJb6eCQfyStLZcPXDuxcFnSd68hNDp",
+	"5YajNcMbPcD2UTuPgCfjYpUyJHeB8fykn35xbeBDnZxD",
+	"BNwZfUYRkW39CwHx4nPWCDmaSVa5gvdCEdUYoJTmTjhF",
+	"DWx52mw3VSFNTUCAErSbNcwJgWg2R6nXNAMD2tzsdGYf",
+	"4PoCSqsuxAuMRwqDw85kkjaxEZLdNkJuNSKctrEjGhUi",
+	"2JGq7UbHkVqoET2Jxb9shY8ZM4YHsfMKzMcsvHr8BFTN",
+	"HfXpfZT1GyNXKMYQynSJD1BYBoaQeY7yq3fgkgeGtNFf",
+	"9csQD7d9ZFe3GuHoZA6Nr6yqxfy4qtVMXmrhVsEUsNxP",
+	"9cLREHvxGBWBvQWZu5fGG8H4qEXpytaUVamWuPkYWQGg",
+	"DW9ja8GF7hHjFrjaq8M1tCxPcj1UAjnc5UkMRHGTjkzZ",
+	"ALo3RphkyUUun3CN8R1AUemERg8dkzokr8CEdhbK537d",
+	"FejJy7Tmc37rxhUf3kPaLJTcoJZPqCggMDFK9KAaXJWr",
+	"4VZmVQ3ZWom7BtnTJ3NMs9rL9YuEmwyCn8GyHzZoEnky",
+	"4TY5UQH7EmqUuTPYQHxtdrvgjEZXWuSHq7vq1nngQmQ1",
+	"646hCQTsgNqu3bB9GekE5AXeCripu8ArUsSG7jDvC6r5",
+	"4ChxfaFM2wBJJddrAPPHfwhTKZ8XE2xmemKesCqTdygS",
+	"GHH83Q2accMQ78sN5fE5NVHujks5GP5DUUyfCQbdRo7C",
+	"ADQZtd7HioN5nei6jZwxXpP43kER4PvCw9VGmnzdYJpW",
+	"CfLputQBpcMJaxSAg19uoUsSkjUfAeZSrmdXFW8gijuY",
+	"DTPYoYL6JavHn79zHaYmsyWM7qmEFSBXGJohLUGKFEi1",
+	"3bvewBPmj3QkTVeoMs1yAbxQeRzTj4hcRNWFtcPG1cfR",
+	"4ZnCuzHrXL9AMQdNN1NTE4ZhHfZDSHbZCYzKohUUvNUX",
+	"5LCwobAnV4BLV2pe4MJMkhtYcEZhmU23PuYGDf35RjWf",
+	"QviavfdDoSajY92fQA41PLa9PNwX6F9VRFKQo2EMjpC",
+	"HpR1XGvh2cmkisCatWjMLPuuyGHBCqPx23PAGA91ehoe",
+	"D67YtkaNYJchP5UNfcT9o7JK21UE2rWhggmMEAiTsUki",
+	"HCj1zKfi4x23Zu63Nb54rRWDQyNz2Nz9bJfizaHyvtZX",
+	"7WY1dyitfL6MkTbhNX2ZDC818GfxHGDjZBMnD167Y3ET",
+	"HF21mDZ6W9E1LNUMk615Mbx1Fg14WHRQBL2QewbsjFmE",
+	"6wx9pyfGMddjQEHewMtgACjPgzaYTbyzq5acUPvrE3Q8",
+	"FTiL7Ab6yUpB7qB6q65JpgvkLrQrkZTVjX3vJXxoUkqH",
+	"Wf6VYpJhf9Grt5PqBYLSPBaN74F4w2DMEtEfTS7nq3V",
+	"2ifwdTp9QUcq8A6bsQqhbvrrFE8PnU2CMdMojep2dzgZ",
+	"82Qd9Av7VbFprweUnEVEZ8fywY8of26pQzh24s4H4mSL",
+	"8QTst9rBAqwNNMtAXquk8LmjpckFxUv8BEQVSahyMDyu",
+	"EiSJT3iCTHVesWL2ukf9CVwk8DLLQbpdNPzn7eZgn7BS",
+	"E9Ta56PcPFCJpiLQEbEovrg5sWggNjFm5pogZd7UZMV9",
+	"nhodHHFM9T5XmTvRMQKueBJh6eUVCEw5MhtDNagCoS8",
+	"CCjPcKavFrw8mBmMY5ANCypVAjeQvch1QS1Z74Bj4m66",
+	"FB5DLSh9eE4M9fAY62FS5DNcPW2JEFwcPsZmZANgdzNj",
+	"6dZZ4sc4Hs5q2931ne4TR1Ekegwn1DRjmjxAqxfumNmH",
+	"2tC6wad8cTrcLkGFtzvot9czSjy6Jg1pviUykhrEkosv",
+	"2E7zgGWpmbWvUmiCNLTVyUVRRxoS4rt94pUcSZkdR1Ph",
+	"HK27oTbRF5Zg2DLPd3ET5FKZSjyAoLRym9wZoKfgAkbU",
+	"AvXCE3gvjcf1BPmrWbDJ7BY4eePwnXcQ76tpdFGRGHxM",
+	"BTu2ptLLMXcVYoQYZWWTnn2FFtgR31hf9Eo12hHB58uf",
+	"BBUwKZTH642cx5SHZd7g1qUgGRXYW59JiEhmjnTEUoi9",
+	"AeKgqDHpBu1SM6ekNrM4Vm2AZa8wkzkZKAPZRLWv4u8t",
+	"Fmo2rmLkgPYrNy2VwnEaBYgs6rh6jJD1G1ptVmYnnndd",
+	"3mxR89PfCWye9Fo7fyki25ubzDnAmS9AQjHmZUMVHsud",
+	"HUqrXzXqttzBjChDhHLiBuk2wbuGMRqPaBHDeNae69PP",
+	"EKEhkrSrpruKCtgv9mFyeqnZTi4TxhKesCREF9yTcepk",
+	"5czrdzrsbqeV3SkYbwEQGAEBG4ThFzkfJZmsaRNKbGsJ",
+	"BkNMjcaHy9xVTfHNfPxfMSqmotsSsf6njmmjJd9E3ayH",
+	"8hmsvPesandvUrPNdEvYA2g8U3vZfWq2stywF3Ca5TEg",
+	"4NwhgvCYWBHb27FRHRdb2GiNW2xzww8mSD4SAtDDDEZU",
+	"6x4ZyAMQ5Lam2sDmGzVym2GdjMNAmseUc9MSbLTTdfmv",
+	"9A6FDPsP1C256akJUuheexE2W7WeovvpwLPb2jUnLUDK",
+	"Cvbip8WAghcGxMvpLxiBduutweJjmq7VXd2TXUQ8PSMh",
+	"6GWcq4hMtrHHBSd3vDSQC1rs9Cy36rGhk2HjD9XmsytK",
+	"8jrp9cBekXPEDZfR979ttxG3FxYB7fWkMjHUa3b9Ljth",
+	"7s1zs85aLgGXBa92M8xzLWwS34GRoxZQTdHaFYMaD5fp",
+	"HtRpoDNv6vLDLajMcEa2M1sBamaSY1wAxJgcLXWXAFao",
+	"CsAt6ttT14xbUPDHza9nQkKnd1AYcmGABbBpWWyqYf1S",
+	"H8ZhSsbeckLf5Ukfswu8W2PxdwC9p2S3Esaqpad7CYp9",
+	"6JxBB9KEGqa1k2s1SxQagL7tK6BU2rHQdxzYEiTnafpp",
+	"7jY2eVK7ebKmBULQq1S4ZSAaqFgxTvtmUvcieMKdKc9j",
+	"AXRh5HE3jCAU5d2NaZB9rNhmH9baUDzsStRRrgBb4tZa",
+	"4Mcpypis6dFEpvZXGLsYub9ndnc9AQy1c2Wx33v9EaVi",
+	"299xNEuEduyxQyH4FtZXan4QzqgVcijY4KSd36GaJxAu",
+	"3x7FbiNmRQEag4Vuii6NorpptsFHsLjDttQXUgUvzhvt",
+	"Bumj6J2Tu4etqKfMg5u4hSc6ejFdpzKMeSkt8EtSgMxD",
+	"HTwm8XTzms6HJQ3Wogg3gW8SCzXAYpSuVv1da2yBGQvn",
+	"GNDiB22Bp95nyuf6ZmhE2smM7wM4Wxy5F4XhZPhRtY5x",
+	"GGm3bw9ZGeYxDyX6kknp99NqBNx6Uip2e2W35Mn1PXAp",
+	"CYzCHkBXt832UE872QC8WB9RkuuCMmaCzMVXm3UtJVhB",
+	"Vc4CqKXx88imzo457WTkwJyqo9eDXEKE9dJiDpKoZo8",
+	"AY2WoofcD28oe38RexuhFvQFJ7sqgkGWKJWKEQ6BdAYP",
+	"3kK4gvxEfFqUfEbUYnStWu3v3JPz31hyrnKzxEviEwFg",
+	"75aCecXHPgSBEhEZdFtCmo7AMFkHLeP4jK1Dk7MZqTkC",
+	"DC5oWJDNf7pmJyMYvdThSvpAFT345wpTSvzQmPzTHMn3",
+	"36txzL16DEoj6Ty9KYz1o5EHZBYkWeHBuamo1CGmWDJV",
+	"5xdVeNXt3339hu1RcTs8jdDeyyB7xxULAKNsjYrVn2Cp",
+	"59ss3MBo9PjU8DA5jRrX6mwSp7eKNuPvwSFVbZvASQ6P",
+	"7ThYuQhNk8iH4z1Z93AC6Td87hDKZkK78opCyj9w6TbY",
+	"GHLK2eAJMVTZ1PemAeMLtJFUEFhN5ggtvxRghTKgn5ZX",
+	"Fxd4G9ywB1pMGgddgpF8y3JfNfbSaPBcAeL9JnDF8xbK",
+	"Gs72fa1YswvikdCiviazFoJjTSfZMuWBoJKZRZGBzyKG",
+	"E5WnF5evq8CLw4aM7N9qzraceiMnoHZQL24DBBJxQLUf",
+	"9eLXpRF2BBd6SZ24j3g4QxJtt6AxMyULLXeAzsG5Dxfc",
+	"H6Ctg1Kp91F4yBvaYK1LwNgurbNTzpEsm6EUuSgZbVA1",
+	"5KMaaxeuho8Dm1egQWCvYzDo1TW6WJ9sPoJHHqAEP5Fq",
+	"DCiYrEtuztPRWfiF39bfSNpeBbUrKprmzXDRQRdXkRbT",
+	"CY7MeTPhqgTNij43DBXSAK6J7n4gWWxJWgCNu8gNak9w",
+	"4ugWThTTLoVJfKN7D3e23rpAKuJvcoitjyBgu92shB9N",
+	"37xNJuHwB9dvdKT1vgQ3GyH8CxsAKe1JShFTN2ps5K1H",
+	"5fyGMXoGDNVoCHK7E7ud2kigjmGx831GXbir46E7sthT",
+	"BqJWa8rS24RYvqv5LUPDKkfRh42e82mKgxxmduBcTw5B",
+	"AZCEEhTjnCS5CJ98DkLT1WaFJPMYnb6zbXA6fLiGhSGU",
+	"2dE9paZ5mBuhJdJr954xRLXJs8vQLTzCrKRkzGeL91z9",
+	"GfyU8x9UrqNUNZdLgJTBnhFmCwDShHoZ3fDVFq3FriWb",
+	"8rmsrDRuuq53y4pMi6AP3WuMrLw7kKHJSBBwVAdiVHtz",
+	"2hFTGCshRFfFoZXNZYNEUtmMPAcMoxEKWiogkekH2A8U",
+	"3ppWgzRovXB2gsW5xQcfjq4bhKLrQq8eTUMaYgAZ5seg",
+	"4MRQQVvzPF78g9kRDhFMcs5buU62v4yPJfNu2BLviRT8",
+	"HwUScS8RaVP41zyPrun5NjAs225xppYaTRf1J54kRFxc",
+	"CyJ1q54tW9vWCNrFQAUo7i6tnnXAaJWhx4eeMzLJfeuB",
+	"6UoGrdG5bi8qc3J8g2UKoRTcrXJRSe2ZgFCU5ZCGy5mY",
+	"N1XU1ndqGv2MzrbmXJ4iY74gs7kxFL184bjT5vdz4ja",
+	"DptVMryAbFUB7rAy3Qc5RkXYKxj5T6btPqwdgL9w2UDV",
+	"6f8hFVczMZhRrve5dhtjYbqREzs6C2oT2XmfxvDkHyQu",
+	"AcPhYcoWKnqr98JLgg4dQk7EQovvJPrVCfEzRztqvDGr",
+	"9Ttdz98wSXVRLV2TZQt5fRkwKi2R7sCKBgz2KGTCEMLv",
+	"7Ugxuy4wuTHap9cPPwLap25XNUbpTUqrnQ7bDiH4eEsp",
+	"5HR6JWhBfGKxagDqVbqZtb4pYzswwngUwbfutfhCUupo",
+	"7JgUYoymSMmFPKRoZtfACYWET5xe6uGig9UiuAUae2Qu",
+	"AUxFYA8rCGxwRBpmhKWARTZRPWndAdDKaf19vJ3SPwbA",
+	"HiZE4HGRRLNaVRCEKwTq57im2e4ZAUsQo3TSrKJoxULY",
+	"2NgHQZTqouonTqr71CV1AVMVqeVXfXxfSNz5qxJb5iZD",
+	"3GnmRqrSXxgs2GRJmJAXXsSys7DCHx15eSzuRDp5puAw",
+	"A61LGy4EGKMN1TEy1UdefbQtYBK3D1GY28viE6rhiD6M",
+	"61Vp6kvZfz53FKNQJ7At9n14Y4mFZxyGt9KZD6kV6Dxd",
+	"Br1V18yM8c7xxuSXa86ZangXFZmkeV1KB3ccgUccjsaj",
+	"BUAKru3Z17uqxjbWW6VchcQ5Vji7CuJT6s7zuGieyBAx",
+	"3NyM6VQjbcs4KCEjMUH9UkSUHTu9LSxeEuq6pyxgfEkW",
+	"72P7mq3bueuX83UvVtrC73ex6a3mNjiK8Pggzs1a3iz3",
+	"2vJeusvZ6TS62NdUSGpUff9NTQatSZkrVcoxdAJqVyLj",
+	"q7yeJ8P1sHtZzbMh874g4rZrFiujbzfRNyGFghKCbP3",
 ];
 
 // NEW TRANSACTION
@@ -193,11 +375,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					<IdlUpgradeListItem
+					{/* <IdlUpgradeListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
-					/>
+					/> */}
 					<MultisigSetOwnersListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -238,11 +420,6 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					{/* <InitializeMarketListItem
-            didAddTransaction={didAddTransaction}
-            multisig={multisig}
-            onClose={onClose}
-          /> */}
 					<CredixPassListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -254,11 +431,6 @@ function AddTransactionDialog({
 						onClose={onClose}
 					/>
 					<UpdateMarketListItem
-						didAddTransaction={didAddTransaction}
-						multisig={multisig}
-						onClose={onClose}
-					/>
-					<NameTokenListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
@@ -281,9 +453,9 @@ function AddTransactionDialog({
 
 // LABELS FOR TRANSACTIONS
 function ixLabel(tx: any, multisigClient: any) {
-	console.log(tx);
-	console.log("account length", tx.account.accounts.length);
-	console.log("data length", tx.account.data.length);
+	// console.log(tx);
+	// console.log("account length", tx.account.accounts.length);
+	// console.log("data length", tx.account.data.length);
 	if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
 		// Upgrade instruction.
 		if (tx.account.data.equals(Buffer.from([3, 0, 0, 0]))) {
@@ -295,40 +467,43 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		}
 	}
-	if (tx.account.programId.equals(multisigClient.programId)) {
-		const setThresholdSighash = multisigClient.coder.sighash(
-			"global",
-			"change_threshold"
-		);
-		if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-			return (
-				<ListItemText
-					primary="Set threshold"
-					secondary={tx.publicKey.toString()}
-				/>
-			);
-		}
-		const setOwnersSighash = multisigClient.coder.sighash(
-			"global",
-			"set_owners"
-		);
-		if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-			return (
-				<ListItemText
-					primary="Set owners"
-					secondary={tx.publicKey.toString()}
-				/>
-			);
-		}
-	}
+	// if (tx.account.programId.equals(multisigClient.programId)) {
+	// 	const setThresholdSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"change_threshold"
+	// 	);
+	// 	if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return (
+	// 			<ListItemText
+	// 				primary="Set threshold"
+	// 				secondary={tx.publicKey.toString()}
+	// 			/>
+	// 		);
+	// 	}
+	// 	const setOwnersSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"set_owners"
+	// 	);
+	// 	if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return (
+	// 			<ListItemText
+	// 				primary="Set owners"
+	// 				secondary={tx.publicKey.toString()}
+	// 			/>
+	// 		);
+	// 	}
+	// }
 	if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
 		const tag = tx.account.data.slice(0, 1);
 		const amountBuf = tx.account.data.slice(1, 9) as Buffer;
-		const amountParsed = u64.fromBuffer(amountBuf).toNumber() / 1000000;
+		const amountInt = amountBuf.readBigInt64LE();
+		// @ts-ignore
+		const amountParsed = Number(amountInt.toString()) / 1000000;
 		if (Buffer.from([3]).equals(tag)) {
 			return (
 				<ListItemText
 					primary={`Transfer ${amountParsed.toString()} Token`}
+					// primary={"yey"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
@@ -383,6 +558,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			const underwriter = tx.account.data.slice(9, 10)[0];
 			const borrower = tx.account.data.slice(10, 11)[0];
 			const releaseDateBuffer = tx.account.data.slice(11, 19);
+			// @ts-ignore
 			const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
 			const disableWithdrawalFee = tx.account.data.slice(19, 20)[0];
 			let releaseDate;
@@ -408,6 +584,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			const underwriter = tx.account.data.slice(8, 9)[0];
 			const borrower = tx.account.data.slice(9, 10)[0];
 			const releaseDateBuffer = tx.account.data.slice(10, 18);
+			// @ts-ignore
 			const releaseDateUnix = u64.fromBuffer(releaseDateBuffer);
 			const disableWithdrawalFee = tx.account.data.slice(18, 19)[0];
 			let releaseDate;
@@ -515,11 +692,11 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		}
 	}
-	if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-		return (
-			<ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
-		);
-	}
+	// if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+	// 	return (
+	// 		<ListItemText primary="Upgrade IDL" secondary={tx.publicKey.toString()} />
+	// 	);
+	// }
 	return <ListItemText primary={tx.publicKey.toString()} />;
 }
 
@@ -569,13 +746,12 @@ function NewMultisigButton() {
 }
 
 export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [multisigAccount, setMultisigAccount] = useState<any>(undefined);
 	const [transactions, setTransactions] = useState<any>(null);
 	const [showSignerDialog, setShowSignerDialog] = useState(false);
-	const [showAddTransactionDialog, setShowAddTransactionDialog] = useState(
-		false
-	);
+	const [showAddTransactionDialog, setShowAddTransactionDialog] =
+		useState(false);
 	const [forceRefresh, setForceRefresh] = useState(false);
 	useEffect(() => {
 		multisigClient.account.multisig
@@ -682,7 +858,11 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
 							) : (
 								// eslint-disable-next-line array-callback-return
 								transactions.map((tx: any) => {
-									if (!tx.account.didExecute) {
+									if (
+										!tx.account.didExecute &&
+										multisigAccount.ownerSetSeqno === tx.account.ownerSetSeqno
+									) {
+										console.log(tx.publicKey.toString());
 										return (
 											<TxListItem
 												key={tx.publicKey.toString()}
@@ -706,7 +886,7 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
 			/>
 			{multisigAccount && (
 				<SignerDialog
-					key={multisigClient.provider.wallet.publicKey.toString()}
+					key={multisigClient.provider.publicKey?.toString()}
 					multisig={multisig}
 					multisigAccount={multisigAccount}
 					open={showSignerDialog}
@@ -724,8 +904,8 @@ export function NewMultisigDialog({
 	open: boolean;
 	onClose: () => void;
 }) {
-	const history = useHistory();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const navigate = useNavigate();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 	const [threshold, setThreshold] = useState(2);
 	// @ts-ignore
@@ -780,7 +960,7 @@ export function NewMultisigDialog({
 			action: <ViewTransactionOnExplorerButton signature={tx} />,
 		});
 		_onClose();
-		history.push(`/${multisig.publicKey.toString()}`);
+		navigate(`/${multisig.publicKey.toString()}`);
 	};
 	return (
 		<Dialog fullWidth open={open} onClose={_onClose} maxWidth="md">
@@ -867,7 +1047,7 @@ function TxListItem({
 	tx: any;
 }) {
 	const { enqueueSnackbar } = useSnackbar();
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [open, setOpen] = useState(false);
 	const [txAccount, setTxAccount] = useState(tx.account);
 	useEffect(() => {
@@ -928,11 +1108,12 @@ function TxListItem({
 		enqueueSnackbar("Approving transaction", {
 			variant: "info",
 		});
+		//@ts-ignore
 		await multisigClient.rpc.approve({
 			accounts: {
 				multisig,
 				transaction: tx.publicKey,
-				owner: multisigClient.provider.wallet.publicKey,
+				owner: multisigClient.provider.publicKey,
 			},
 		});
 		enqueueSnackbar("Transaction approved", {
@@ -1121,7 +1302,7 @@ function SignerDialog({
 	open: boolean;
 	onClose: () => void;
 }) {
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const [signer, setSigner] = useState<null | string>(null);
 	useEffect(() => {
 		PublicKey.findProgramAddress(
@@ -1168,28 +1349,28 @@ function icon(tx, multisigClient) {
 	if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
 		return <BuildIcon />;
 	}
-	if (tx.account.programId.equals(multisigClient.programId)) {
-		const setThresholdSighash = multisigClient.coder.sighash(
-			"global",
-			"change_threshold"
-		);
-		if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
-			return <GavelIcon />;
-		}
-		const setOwnersSighash = multisigClient.coder.sighash(
-			"global",
-			"set_owners"
-		);
-		if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
-			return <SupervisorAccountIcon />;
-		}
-	}
+	// if (tx.account.programId.equals(multisigClient.programId)) {
+	// 	const setThresholdSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"change_threshold"
+	// 	);
+	// 	if (setThresholdSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return <GavelIcon />;
+	// 	}
+	// 	const setOwnersSighash = multisigClient.coder.sighash(
+	// 		"global",
+	// 		"set_owners"
+	// 	);
+	// 	if (setOwnersSighash.equals(tx.account.data.slice(0, 8))) {
+	// 		return <SupervisorAccountIcon />;
+	// 	}
+	// }
 	if (tx.account.programId.equals(TOKEN_PROGRAM_ID)) {
 		return <MoneyRounded />;
 	}
-	if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
-		return <DescriptionIcon />;
-	}
+	// if (idl.IDL_TAG.equals(tx.account.data.slice(0, 8))) {
+	// 	return <DescriptionIcon />;
+	// }
 	return (
 		<img
 			src="/credix.svg"
@@ -1213,7 +1394,7 @@ function seed(): string {
 export async function getOwnedTokenAccounts(
 	connection: Connection,
 	publicKey: PublicKey
-): Promise<TokenAccount[]> {
+): Promise<any[]> {
 	const accounts = await connection.getProgramAccounts(TOKEN_PROGRAM_ID, {
 		filters: [
 			{
@@ -1227,9 +1408,13 @@ export async function getOwnedTokenAccounts(
 			},
 		],
 	});
-	return accounts.map((r) => {
-		const tokenAccount = parseTokenAccount(r.account.data);
-		tokenAccount.address = r.pubkey;
+	console.log(accounts);
+	return accounts.map(async (r) => {
+		// console.log("before parsing");
+		// const tokenAccount = parseTokenAccount(r.account.data);
+		// console.log("after parsing");
+		// tokenAccount.address = r.pubkey;
+		const tokenAccount = await getAccount(connection, r.pubkey);
 		return tokenAccount;
 	});
 }

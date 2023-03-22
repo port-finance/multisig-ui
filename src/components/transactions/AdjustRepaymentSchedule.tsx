@@ -69,16 +69,12 @@ function AdjustRepaymentScheduleListItemDetails({
 }) {
 	const [deal, setDeal] = useState<Deal | null>();
 	const [indexToStart, setIndexToStart] = useState<number>(0);
-	const [
-		repaymentSchedulePrincipal,
-		setRepaymentSchedulePrincipal,
-	] = useState<string>("");
-	const [
-		repaymentScheduleInterest,
-		setRepaymentScheduleInterest,
-	] = useState<string>("");
+	const [repaymentSchedulePrincipal, setRepaymentSchedulePrincipal] =
+		useState<string>("");
+	const [repaymentScheduleInterest, setRepaymentScheduleInterest] =
+		useState<string>("");
 
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const decimals = 1000000;
 	const { enqueueSnackbar } = useSnackbar();
 
@@ -203,10 +199,11 @@ function AdjustRepaymentScheduleListItemDetails({
 			// @ts-ignore
 			Buffer.from(adjustRepaymentScheduleIx[0].data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: multisigClient.provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],

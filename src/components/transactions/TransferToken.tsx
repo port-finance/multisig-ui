@@ -11,12 +11,13 @@ import {
 	Button,
 } from "@material-ui/core";
 import { MoneyRounded, ExpandLess, ExpandMore } from "@material-ui/icons";
-import { getTokenAccount, getMintInfo } from "@project-serum/common";
+import { getTokenAccount, getMintInfo, Provider } from "@project-serum/common";
 import {
-	u64,
-	Token,
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	TOKEN_PROGRAM_ID,
+	getAccount,
+	getAssociatedTokenAddress,
+	createTransferInstruction,
 } from "@solana/spl-token";
 import BN from "bn.js";
 import { useSnackbar } from "notistack";
@@ -31,6 +32,7 @@ import {
 	SYSVAR_RENT_PUBKEY,
 	SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
+import { u64 } from "@project-serum/borsh";
 
 export function TransferTokenListItem({
 	multisig,
@@ -73,13 +75,13 @@ function TransferTokenListItemDetails({
 }) {
 	const [source, setSource] = useState<null | string>(null);
 	const [destination, setDestination] = useState<null | string>(null);
-	const [amount, setAmount] = useState<null | u64>(null);
+	const [amount, setAmount] = useState<null | BN>(null);
 
-	const [multisigClient, credixClient] = useMultisigProgram();
+	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const tokenAccounts = useMultiSigOwnedTokenAccounts(
-		multisigClient.provider,
+		provider,
 		multisig,
 		multisigClient.programId
 	);
@@ -88,12 +90,7 @@ function TransferTokenListItemDetails({
 		ownerPk: PublicKey,
 		mintPk: PublicKey
 	) => {
-		return await Token.getAssociatedTokenAddress(
-			ASSOCIATED_TOKEN_PROGRAM_ID,
-			TOKEN_PROGRAM_ID,
-			mintPk,
-			ownerPk
-		);
+		return await getAssociatedTokenAddress(mintPk, ownerPk);
 	};
 
 	const createTransactionAccount = async () => {
@@ -106,19 +103,19 @@ function TransferTokenListItemDetails({
 			[multisig.toBuffer()],
 			multisigClient.programId
 		);
-		const sourceTokenAccount = await getTokenAccount(
-			multisigClient.provider,
+
+		const sourceTokenAccount = await getAccount(
+			provider.connection,
 			sourceAddr
 		);
-
 		const destinationTokenAccAddr = destinationAccAddr;
 		// UNCOMMENT THE BELOW IF YOU WANT TO PASS A WALLET ADDRESS AND DERIVE THE TOKEN ADDRESS
 		// const destinationTokenAccAddr = await getAssociatedTokenAddressPK(destinationAccAddr, sourceTokenAccount.mint);
 
 		// @ts-ignore
 		try {
-			const destinationTokenAccount = await getTokenAccount(
-				multisigClient.provider,
+			const destinationTokenAccount = await getAccount(
+				provider.connection,
 				destinationTokenAccAddr
 			);
 			// @ts-ignore
@@ -139,8 +136,9 @@ function TransferTokenListItemDetails({
 			return;
 		}
 
-		const tokenMint = await getMintInfo(
-			multisigClient.provider,
+		// const tokenMint = await getMintInfo(provider, sourceTokenAccount.mint);
+
+		let tokenMint = await provider.connection.getTokenSupply(
 			sourceTokenAccount.mint
 		);
 
@@ -150,16 +148,14 @@ function TransferTokenListItemDetails({
 			});
 			return;
 		}
-		const TEN = new u64(10);
-		const multiplier = TEN.pow(new BN(tokenMint.decimals));
+		const TEN = new BN(10);
+		const multiplier = TEN.pow(new BN(tokenMint.value.decimals));
 		const amountInLamports = amount.mul(multiplier);
-		const transferIx = Token.createTransferInstruction(
-			TOKEN_PROGRAM_ID,
+		const transferIx = createTransferInstruction(
 			sourceAddr,
 			destinationTokenAccAddr,
 			multisigSigner,
-			[],
-			new u64(amountInLamports.toString())
+			amountInLamports.toNumber()
 		);
 		const transaction = new Account();
 		const tx = await multisigClient.rpc.createTransaction(
@@ -167,10 +163,11 @@ function TransferTokenListItemDetails({
 			transferIx.keys,
 			Buffer.from(transferIx.data),
 			{
+				// @ts-ignore
 				accounts: {
 					multisig,
 					transaction: transaction.publicKey,
-					proposer: multisigClient.provider.wallet.publicKey,
+					proposer: provider.publicKey as PublicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 				},
 				signers: [transaction],
@@ -204,6 +201,7 @@ function TransferTokenListItemDetails({
 				<InputLabel id="source-select-label">Source Token Mint</InputLabel>
 				<Select autoWidth={true} value={source}>
 					{tokenAccounts.map((tokenAccount) => {
+						console.log("amount", typeof tokenAccount.amount);
 						return (
 							<MenuItem
 								value={tokenAccount.address.toString()}
@@ -213,7 +211,10 @@ function TransferTokenListItemDetails({
 							>
 								<p>
 									{tokenAccount.mint.toString()} - [Balance:{" "}
-									{(tokenAccount.amount.toNumber() / 1000000).toString()}]
+									{(
+										Number(tokenAccount.amount.toString()) / 1000000
+									).toString()}
+									]
 								</p>
 							</MenuItem>
 						);
@@ -224,7 +225,7 @@ function TransferTokenListItemDetails({
 					fullWidth
 					label="Amount"
 					value={amount}
-					onChange={(e) => setAmount(new u64(e.target.value as string))}
+					onChange={(e) => setAmount(new BN(e.target.value as string))}
 				/>
 				<TextField
 					style={{ marginTop: "16px" }}
