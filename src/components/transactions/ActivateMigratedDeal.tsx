@@ -91,7 +91,7 @@ function ActivateMigratedDealListItemDetails({
 			const tranches = await deal.fetchTranches();
 
 			// @ts-ignore
-			if (Number(tranches?.tranches[1].size.amount) > 0) {
+			if (Number(tranches?.tranches[1]?.size.amount) > 0) {
 				console.log(tranches?.tranches[1].size.amount);
 				setLpClaims(
 					JSON.stringify([
