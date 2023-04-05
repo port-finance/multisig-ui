@@ -185,6 +185,11 @@ function MarketAdminsListItemDetails({
 			multisigSigner
 		);
 
+		console.log("config", {
+			multisig: configMultisig,
+			managers: configManagers,
+			passIssuers: configPassIssuers,
+		});
 		const transaction = new Account();
 		const tx = await multisigClient.rpc.createTransaction(
 			config.clusterConfig.programId,

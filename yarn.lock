@@ -1136,10 +1136,10 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@credix/credix-client@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.5.0.tgz#b1d4cf73ee282aa7f834a7f4b413659422129146"
-  integrity sha512-lrLKHdT+cgOU5Die1dcJsW0pxZ3DOMV0MGT/bTKCxOFScVd0RErs4VZn0u8rDNAmtQI4R5PxdujEOHAw8ejrfg==
+"@credix/credix-client@2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.6.0.tgz#e24c1267b3ef4d2619cd64c70a66a81e39277886"
+  integrity sha512-4rpHAcb4CSFNYUJtR6cPrFOorzHE6wX5ibPZL4T5tOOgoSPps/N2j5YNtvsBL1vvBZV/8y/nuprLHKF2jIVLFA==
   dependencies:
     "@metaplex-foundation/mpl-token-metadata" "^2.5.2"
     "@project-serum/anchor" "^0.26.0"

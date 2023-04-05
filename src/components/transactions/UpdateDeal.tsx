@@ -72,6 +72,7 @@ function UpdateDealListItemDetails({
 	const [serviceFeesRepaid, setServiceFeesRepaid] = useState<number>();
 	const [yearLatestServiceFeesCharged, setYearLatestServiceFeesCharged] =
 		useState<number>();
+	const [openedAt, setOpenedAt] = useState<number>();
 	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
@@ -103,6 +104,7 @@ function UpdateDealListItemDetails({
 			setYearLatestServiceFeesCharged(
 				Number(deal.yearLatestServiceFeesCharged)
 			);
+			setOpenedAt(Number(deal.openedAt));
 		}
 	};
 
@@ -142,6 +144,10 @@ function UpdateDealListItemDetails({
 		setYearLatestServiceFeesCharged(Number(e.target.value));
 	};
 
+	const onChangeOpenedAt = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setOpenedAt(Number(e.target.value));
+	};
+
 	const onSubmit = serialAsync(async (e: React.SyntheticEvent) => {
 		e.preventDefault();
 		enqueueSnackbar("Creating transaction", {
@@ -162,6 +168,8 @@ function UpdateDealListItemDetails({
 			serviceFeesRepaid: serviceFeesRepaid * 1000000,
 			// @ts-ignore
 			yearLatestServiceFeesCharged: yearLatestServiceFeesCharged,
+			// @ts-ignore
+			openedAt: openedAt,
 		};
 
 		const updateDealConfigIx = await deal?.updateIx(dealConfig, multisigSigner);
@@ -270,6 +278,21 @@ function UpdateDealListItemDetails({
 						name="yearLatestServiceFeesCharged"
 						value={yearLatestServiceFeesCharged}
 						onChange={onChangeYearLatestServiceFeesCharged}
+						style={{
+							marginLeft: "10px",
+							width: "500px",
+							margin: "10px",
+						}}
+					/>
+				</label>
+				<br />
+				<label>
+					opened at:
+					<input
+						type="number"
+						name="openedAt"
+						value={openedAt}
+						onChange={onChangeOpenedAt}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
