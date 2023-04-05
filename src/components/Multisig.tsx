@@ -630,7 +630,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		} else if (
 			tx.account.accounts.length === 4 &&
-			tx.account.data.length === 34
+			tx.account.data.length === 43
 		) {
 			return (
 				<ListItemText
