@@ -1136,16 +1136,15 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@credix/credix-client@2.6.0":
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.6.0.tgz#e24c1267b3ef4d2619cd64c70a66a81e39277886"
-  integrity sha512-4rpHAcb4CSFNYUJtR6cPrFOorzHE6wX5ibPZL4T5tOOgoSPps/N2j5YNtvsBL1vvBZV/8y/nuprLHKF2jIVLFA==
+"@credix/credix-client@2.6.0-alpha.5":
+  version "2.6.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.6.0-alpha.5.tgz#0453043472f569b1c07c11c28d8c7f9bc22cac25"
+  integrity sha512-DX8qxgfii05PinKYsymbjw9GfQucNmm5YrfvV6sl8hflHqSJswSXNfjUrR3uFAmAC/yVVhcP4ZhHWKv4eLhWPw==
   dependencies:
     "@metaplex-foundation/mpl-token-metadata" "^2.5.2"
     "@project-serum/anchor" "^0.26.0"
     "@saberhq/anchor-contrib" "^1.14.11"
     "@solana/spl-token" "^0.3.7"
-    "@solana/web3.js" "^1.73.2"
     big.js "^6.2.1"
     bn.js "^5.2.1"
     node-irr "^2.0.3"
@@ -2962,7 +2961,7 @@
     "@wallet-standard/app" "^1.0.1"
     "@wallet-standard/base" "^1.0.1"
 
-"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.44.3", "@solana/web3.js@^1.56.2", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.66.2", "@solana/web3.js@^1.68.0", "@solana/web3.js@^1.73.2":
+"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.44.3", "@solana/web3.js@^1.56.2", "@solana/web3.js@^1.63.1", "@solana/web3.js@^1.66.2", "@solana/web3.js@^1.68.0":
   version "1.74.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.74.0.tgz#dbcbeabb830dd7cbbcf5e31404ca79c9785cbf2d"
   integrity sha512-RKZyPqizPCxmpMGfpu4fuplNZEWCrhRBjjVstv5QnAJvgln1jgOfgui+rjl1ExnqDnWKg9uaZ5jtGROH/cwabg==

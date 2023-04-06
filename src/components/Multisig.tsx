@@ -80,7 +80,9 @@ import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 import { UpdateDealListItem } from "./transactions/UpdateDeal";
 import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
 import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDeal";
+// import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { u64 } from "@project-serum/borsh";
+import { UpdateProgramStateListItem } from "./transactions/updateProgramState";
 
 const NO_SHOW_LIST = [
 	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
@@ -398,6 +400,16 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
+					{/* <InitializeMarketListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/> */}
+					<UpdateProgramStateListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
 					<TranchePassListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -625,6 +637,16 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={`Issue Tranche pass for ${investorPk}`}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (
+			tx.account.accounts.length === 2 &&
+			tx.account.data.length === 44
+		) {
+			return (
+				<ListItemText
+					primary={"update program state multisig"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);
