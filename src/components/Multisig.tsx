@@ -74,6 +74,7 @@ import { OpenDealListItem } from "./transactions/OpenDeal";
 import { TransferTokenListItem } from "./transactions/TransferToken";
 import { FreezeThawGlobalMarketStateListItem } from "./transactions/FreezeThawGlobalMarketState";
 import { UpdateMarketListItem } from "./transactions/UpdateMarket";
+import { FreezeThawTokenAccountListItem } from "./transactions/FreezeThawTokenAccount";
 import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
@@ -460,6 +461,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
+					<FreezeThawTokenAccountListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
 				</List>
 			</DialogContent>
 		</Dialog>
@@ -705,6 +711,13 @@ function ixLabel(tx: any, multisigClient: any) {
 			return (
 				<ListItemText
 					primary={`Activate migrated deal for borrower ${borrowerPk.toString()}`}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
+		} else if (tx.account.accounts.length === 7) {
+			return (
+				<ListItemText
+					primary={"thaw / freeze token account"}
 					secondary={tx.publicKey.toString()}
 				/>
 			);

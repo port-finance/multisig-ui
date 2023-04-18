@@ -10,5 +10,32 @@ module.exports = function override(config, env) {
 	config.resolve.fallback = {
 		fs: false,
 	};
+	config.module = {
+		...config.module,
+		rules: [
+			// Necessary for @injectivelabs dependencies
+			{
+				test: /\.m?js/,
+				resolve: {
+					fullySpecified: false,
+				},
+			},
+			// Necessary for @injectivelabs dependencies. They contain Typescript files and that's causing problems if we don't have this rule
+			{
+				test: /\.tsx?$/,
+				include: /node_modules\/@injectivelabs/,
+				use: [
+					{
+						loader: "ts-loader",
+						options: {
+							transpileOnly: true,
+							configFile: "tsconfig.json",
+						},
+					},
+				],
+			},
+			...config.module.rules,
+		],
+	};
 	return config;
 };

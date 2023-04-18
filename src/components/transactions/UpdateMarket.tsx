@@ -79,6 +79,7 @@ function UpdateMarketListItemDetails({
 	const [performanceFee, setPerformanceFee] = useState<string>();
 	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
 	const [withdrawalFee, setWithdrawalFee] = useState<string>();
+	const [hasWithdrawEpochs, setHasWithdrawEpochs] = useState<boolean>(false);
 	const [poolSizeLimitPercentage, setPoolSizeLimitPercentage] =
 		useState<string>();
 	const [treasuryPoolTokenAccount, setTreasuryPoolTokenAccount] =
@@ -87,6 +88,14 @@ function UpdateMarketListItemDetails({
 	const [globalMarketSeed, setGlobalMarketSeed] = useState<string>(
 		SEEDS.GLOBAL_MARKET_STATE_PDA
 	);
+	const [withdrawEpochsRequestSeconds, setWithdrawEpochsRequestSeconds] =
+		useState<number>();
+	const [withdrawEpochsRedeemSeconds, setWithdrawEpochsRedeemSeconds] =
+		useState<number>();
+	const [
+		withdrawEpochsAvailableLiquiditySeconds,
+		setWithdrawEpochsAvailableLiquiditySeconds,
+	] = useState<number>();
 	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
 
@@ -115,6 +124,12 @@ function UpdateMarketListItemDetails({
 			setTreasuryPoolTokenAccount(market.treasury.toString());
 			setServiceFeePercentage(fractionToString(market.serviceFeePercentage));
 			setWithdrawalFee(fractionToString(market.withdrawFee));
+			setHasWithdrawEpochs(market.hasWithdrawEpochs);
+			setWithdrawEpochsRequestSeconds(market.withdrawEpochRequestSeconds);
+			setWithdrawEpochsRedeemSeconds(market.withdrawEpochRedeemSeconds);
+			setWithdrawEpochsAvailableLiquiditySeconds(
+				market.withdrawEpochAvailableLiquiditySeconds
+			);
 		}
 	};
 
@@ -154,6 +169,32 @@ function UpdateMarketListItemDetails({
 		setTreasuryPoolTokenAccount(e.target.value);
 	};
 
+	const onChangeHasWithdrawEpochs = (
+		e: React.ChangeEvent<HTMLSelectElement>
+	) => {
+		e.target.value === "true"
+			? setHasWithdrawEpochs(true)
+			: setHasWithdrawEpochs(false);
+	};
+
+	const onChangeWithdrawEpochsRequestSeconds = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setWithdrawEpochsRequestSeconds(Number(e.target.value));
+	};
+
+	const onChangeWithdrawEpochsRedeemSeconds = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setWithdrawEpochsRedeemSeconds(Number(e.target.value));
+	};
+
+	const onChangeWithdrawEpochsAvailableLiquiditySeconds = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setWithdrawEpochsAvailableLiquiditySeconds(Number(e.target.value));
+	};
+
 	const onSubmit = serialAsync(async (e: React.SyntheticEvent) => {
 		e.preventDefault();
 		enqueueSnackbar("Creating transaction", {
@@ -176,6 +217,11 @@ function UpdateMarketListItemDetails({
 			withdrawalFee: stringToFraction(withdrawalFee),
 			//@ts-ignore
 			treasuryPoolTokenAccount: new PublicKey(treasuryPoolTokenAccount),
+			hasWithdrawEpochs: hasWithdrawEpochs,
+			withdrawEpochRequestSeconds: withdrawEpochsRequestSeconds,
+			withdrawEpochRedeemSeconds: withdrawEpochsRedeemSeconds,
+			withdrawEpochAvailableLiquiditySeconds:
+				withdrawEpochsAvailableLiquiditySeconds,
 		};
 
 		const updateMarketConfigIx = await market?.updateConfigIx(
@@ -303,6 +349,67 @@ function UpdateMarketListItemDetails({
 						name="treasuryPoolTokenAccount"
 						value={treasuryPoolTokenAccount}
 						onChange={onChangeTreasuryPoolTokenAccount}
+						style={{
+							marginLeft: "10px",
+							width: "500px",
+							margin: "10px",
+						}}
+					/>
+				</label>
+				<br />
+				<label>
+					Withdraw epochs enabled
+					<select
+						name="withdrawEpochsEnabled"
+						onChange={onChangeHasWithdrawEpochs}
+						style={{ marginLeft: "10px", width: "100px", margin: "10px" }}
+					>
+						<option selected={hasWithdrawEpochs} value="true">
+							True
+						</option>
+						<option selected={!hasWithdrawEpochs} value="false">
+							False
+						</option>
+					</select>
+				</label>
+				<br />
+				<label>
+					withdraw epochs request seconds:
+					<input
+						type="number"
+						name="withdrawEpochsRequestSeconds"
+						value={withdrawEpochsRequestSeconds}
+						onChange={onChangeWithdrawEpochsRequestSeconds}
+						style={{
+							marginLeft: "10px",
+							width: "500px",
+							margin: "10px",
+						}}
+					/>
+				</label>
+				<br />
+				<label>
+					withdraw epochs redeem seconds:
+					<input
+						type="number"
+						name="withdrawEpochsRedeemSeconds"
+						value={withdrawEpochsRedeemSeconds}
+						onChange={onChangeWithdrawEpochsRedeemSeconds}
+						style={{
+							marginLeft: "10px",
+							width: "500px",
+							margin: "10px",
+						}}
+					/>
+				</label>
+				<br />
+				<label>
+					withdraw epochs available liquidity seconds:
+					<input
+						type="number"
+						name="withdrawEpochsAvailableLiquiditySeconds"
+						value={withdrawEpochsAvailableLiquiditySeconds}
+						onChange={onChangeWithdrawEpochsAvailableLiquiditySeconds}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
