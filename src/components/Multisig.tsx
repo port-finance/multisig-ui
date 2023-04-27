@@ -166,6 +166,8 @@ const NO_SHOW_LIST = [
 	"BR526swddpwyyuJqzwtWhc59gEcoy88qV45uJi2PwEZH",
 	"2Z6TsJVg7YhS3RtYUjzxUXab6cYLgaQsEvhWnusJcUnK",
 	"BeWMfsBrj6z9UvyPcGSe3o1gLvMrEwR788jmm9q8uK21",
+	"HhtHWL6dwHFDFxrr4BJgBoD18wF27FHxEX8oeQ2iu4y2",
+	"EnBq28EkxUU7avzabfwgESZvWZMhW2rHhY9YUf1mCBkZ",
 	"9ZXvBiW1U5CBh56FD9Mi82RJWh9juRuqgr1EYNcgHKpg",
 	"AJKeAJgXo16NzYJcw3R8WKrK11tYhoChVCHTWGBbHxcw",
 	"c5eiDeZHQe1Ly4bDx7QfRaKckuBgZWfgfJj8khyUcAu",
