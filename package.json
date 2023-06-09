@@ -22,7 +22,7 @@
 		"@solana/wallet-adapter-base": "^0.9.22",
 		"@solana/wallet-adapter-material-ui": "^0.16.29",
 		"@solana/wallet-adapter-react": "^0.15.31",
-		"@solana/wallet-adapter-wallets": "^0.19.15",
+		"@solana/wallet-adapter-wallets": "^0.19.16",
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/react": "^14.0.0",
 		"@testing-library/user-event": "^14.4.3",
