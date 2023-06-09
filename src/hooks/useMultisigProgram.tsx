@@ -41,6 +41,7 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 		};
 		const currentNetwork = (connection as any)._rpcEndpoint;
 		const currentMultisigProgramId = getMultisigProgramIdByUrl(currentNetwork);
+
 		const programId = new PublicKey(
 			"CRDx2YkdtYtGZXGHZ59wNv1EwKHQndnRc1gT4p8i2vPX"
 		);
