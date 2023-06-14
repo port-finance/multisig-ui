@@ -171,17 +171,7 @@ function TranchePassListItemDetails({
 		if (tranches) {
 			tranches.tranches.forEach((tranche, index) => {
 				// @ts-ignore
-				if (tranche.index !== 1 && tranche.size.uiAmount > 0) {
-					let name = "";
-					if (tranche.index === 0) {
-						name = "super senior";
-					}
-					if (tranche.index === 2) {
-						name = "mezzanine";
-					}
-					if (tranche.index === 3) {
-						name = "junior";
-					}
+				if (tranche.isFundedByPool === false && tranche.size.uiAmount > 0) {
 					let trancheRowNew = (
 						<div
 							key={tranche.deal.borrower.toString()}
@@ -196,7 +186,7 @@ function TranchePassListItemDetails({
 							}}
 						>
 							<p style={{ width: "200px" }}>{tranche.deal.name}</p>
-							<p style={{ width: "200px" }}>{name}</p>
+							<p style={{ width: "200px" }}>{tranche.name}</p>
 							<Button
 								style={{ width: "100px" }}
 								onClick={() => createTransactionAccount(tranche)}

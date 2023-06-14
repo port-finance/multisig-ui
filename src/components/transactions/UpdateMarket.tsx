@@ -76,8 +76,7 @@ function UpdateMarketListItemDetails({
 	didAddTransaction: (tx: PublicKey) => void;
 }) {
 	const [market, setMarket] = useState<Market | null>();
-	const [performanceFee, setPerformanceFee] = useState<string>();
-	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
+	const [credixFeePercentage, setCredixFeePercentage] = useState<string>();
 	const [withdrawalFee, setWithdrawalFee] = useState<string>();
 	const [hasWithdrawEpochs, setHasWithdrawEpochs] = useState<boolean>(false);
 	const [poolSizeLimitPercentage, setPoolSizeLimitPercentage] =
@@ -113,7 +112,6 @@ function UpdateMarketListItemDetails({
 	const fetchMarketConfig = async () => {
 		if (market) {
 			console.log(market);
-			setPerformanceFee(fractionToString(market.defaultPerformanceFee));
 			try {
 				setPoolSizeLimitPercentage(
 					fractionToString(market.poolSizeLimitPercentage)
@@ -122,7 +120,7 @@ function UpdateMarketListItemDetails({
 				setPoolSizeLimitPercentage(fractionToString(Fraction.max()));
 			}
 			setTreasuryPoolTokenAccount(market.treasury.toString());
-			setServiceFeePercentage(fractionToString(market.serviceFeePercentage));
+			setCredixFeePercentage(fractionToString(market.credixFeePercentage));
 			setWithdrawalFee(fractionToString(market.withdrawFee));
 			setHasWithdrawEpochs(market.hasWithdrawEpochs);
 			setWithdrawEpochsRequestSeconds(market.withdrawEpochRequestSeconds);
@@ -145,12 +143,10 @@ function UpdateMarketListItemDetails({
 		await fetchMarketConfig();
 	};
 
-	const onChangePerformanceFee = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setPerformanceFee(e.target.value);
-	};
-
-	const onChangeServiceFee = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setServiceFeePercentage(e.target.value);
+	const onChangeCredixFeePercentage = (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		setCredixFeePercentage(e.target.value);
 	};
 
 	const onChangeWithdrawalFee = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,7 +208,7 @@ function UpdateMarketListItemDetails({
 			//@ts-ignore
 			poolSizeLimitPercentage: stringToFraction(poolSizeLimitPercentage),
 			//@ts-ignore
-			serviceFeePercentage: stringToFraction(serviceFeePercentage),
+			credixFeePercentage: stringToFraction(credixFeePercentage),
 			//@ts-ignore
 			withdrawalFee: stringToFraction(withdrawalFee),
 			//@ts-ignore
@@ -283,27 +279,12 @@ function UpdateMarketListItemDetails({
 				<Checkbox checked={!(market === undefined)} />
 				<br />
 				<label>
-					performanceFee:
-					<input
-						type="text"
-						name="performanceFee"
-						value={performanceFee}
-						onChange={onChangePerformanceFee}
-						style={{
-							marginLeft: "10px",
-							width: "500px",
-							margin: "10px",
-						}}
-					/>
-				</label>
-				<br />
-				<label>
-					serviceFee:
+					credixFeePercentage:
 					<input
 						type="text"
 						name="serviceFee"
-						value={serviceFeePercentage}
-						onChange={onChangeServiceFee}
+						value={credixFeePercentage}
+						onChange={onChangeCredixFeePercentage}
 						style={{
 							marginLeft: "10px",
 							width: "500px",

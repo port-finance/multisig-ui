@@ -79,7 +79,7 @@ import { CredixPassListItem } from "./transactions/CredixPass";
 import { TranchePassListItem } from "./transactions/TranchePass";
 import { MarketAdminsListItem } from "./transactions/MarketAdmins";
 import { UpdateDealListItem } from "./transactions/UpdateDeal";
-import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
+// import { AdjustRepaymentScheduleListItem } from "./transactions/AdjustRepaymentSchedule";
 import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDeal";
 // import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { u64 } from "@project-serum/borsh";
@@ -89,9 +89,17 @@ const NO_SHOW_LIST = [
 	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
 	"EsQJUXtfz5BQJya9e5sYZdeGUgsN61KyqABRybWyHx2r",
 	"9f7DQZVCcrAwbZqdaPzZmvgCsKJeuyat8vX1Pf2dUgUt",
+	"BeWMfsBrj6z9UvyPcGSe3o1gLvMrEwR788jmm9q8uK21",
+	"5xwnWVbJuU3DQH6S6tBjr7D49nhMV9t8ZDNFLFYL4nPH",
+	"6VaJS2jGDvS4tqYnH4rrfNyFQRvXheyDPzpYhwJJ2Cs",
+	"CQXgFipSTxpNvpgF5f3Xo1pkD3yQ6gYiwfuBL8L5Z4SK",
 	"Fu9E3uxbwy5TmFQneYzrwh1KHcqdgqpZUunLgUEXkUkX",
 	"AHoRfLLjdubrzEXyjqKrMoRWCT89Ld8gVVV1XMyKPKTh",
 	"Gk5h7TZ2HqRfnTewmpyirj9dMhozXUcjYoEf4UL5hJU1",
+	"3riNy5z1s6fryUzZJCESKY5WGMFVWxfrKeTNWSRGiV8J",
+	"EnBq28EkxUU7avzabfwgESZvWZMhW2rHhY9YUf1mCBkZ",
+	"86hM1sf5mDnXGEVubjdFUwMvkNgLZMmq13apQRa4CpEe",
+	"HhtHWL6dwHFDFxrr4BJgBoD18wF27FHxEX8oeQ2iu4y2",
 	"6xxwD7NdsMcFLaiLKRyJfYyYMozqrmYFV6u5GT6AjPRj",
 	"2rQ6KmUbw4vEmLGfetoaWS9CU1Vyt15GgwqEbtx9fwtR",
 	"EcgopxcRz2Byn7EUJRV7WEBAdr2SQVHaRwsBAuu7URfP",
@@ -165,11 +173,6 @@ const NO_SHOW_LIST = [
 	"Ap3sqH2ka1XgxS11PbrjTaVLwSQVbQj8QdwbE96mREyR",
 	"BR526swddpwyyuJqzwtWhc59gEcoy88qV45uJi2PwEZH",
 	"2Z6TsJVg7YhS3RtYUjzxUXab6cYLgaQsEvhWnusJcUnK",
-	"BeWMfsBrj6z9UvyPcGSe3o1gLvMrEwR788jmm9q8uK21",
-	"HhtHWL6dwHFDFxrr4BJgBoD18wF27FHxEX8oeQ2iu4y2",
-	"EnBq28EkxUU7avzabfwgESZvWZMhW2rHhY9YUf1mCBkZ",
-	"3riNy5z1s6fryUzZJCESKY5WGMFVWxfrKeTNWSRGiV8J",
-	"86hM1sf5mDnXGEVubjdFUwMvkNgLZMmq13apQRa4CpEe",
 	"9ZXvBiW1U5CBh56FD9Mi82RJWh9juRuqgr1EYNcgHKpg",
 	"AJKeAJgXo16NzYJcw3R8WKrK11tYhoChVCHTWGBbHxcw",
 	"c5eiDeZHQe1Ly4bDx7QfRaKckuBgZWfgfJj8khyUcAu",
@@ -456,11 +459,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
-					<AdjustRepaymentScheduleListItem
+					{/* <AdjustRepaymentScheduleListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
 						onClose={onClose}
-					/>
+					/> */}
 					<ActivateMigratedDealListItem
 						didAddTransaction={didAddTransaction}
 						multisig={multisig}
@@ -663,7 +666,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		} else if (
 			tx.account.accounts.length === 4 &&
-			tx.account.data.length === 43
+			tx.account.data.length === 40
 		) {
 			return (
 				<ListItemText

@@ -354,6 +354,7 @@ function CredixPassListItemDetails({
 				<label>
 					Release date
 					<DateTimePicker
+						// @ts-ignore
 						onChange={onChangeReleaseTimestamp}
 						value={new Date(releaseTimestamp.toNumber() * 1000)}
 					/>

@@ -20,6 +20,7 @@ import {
 	Fraction,
 	UpdateDealConfig,
 	MarketAdmins,
+	UpdateArrangementFeeConfig,
 } from "@credix/credix-client";
 import { serialAsync } from "../../credix/utils/async.utils";
 
@@ -67,11 +68,14 @@ function UpdateDealListItemDetails({
 	didAddTransaction: (tx: PublicKey) => void;
 }) {
 	const [deal, setDeal] = useState<Deal | null>();
-	const [serviceFeePercentage, setServiceFeePercentage] = useState<string>();
-	const [serviceFees, setServiceFees] = useState<number>();
-	const [serviceFeesRepaid, setServiceFeesRepaid] = useState<number>();
-	const [yearLatestServiceFeesCharged, setYearLatestServiceFeesCharged] =
-		useState<number>();
+	const [arrangementFeePercentage, setarrangementFeePercentage] =
+		useState<string>();
+	const [arrangementFees, setarrangementFees] = useState<number>();
+	const [arrangementFeesRepaid, setarrangementFeesRepaid] = useState<number>();
+	const [
+		timeLatestArrangementFeesCharged,
+		settimeLatestArrangementFeesCharged,
+	] = useState<number>();
 	const [openedAt, setOpenedAt] = useState<number>();
 	const [multisigClient, credixClient, provider] = useMultisigProgram();
 	const { enqueueSnackbar } = useSnackbar();
@@ -98,11 +102,15 @@ function UpdateDealListItemDetails({
 
 	const fetchDealConfig = async () => {
 		if (deal) {
-			setServiceFeePercentage(fractionToString(deal.serviceFeePercentage));
-			setServiceFees(Number(deal.serviceFees.amount) / 1000000);
-			setServiceFeesRepaid(Number(deal.serviceFeesRepaid.amount) / 1000000);
-			setYearLatestServiceFeesCharged(
-				Number(deal.yearLatestServiceFeesCharged)
+			setarrangementFeePercentage(
+				fractionToString(deal.arrangementFeePercentage)
+			);
+			setarrangementFees(Number(deal.arrangementFees.amount) / 1000000);
+			setarrangementFeesRepaid(
+				Number(deal.arrangementFeesRepaid.amount) / 1000000
+			);
+			settimeLatestArrangementFeesCharged(
+				Number(deal.timeLatestArrangementFeesCharged)
 			);
 			setOpenedAt(Number(deal.openedAt));
 		}
@@ -122,26 +130,26 @@ function UpdateDealListItemDetails({
 		await fetchDealConfig();
 	};
 
-	const onChangeServiceFeePercentage = (
+	const onChangearrangementFeePercentage = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setServiceFeePercentage(e.target.value);
+		setarrangementFeePercentage(e.target.value);
 	};
 
-	const onChangeServiceFees = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setServiceFees(Number(e.target.value));
+	const onChangearrangementFees = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setarrangementFees(Number(e.target.value));
 	};
 
-	const onChangeServiceFeesRepaid = (
+	const onChangearrangementFeesRepaid = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setServiceFeesRepaid(Number(e.target.value));
+		setarrangementFeesRepaid(Number(e.target.value));
 	};
 
-	const onChangeYearLatestServiceFeesCharged = (
+	const onChangetimeLatestArrangementFeesCharged = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
-		setYearLatestServiceFeesCharged(Number(e.target.value));
+		settimeLatestArrangementFeesCharged(Number(e.target.value));
 	};
 
 	const onChangeOpenedAt = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,17 +167,15 @@ function UpdateDealListItemDetails({
 			multisigClient.programId
 		);
 
-		const dealConfig: UpdateDealConfig = {
+		const dealConfig: UpdateArrangementFeeConfig = {
 			// @ts-ignore
-			serviceFeePercentage: stringToFraction(serviceFeePercentage),
+			arrangementFeePercentage: stringToFraction(arrangementFeePercentage),
 			// @ts-ignore
-			serviceFees: serviceFees * 1000000,
+			arrangementFees: arrangementFees * 1000000,
 			// @ts-ignore
-			serviceFeesRepaid: serviceFeesRepaid * 1000000,
+			arrangementFeesRepaid: arrangementFeesRepaid * 1000000,
 			// @ts-ignore
-			yearLatestServiceFeesCharged: yearLatestServiceFeesCharged,
-			// @ts-ignore
-			openedAt: openedAt,
+			timeLatestArrangementFeesCharged: timeLatestArrangementFeesCharged,
 		};
 
 		const updateDealConfigIx = await deal?.updateIx(dealConfig, multisigSigner);
@@ -227,12 +233,12 @@ function UpdateDealListItemDetails({
 				<Checkbox checked={!(deal === undefined)} />
 				<br />
 				<label>
-					serviceFeePercentage:
+					arrangementFeePercentage:
 					<input
 						type="text"
-						name="serviceFeePercentage"
-						value={serviceFeePercentage}
-						onChange={onChangeServiceFeePercentage}
+						name="arrangementFeePercentage"
+						value={arrangementFeePercentage}
+						onChange={onChangearrangementFeePercentage}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
@@ -242,12 +248,12 @@ function UpdateDealListItemDetails({
 				</label>
 				<br />
 				<label>
-					serviceFees:
+					arrangementFees:
 					<input
 						type="number"
-						name="serviceFees"
-						value={serviceFees}
-						onChange={onChangeServiceFees}
+						name="arrangementFees"
+						value={arrangementFees}
+						onChange={onChangearrangementFees}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
@@ -257,12 +263,12 @@ function UpdateDealListItemDetails({
 				</label>
 				<br />
 				<label>
-					serviceFeesRepaid:
+					arrangementFeesRepaid:
 					<input
 						type="number"
-						name="serviceFeesRepaid"
-						value={serviceFeesRepaid}
-						onChange={onChangeServiceFeesRepaid}
+						name="arrangementFeesRepaid"
+						value={arrangementFeesRepaid}
+						onChange={onChangearrangementFeesRepaid}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
@@ -272,27 +278,12 @@ function UpdateDealListItemDetails({
 				</label>
 				<br />
 				<label>
-					yearLatestServiceFeesCharged:
+					timeLatestArrangementFeesCharged:
 					<input
 						type="number"
-						name="yearLatestServiceFeesCharged"
-						value={yearLatestServiceFeesCharged}
-						onChange={onChangeYearLatestServiceFeesCharged}
-						style={{
-							marginLeft: "10px",
-							width: "500px",
-							margin: "10px",
-						}}
-					/>
-				</label>
-				<br />
-				<label>
-					opened at:
-					<input
-						type="number"
-						name="openedAt"
-						value={openedAt}
-						onChange={onChangeOpenedAt}
+						name="timeLatestArrangementFeesCharged"
+						value={timeLatestArrangementFeesCharged}
+						onChange={onChangetimeLatestArrangementFeesCharged}
 						style={{
 							marginLeft: "10px",
 							width: "500px",
