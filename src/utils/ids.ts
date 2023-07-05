@@ -10,12 +10,12 @@ export let TOKEN_PROGRAM_ID = new PublicKey(
 export const PROGRAM_IDS = [
 	{
 		name: "mainnet-beta",
-		url: "https://solana-api.syndica.io/access-token/E5KeCHVwoa6mIusXi3xbMD7SASJZaPMK4K09zzubNlyNkoc2GOZRZBxDpBvxhXfb/rpc",
+		url: "https://rpc.credix.finance/",
 		multisigProgramId: "msigmtwzgXJHj2ext4XJjCDmpbcMuufFb5cHuwg6Xdt",
 	},
 	{
 		name: "devnet",
-		url: "https://api.devnet.solana.com",
+		url: "https://rpc.pre.credix.finance/",
 		multisigProgramId: "74Cgm3as7QPrp1v8DfQkUHmj6QaSQupqCKGKmKhAvfzV",
 	},
 	{
