@@ -1,5 +1,5 @@
 import { Program, AnchorProvider, Wallet } from "@project-serum/anchor";
-import { CredixClient } from "@credix/credix-client";
+import { CredixClient, CredixClientConfig } from "@credix/credix-client";
 import { ConfirmOptions, Keypair, PublicKey } from "@solana/web3.js";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useMemo } from "react";
@@ -35,6 +35,7 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 	const connection = useConnection();
 
 	return useMemo(() => {
+		console.log("here");
 		const opts: ConfirmOptions = {
 			preflightCommitment: "recent",
 			commitment: "recent",
@@ -45,9 +46,11 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 		const programId = new PublicKey(
 			"CRDx2YkdtYtGZXGHZ59wNv1EwKHQndnRc1gT4p8i2vPX"
 		);
-		const config = {
+		console.log("here 2");
+		const config: CredixClientConfig = {
 			programId: programId,
 			secondaryMarketProgramId: programId,
+			scowProgramId: programId,
 			confirmOptions: opts,
 		};
 		let provider = new AnchorProvider(
@@ -55,16 +58,19 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 			wallet ?? new MyWallet(Keypair.generate()),
 			opts
 		);
+		console.log("here 3");
 		let newProgram = new Program(
 			MultisigIdl,
 			currentMultisigProgramId,
 			provider
 		);
+		console.log("here 4");
 		let newCredixClient = new CredixClient(
 			connection,
 			wallet as MyWallet,
 			config
 		);
+		console.log("here 5");
 		return [newProgram, newCredixClient, provider];
 	}, [wallet, connection]);
 }

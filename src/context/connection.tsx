@@ -9,8 +9,7 @@ export type ENV = "mainnet-beta" | "localnet" | "devnet";
 export const ENDPOINTS = [
 	{
 		name: "mainnet-beta" as ENV,
-		endpoint:
-			"https://solana-api.syndica.io/access-token/E5KeCHVwoa6mIusXi3xbMD7SASJZaPMK4K09zzubNlyNkoc2GOZRZBxDpBvxhXfb/rpc",
+		endpoint: "https://rpc.credix.finance/",
 		chainID: ChainID.MainnetBeta,
 	},
 	{
@@ -20,7 +19,7 @@ export const ENDPOINTS = [
 	},
 	{
 		name: "devnet" as ENV,
-		endpoint: clusterApiUrl("devnet"),
+		endpoint: "https://rpc.pre.credix.finance/",
 		chainID: ChainID.Devnet,
 	},
 ];
