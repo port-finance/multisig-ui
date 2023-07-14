@@ -4,7 +4,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-In the project directory, you can run:
+In the project directory, you can run
 
 ### `yarn start`
 
@@ -45,7 +45,11 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Port Multisig Address
-Multisig address: `6ExGdhoUeqzExzXWx1tW2RPojuRnfXeTRwQ7sCeEcnKy`
+### Credix Multisig Addresses
+#### Mainnet
+Multisig address: `AM194gsNqRnmu8CZKi5GBPRGMC4Bq4Egkj2GQ4Yz4JZ4`
+Program derived address: `9GKiJfzjUUpWxKm1owKwAA2QWMQc7UXg4btXPF1BEbLV`
 
-Program derived address: `8jJSYeg13LwDP3jNdPdKsG88pNEgmKuwn5W4kPZ13dn8`
+#### Devnet
+Multisig address: `5xwnWVbJuU3DQH6S6tBjr7D49nhMV9t8ZDNFLFYL4nPH`
+Program derived address: `Du6efvMcXXLGyEea4SrTnVGHgBZmu4xU7SM9vDfRDqrp`

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useHistory, useLocation } from "react-router";
+import { useNavigate, useLocation, Routes } from "react-router";
 import { HashRouter, Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { MuiThemeProvider } from "@material-ui/core/styles";
@@ -10,91 +10,71 @@ import Layout from "./components/Layout";
 import Multisig from "./components/Multisig";
 import { WalletDialogProvider } from "@solana/wallet-adapter-material-ui";
 import { WalletProvider } from "@solana/wallet-adapter-react";
-import {
-  getLedgerWallet,
-  getMathWallet,
-  getPhantomWallet,
-  getSolflareWallet,
-  getSolletWallet,
-  getSolongWallet,
-  getTorusWallet,
-} from '@solana/wallet-adapter-wallets';
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
 import { ConnectionProvider } from "./context/connection";
-import './App.css'
+import "./App.css";
 import { AccountProvider } from "./context/AccountContext";
 
 function App() {
-  const theme = createMuiTheme({
-    palette: {
-      background: {
-        default: "rgb(255,255,255)",
-      },
-    },
-    typography: {
-      fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-    },
-    overrides: {},
-  });
-  const wallets = useMemo(
-    () => [
-        getPhantomWallet(),
-        getSolflareWallet(),
-        getTorusWallet({
-            options: {
-                clientId: 'BOM5Cl7PXgE9Ylq1Z1tqzhpydY0RVr8k90QQ85N7AKI5QGSrr9iDC-3rvmy0K_hF0JfpLMiXoDhta68JwcxS1LQ',
-            },
-        }),
-        getLedgerWallet(),
-        getSolongWallet(),
-        getMathWallet(),
-        getSolletWallet(),
-    ],
-    []
-  );
+	const theme = createMuiTheme({
+		palette: {
+			background: {
+				default: "rgb(255,255,255)",
+			},
+		},
+		typography: {
+			fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
+		},
+		overrides: {},
+	});
+	const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
-  return (
-    <MuiThemeProvider theme={theme}>
-      <CssBaseline />
-      <SnackbarProvider maxSnack={5} autoHideDuration={8000}>
-        <ConnectionProvider>
-          <WalletProvider wallets={wallets} autoConnect>
-              <WalletDialogProvider>
-                <AccountProvider>
-                  <HashRouter basename={"/"}>
-                        <Layout>
-                          <Route exact path="/" component={MultisigPage} />
-                          <Route
-                            exact
-                            path="/:address"
-                            component={MultisigInstancePage}
-                          />
-                        </Layout>
-                  </HashRouter>
-                </AccountProvider>
-              </WalletDialogProvider>
-          </WalletProvider>
-        </ConnectionProvider>
-      </SnackbarProvider>
-    </MuiThemeProvider>
-  );
+	return (
+		<MuiThemeProvider theme={theme}>
+			<CssBaseline />
+			<SnackbarProvider maxSnack={5} autoHideDuration={8000}>
+				<ConnectionProvider>
+					<WalletProvider wallets={wallets} autoConnect>
+						<WalletDialogProvider>
+							<AccountProvider>
+								<HashRouter basename={"/"}>
+									<Layout>
+										<Routes>
+											<Route path="/" element={<MultisigPage />} />
+											<Route
+												path="/:address"
+												element={<MultisigInstancePage />}
+											/>
+										</Routes>
+									</Layout>
+								</HashRouter>
+							</AccountProvider>
+						</WalletDialogProvider>
+					</WalletProvider>
+				</ConnectionProvider>
+			</SnackbarProvider>
+		</MuiThemeProvider>
+	);
 }
 
 function MultisigPage() {
-  const multisig = new PublicKey("6ExGdhoUeqzExzXWx1tW2RPojuRnfXeTRwQ7sCeEcnKy");
-  return <Multisig multisig={multisig} />;
+	const multisig = new PublicKey(
+		"AM194gsNqRnmu8CZKi5GBPRGMC4Bq4Egkj2GQ4Yz4JZ4"
+	);
+	return <Multisig multisig={multisig} />;
 }
 
 export function MultisigInstancePage() {
-  const history = useHistory();
-  const location = useLocation();
-  const path = location.pathname.split("/");
-  if (path.length !== 2) {
-    history.push(`/multisig`);
-    return <></>;
-  } else {
-    const multisig = new PublicKey(path[1]);
-    return <Multisig multisig={multisig} />;
-  }
+	const navigate = useNavigate();
+	const location = useLocation();
+	const path = location.pathname.split("/");
+	if (path.length !== 2) {
+		navigate(`/multisig`);
+		return <></>;
+	} else {
+		const multisig = new PublicKey(path[1]);
+		return <Multisig multisig={multisig} />;
+	}
 }
 
 export default App;
