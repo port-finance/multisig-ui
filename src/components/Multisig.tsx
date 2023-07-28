@@ -482,7 +482,7 @@ function AddTransactionDialog({
 
 // LABELS FOR TRANSACTIONS
 function ixLabel(tx: any, multisigClient: any) {
-	// console.log(tx);
+	console.log("transaction log", tx);
 	console.log("account length", tx.account.accounts.length);
 	console.log("data length", tx.account.data.length);
 	if (tx.account.programId.equals(BPF_LOADER_UPGRADEABLE_PID)) {
@@ -656,7 +656,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		} else if (
 			tx.account.accounts.length === 2 &&
-			tx.account.data.length === 44
+			tx.account.data.length === 42
 		) {
 			return (
 				<ListItemText
