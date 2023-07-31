@@ -51,6 +51,7 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 			programId: programId,
 			secondaryMarketProgramId: programId,
 			scowProgramId: programId,
+			variableRatesProgramId: programId,
 			confirmOptions: opts,
 		};
 		let provider = new AnchorProvider(

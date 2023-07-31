@@ -84,6 +84,7 @@ import { ActivateMigratedDealListItem } from "./transactions/ActivateMigratedDea
 // import { InitializeMarketListItem } from "./transactions/InitializeMarket";
 import { u64 } from "@project-serum/borsh";
 import { UpdateProgramStateListItem } from "./transactions/updateProgramState";
+import { SetOffRampTokenAccountListItem } from "./transactions/setOffRampTokenAccount";
 
 const NO_SHOW_LIST = [
 	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
@@ -474,6 +475,11 @@ function AddTransactionDialog({
 						multisig={multisig}
 						onClose={onClose}
 					/>
+					<SetOffRampTokenAccountListItem
+						didAddTransaction={didAddTransaction}
+						multisig={multisig}
+						onClose={onClose}
+					/>
 				</List>
 			</DialogContent>
 		</Dialog>
@@ -674,6 +680,16 @@ function ixLabel(tx: any, multisigClient: any) {
 					secondary={tx.publicKey.toString()}
 				/>
 			);
+		} else if (
+			tx.account.accounts.length === 11 &&
+			tx.account.data.length === 40
+		) {
+			return (
+				<ListItemText
+					primary={"Set off ramp token account for deal"}
+					secondary={tx.publicKey.toString()}
+				/>
+			);
 		} else if (tx.account.accounts.length === 8) {
 			return (
 				<ListItemText
@@ -819,12 +835,25 @@ export function MultisigInstance({ multisig }: { multisig: PublicKey }) {
 					!a.account.didExecute && b.account.didExecute ? -1 : 1
 				);
 				var txsFiltered = txs.filter(function (tx) {
-					return !NO_SHOW_LIST.includes(tx.publicKey.toString());
+					return (
+						!NO_SHOW_LIST.includes(tx.publicKey.toString()) &&
+						// @ts-ignore
+						tx.account.multisig.toString() === multisig.toString()
+					);
 				});
+				// var txsFiltered2 = txsFiltered.filter(function (tx) {
+				// 	console.log(tx.account.toString());
+				// 	return tx.account === multisigAccount;
+				// });
 				setTransactions(txsFiltered);
 			})
 			.catch((err) => console.log("error", err));
-	}, [multisigClient.account.transaction, multisig, forceRefresh]);
+	}, [
+		multisigClient.account.transaction,
+		multisig,
+		forceRefresh,
+		multisigAccount,
+	]);
 	useEffect(() => {
 		multisigClient.account.multisig
 			.subscribe(multisig)

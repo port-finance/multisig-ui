@@ -1349,10 +1349,10 @@
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.30.1.tgz#6d92582341be3c2ec8d82090253cfa4b7f959edb"
   integrity sha512-KvvX58MGMWh7xA+N+deCfunkA/ZNDvFLw4YbOmX3f/XBIkqrVY7qlotfy2aNb1kgp6h4B6Yc8YawJPDTfvWX7g==
 
-"@credix/credix-client@2.12.1":
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.12.1.tgz#4337cd8b6f53abc44fcb597fd9782971f2d54235"
-  integrity sha512-47Z1YUlN5PxbmlW+7xccfGTiVEne1IsCEJI2e/HIjIU3C933ITOURZajAwr79aixNXBWFrc+xA9qSbDBh8w7JQ==
+"@credix/credix-client@2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@credix/credix-client/-/credix-client-2.13.0.tgz#b2e1e002170aef2946d0dba2723852ae28613767"
+  integrity sha512-r/0spINJxpl2tStQS9V87axToKu4VzwcqtfxTa79x6M9vKVzhUpVJYH2siXVC6J3i0lI0BaCg4x61M5HQCiW1g==
   dependencies:
     "@certusone/wormhole-sdk" "^0.9.9"
     "@metaplex-foundation/mpl-token-metadata" "^2.5.2"
