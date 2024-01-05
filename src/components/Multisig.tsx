@@ -131,6 +131,7 @@ const NO_SHOW_LIST = [
 	"BxLmPP7E28NNth178MQ3nbDTTURcg196FuWNoEEvJ1HY",
 	"DRPykGTLFzhNB8mMP1aw9wBt9ZSgv1FFxdnbCQoXDo8o",
 	"7ezaSsbSoHJWqA59KAq1ENZGgJjhNtVpzULPbyzFNRqF",
+	"Bybd34wLJvZMmzmuw3iH6eoZrnJ5iJrExUWCNTZpV23y",
 	"59y9hWxMbW3MVFP36TJbipaXzXMAWJfoBisP6NtFKDrU",
 	"FPyePnLxghsUwPtrp9pEU8yc3W96ieDPdAdhWFbPKdMV",
 	"AuMhJnjpiQjHffgbkA8HQ4fWjWi5yTJpAV9b8ZdwfpKv",
@@ -667,7 +668,7 @@ function ixLabel(tx: any, multisigClient: any) {
 			);
 		} else if (
 			tx.account.accounts.length === 2 &&
-			tx.account.data.length === 42
+			tx.account.data.length === 43
 		) {
 			return (
 				<ListItemText

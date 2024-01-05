@@ -199,10 +199,12 @@ function CredixPassListItemDetails({
 			const holderPublicKey = new PublicKey(passHolder);
 
 			const credixPassConfig: CredixPassConfig = {
-				active: isActive,
-				borrower: isBorrower,
-				underwriter: isUnderwriter,
-				disableWithdrawalFee: disableWithdrawalFee,
+				flags: {
+					active: isActive,
+					borrower: isBorrower,
+					underwriter: isUnderwriter,
+					disableWithdrawalFee: disableWithdrawalFee,
+				},
 				releaseTimestamp: releaseTimestamp.toNumber(),
 			};
 
