@@ -37,8 +37,8 @@ export function useMultisigProgram(): [Program, CredixClient, AnchorProvider] {
 	return useMemo(() => {
 		console.log("here");
 		const opts: ConfirmOptions = {
-			preflightCommitment: "recent",
-			commitment: "recent",
+			preflightCommitment: "finalized",
+			commitment: "finalized",
 		};
 		const currentNetwork = (connection as any)._rpcEndpoint;
 		const currentMultisigProgramId = getMultisigProgramIdByUrl(currentNetwork);

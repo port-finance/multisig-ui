@@ -37,19 +37,19 @@ interface ConnectionConfig {
 const ConnectionContext = React.createContext<ConnectionConfig>({
 	endpoint: DEFAULT,
 	setEndpoint: () => {},
-	connection: new Connection(DEFAULT, "recent"),
-	sendConnection: new Connection(DEFAULT, "recent"),
+	connection: new Connection(DEFAULT, "finalized"),
+	sendConnection: new Connection(DEFAULT, "finalized"),
 	env: ENDPOINTS[0].name,
 });
 
 export function ConnectionProvider({ children = undefined as any }) {
 	const [endpoint, setEndpoint] = useState(ENDPOINTS[0].endpoint);
 	const connection = useMemo(
-		() => new Connection(endpoint, "recent"),
+		() => new Connection(endpoint, "finalized"),
 		[endpoint]
 	);
 	const sendConnection = useMemo(
-		() => new Connection(endpoint, "recent"),
+		() => new Connection(endpoint, "finalized"),
 		[endpoint]
 	);
 
